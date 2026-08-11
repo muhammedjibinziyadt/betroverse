@@ -396,7 +396,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
       } catch (lsErr) {
-        // Quota error ignored safely because IndexedDB saved it!
+        console.warn("LocalStorage quota exceeded for key:", key, "— IndexedDB still holds the data.", lsErr);
       }
     },
 

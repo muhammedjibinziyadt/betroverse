@@ -437,6 +437,12 @@
         if (!window.indexedDB) return resolve(null);
         try {
           const req = indexedDB.open(this.dbName, this.dbVersion);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("app_store")) {
+              db.createObjectStore("app_store");
+            }
+          };
           req.onsuccess = (e) => { this.db = e.target.result; resolve(this.db); };
           req.onerror = () => resolve(null);
         } catch (e) { resolve(null); }

@@ -118,6 +118,12 @@ const initPortfolio = () => {
       if (window.indexedDB) {
         try {
           const req = indexedDB.open("BetroverseMediaDB", 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("app_store")) {
+              db.createObjectStore("app_store");
+            }
+          };
           req.onsuccess = (e) => {
             const db = e.target.result;
             if (db.objectStoreNames.contains("app_store")) {
