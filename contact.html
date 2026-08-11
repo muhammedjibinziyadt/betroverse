@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/service.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+      <div id="preloader">
+    <div class="loader"></div>
+  </div>
+    <!-- <div class="bg-decoration">
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+    </div> -->
+
+    <!-- <header class="header">
+        <nav class="nav container">
+            <a href="#" class="logo">TechForward</a>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#speakers">Speakers</a></li>
+                <li><a href="#agenda">Agenda</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header> -->
+
+    <main class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Reserve Your Spot for Expert Digital Solutions</h1>
+                    <p>Get started with our professional digital services tailored to your business needs. Simply fill in your details, choose the service you want, and our team will connect with you shortly. Limited slots available, so don’t wait!</p>
+                    
+                    <!-- <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-number">2,500+</span>
+                            <span class="stat-label">Professionals Registered</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">3 hrs</span>
+                            <span class="stat-label">Deep Dive Session</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">Free</span>
+                            <span class="stat-label">Expert Training</span>
+                        </div>
+                    </div> -->
+                </div>
+
+                <div class="form-container">
+                    <div class="form-card">
+                        <!-- <div class="form-header">
+                            <h3>Secure Your Spot</h3>
+                            <p>December 15, 2025 • 2:00 PM EST</p>
+                        </div> -->
+                        
+                        <form id="gform" action="">
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="First name" class="form-input" placeholder="Enter your first name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" name="Last name" class="form-input" placeholder="Enter your last name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Numner</label>
+                                <input type="text" id="phone" name="phone" class="form-input" placeholder="Enter the number" required>
+                            </div>
+
+                            <!-- <div class="form-group">
+                                <label for="company">Company</label>
+                                <input type="text" id="company" name="company" class="form-input" placeholder="Your company name" required>
+                            </div> -->
+
+                            <div class="form-group">
+                                <label for="jobTitle">Services Title</label>
+                                <select id="jobTitle" name="service" class="form-input form-select" required>
+                                    <option value="">Select your service</option>
+                                    <option value="Corporate Films">Corporate Films</option>
+                                    <option value="Brand Promotional Videos">Brand Promotional Videos</option>
+                                    <option value="Product Shoot Videos">Product Shoot Videos</option>
+                                    <option value="Social Media Content">Social Media Content (Reels, Shorts)</option>
+                                    <option value="Event Videography">Event Videography</option>
+                                    <option value="Client Testimonial Videos">Client Testimonial Videos</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="submit-btn">
+                                Submit Request
+                            </button>
+                        </form>
+
+                        <!-- <div id="successMessage" class="success-message">
+                            <h4>🎉 Registration Successful!</h4>
+                            <p>Check your email for service details</p>
+                        </div> -->
+
+                        <div class="form-footer">
+                            By registering, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Preloader logic
+            window.addEventListener("load", function() {
+                setTimeout(() => {
+                    const preloader = document.getElementById("preloader");
+                    if (preloader) preloader.classList.add("hide");
+                    const content = document.getElementById("content");
+                    if (content) content.style.display = "block";
+                }, 900);
+            });
+
+            const form = document.getElementById('gform');
+            if (form) {
+                const submitBtn = form.querySelector('.submit-btn');
+                const originalBtnText = submitBtn ? submitBtn.textContent : "Submit Request";
+
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Simple validation
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let isValid = true;
+                    
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            isValid = false;
+                            field.style.borderColor = '#EF4444';
+                            setTimeout(() => {
+                                field.style.borderColor = '';
+                            }, 3000);
+                        }
+                    });
+
+                    if (!isValid) {
+                        if (submitBtn) {
+                            submitBtn.textContent = 'Please fill all fields';
+                            submitBtn.style.background = '#EF4444';
+                            setTimeout(() => {
+                                submitBtn.textContent = originalBtnText;
+                                submitBtn.style.background = '';
+                            }, 3000);
+                        }
+                        return;
+                    }
+
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Submitting...';
+                        submitBtn.disabled = true;
+                    }
+
+                    const firstName = document.getElementById('firstName').value.trim();
+                    const lastName = document.getElementById('lastName').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const phone = document.getElementById('phone').value.trim();
+                    const service = document.getElementById('jobTitle').value;
+
+                    // Submit directly to Google Apps Script
+                    $.ajax({
+                        url: "https://script.google.com/macros/s/AKfycbz-YUhYE2JkkqDzCeNjkPikgvSRhwuxOz3PR_FHk-d1Zab_ki5Jnd6C2pIjRfwLOGSN/exec",
+                        data: $(form).serialize(),
+                        method: "post",
+                        success: function (response) {
+                            // Save locally to localStorage under 'betro_leads' for local admin dashboard
+                            const newLead = {
+                                id: "local-" + Date.now(),
+                                created_at: new Date().toISOString(),
+                                first_name: firstName,
+                                last_name: lastName,
+                                email: email,
+                                phone: phone,
+                                service: service,
+                                message: "Submitted via contact page request form.",
+                                status: 'new',
+                                notes: ""
+                            };
+                            
+                            const localLeadsData = localStorage.getItem("betro_leads");
+                            const leadsList = localLeadsData ? JSON.parse(localLeadsData) : [];
+                            leadsList.unshift(newLead);
+                            localStorage.setItem("betro_leads", JSON.stringify(leadsList));
+
+                            alert("Form submitted successfully!");
+                            form.reset();
+                            window.location.reload();
+                        },
+                        error: function (err) {
+                            console.error("Submission error:", err);
+                            alert("Failed to submit form.");
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = originalBtnText;
+                            }
+                        }
+                    });
+                });
+
+                // Enhanced input interactions
+                const inputs = form.querySelectorAll('.form-input');
+                inputs.forEach(input => {
+                    input.addEventListener('focus', function() {
+                        this.parentElement.style.transform = 'translateY(-2px)';
+                    });
+
+                    input.addEventListener('blur', function() {
+                        this.parentElement.style.transform = 'translateY(0)';
+                    });
+
+                    input.addEventListener('input', function() {
+                        if (this.value.trim()) {
+                            this.style.borderColor = '#10B981';
+                        } else {
+                            this.style.borderColor = '';
+                        }
+                    });
+                });
+
+                // Email validation
+                const emailInput = document.getElementById('email');
+                if (emailInput) {
+                    emailInput.addEventListener('blur', function() {
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (this.value && !emailRegex.test(this.value)) {
+                            this.style.borderColor = '#EF4444';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 3000);
+                        }
+                    });
+                }
+            }
+
+            // Parallax circles
+            window.addEventListener('scroll', function() {
+                const scrolled = window.pageYOffset;
+                const circles = document.querySelectorAll('.bg-circle');
+                circles.forEach((circle, index) => {
+                    const speed = (index + 1) * 0.1;
+                    circle.style.transform = `translateY(${scrolled * speed}px)`;
+                });
+            });
+
+            // Intersection fade-in for form card
+            const formCard = document.querySelector('.form-card');
+            if (formCard) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }
+                    });
+                });
+
+                formCard.style.opacity = '0';
+                formCard.style.transform = 'translateY(30px)';
+                formCard.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(formCard);
+            }
+        });
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html>

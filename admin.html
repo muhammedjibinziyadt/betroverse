@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Betroverse | Admin Dashboard</title>
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" type="text/css">
+  <link rel="stylesheet" href="css/admin.css" type="text/css">
+  <!-- Fonts and Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <!-- Non-blocking theme setup script -->
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "light") {
+        document.documentElement.classList.add("light-mode");
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <!-- Global Preloader -->
+  <div id="admin-preloader" class="admin-preloader">
+    <div class="admin-loader"></div>
+  </div>
+
+  <div id="app-container" class="app-container">
+
+    <!-- ==========================================
+         2. AUTHENTICATION LOGIN CARD
+         ========================================== -->
+    <div id="login-view" class="auth-view">
+      <div class="glass-card auth-card">
+        <!-- Floating Theme Toggle in Login -->
+        <button class="theme-toggle-btn login-toggle" id="theme-toggle-login" aria-label="Toggle dark/light mode">
+          <i class="ri-sun-line light-icon"></i>
+          <i class="ri-moon-line dark-icon"></i>
+        </button>
+
+        <div class="auth-header">
+          <img src="images/logo.png" alt="Betroverse Logo" class="auth-logo">
+          <h2>Admin Portal</h2>
+          <p>Login to manage leads, view metrics, and customize campaigns.</p>
+          <p style="font-size: 0.85rem; color: #4ab96c; margin-top: 0.5rem; text-align: center;">
+            Use email <strong>admin@betroverse.in</strong> and password <strong>admin123</strong>
+          </p>
+        </div>
+
+        <div id="login-error-alert" class="alert-box error hidden">
+          <i class="ri-error-warning-line"></i>
+          <span class="alert-message">Invalid email or password.</span>
+        </div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <div class="input-wrapper">
+              <i class="ri-mail-line input-icon"></i>
+              <input type="email" id="login-email" placeholder="admin@betroverse.in" required autocomplete="username">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <div class="input-wrapper">
+              <i class="ri-lock-line input-icon"></i>
+              <input type="password" id="login-password" placeholder="••••••••" required
+                autocomplete="current-password">
+            </div>
+          </div>
+          <button type="submit" class="admin-btn primary-btn">Sign In</button>
+          <div class="demo-divider"><span>Or Explore</span></div>
+          <button type="button" class="admin-btn secondary-btn" id="demo-login-btn">
+            <i class="ri-slideshow-3-line"></i> Enter Demo Mode
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         3. DASHBOARD LAYOUT (Main Panel)
+         ========================================== -->
+    <div id="dashboard-view" class="dashboard-layout hidden">
+
+      <!-- Side Navigation Panel -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <img src="images/logo.png" alt="Betroverse Logo" class="sidebar-logo">
+          <span class="sidebar-title">Betroverse</span>
+          <span class="badge admin-badge">Admin</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="sidebar-link active" data-tab="casestudies">
+            <i class="ri-folder-shield-2-line"></i>
+            <span>Case Studies CMS</span>
+          </a>
+          <a href="#" class="sidebar-link" data-tab="medialibrary">
+            <i class="ri-folder-image-line"></i>
+            <span>Media Library</span>
+          </a>
+          <a href="#" class="sidebar-link" data-tab="content">
+            <i class="ri-image-edit-line"></i>
+            <span>Gallery & Brands</span>
+          </a>
+          <a href="#" class="sidebar-link" data-tab="settings">
+            <i class="ri-settings-4-line"></i>
+            <span>Settings</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <!-- Theme Toggle -->
+          <button class="theme-toggle-btn sidebar-theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
+            <i class="ri-sun-line light-icon"></i>
+            <i class="ri-moon-line dark-icon"></i>
+          </button>
+
+          <div class="profile-card">
+            <div class="profile-avatar">
+              <i class="ri-user-settings-line"></i>
+            </div>
+            <div class="profile-info">
+              <span id="user-display-email" class="profile-email">admin@betroverse</span>
+              <button id="logout-btn" class="logout-link"><i class="ri-logout-box-r-line"></i> Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Contents -->
+      <main class="main-content">
+
+        <!-- Header bar -->
+        <header class="dashboard-header">
+          <div>
+            <h1 id="page-title">Case Studies CMS</h1>
+            <p id="page-subtitle">Create, edit, publish/unpublish, and manage dynamic agency case studies.</p>
+          </div>
+          <div class="header-widgets">
+            <span id="cs-autosave-global-badge" class="autosave-badge saved hidden">
+              <i class="ri-checkbox-circle-line"></i> Saved
+            </span>
+            <span id="sync-indicator" class="sync-indicator">
+              <i class="ri-database-2-line"></i> Local Storage Engine
+            </span>
+          </div>
+        </header>
+
+        <!-- Dynamic Tabs -->
+        <div class="tab-container">
+
+          <!-- TAB A: CASE STUDIES CMS -->
+          <div id="tab-casestudies" class="tab-panel active">
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+              <div class="glass-card content-card">
+                <div class="card-header"
+                  style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+                  <div>
+                    <h3>Case Studies CMS Management</h3>
+                    <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem;">Create, edit,
+                      publish/unpublish, and manage dynamic agency case studies.</p>
+                  </div>
+                  <button type="button" class="admin-btn primary-btn" id="add-casestudy-btn"><i class="ri-add-line"></i>
+                    Create New Case Study</button>
+                </div>
+
+                <!-- Filters -->
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                  <input type="text" id="cs-search-input" placeholder="Search by company or category..."
+                    class="form-input"
+                    style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary);">
+                  <select id="cs-status-filter" class="form-input"
+                    style="width: 180px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary);">
+                    <option value="all">All Statuses</option>
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+
+                <!-- Case Study List -->
+                <div id="admin-casestudies-list"
+                  style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                  <!-- JS Inject -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB MEDIA LIBRARY: CENTRAL MEDIA MANAGER -->
+          <div id="tab-medialibrary" class="tab-panel">
+            <div class="glass-card content-card">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+                <div>
+                  <h3>Central Media Library</h3>
+                  <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem;">Manage all images, videos, and document assets across case studies.</p>
+                </div>
+                <div style="display: flex; gap: 0.75rem;">
+                  <label class="admin-btn primary-btn" style="cursor: pointer; margin: 0;">
+                    <i class="ri-upload-cloud-2-line"></i> Upload New Media
+                    <input type="file" id="media-library-upload-input" multiple accept="image/*,video/*,.pdf" style="display: none;">
+                  </label>
+                </div>
+              </div>
+
+              <!-- Media Filters & Search -->
+              <div class="media-controls-bar">
+                <div class="media-search-wrap">
+                  <i class="ri-search-line"></i>
+                  <input type="text" id="media-library-search" placeholder="Search media assets..." class="form-input">
+                </div>
+                <div class="media-type-filter-group">
+                  <button type="button" class="media-type-btn active" data-type="all">All Assets</button>
+                  <button type="button" class="media-type-btn" data-type="image"><i class="ri-image-line"></i> Images</button>
+                  <button type="button" class="media-type-btn" data-type="video"><i class="ri-video-line"></i> Videos</button>
+                  <button type="button" class="media-type-btn" data-type="pdf"><i class="ri-file-pdf-line"></i> Documents</button>
+                </div>
+                <select id="media-folder-filter" class="form-input" style="width: 160px;">
+                  <option value="all">All Folders</option>
+                  <option value="logos">Logos</option>
+                  <option value="banners">Banners</option>
+                  <option value="showcase">Showcase</option>
+                  <option value="videos">Videos</option>
+                  <option value="documents">Documents</option>
+                </select>
+              </div>
+
+              <!-- Drag & Drop Upload Zone -->
+              <div id="media-library-dropzone" class="media-dropzone-box">
+                <i class="ri-cloud-upload-line dropzone-icon"></i>
+                <div class="dropzone-text">
+                  <strong>Drag & Drop Media Files Here</strong>
+                  <span>Supports Images (JPG, PNG, WEBP, SVG), Videos (MP4, WEBM, MOV), Documents (PDF)</span>
+                </div>
+                <div id="media-upload-progress" class="upload-progress-container hidden">
+                  <div class="upload-progress-bar"><div id="media-upload-progress-fill" class="progress-fill" style="width: 0%;"></div></div>
+                  <span id="media-upload-progress-text" class="progress-text">Uploading... 0%</span>
+                </div>
+              </div>
+
+              <!-- Assets Grid -->
+              <div id="media-library-grid" class="media-grid-container">
+                <!-- JS Inject Assets -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB B: CONTENT MANAGEMENT (GALLERY & BRANDS) -->
+          <div id="tab-content" class="tab-panel">
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+
+              <!-- Brands Management Card -->
+              <div class="glass-card content-card">
+                <div class="card-header"
+                  style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+                  <div>
+                    <h3>Brands & Client Logos</h3>
+                    <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem;">Add or remove client
+                      logos displayed in "Brands Who Believe in Us".</p>
+                  </div>
+                  <button type="button" class="admin-btn primary-btn" id="add-brand-btn"><i class="ri-add-line"></i> Add
+                    Brand Logo</button>
+                </div>
+                <div class="gallery-grid" id="admin-brands-grid"
+                  style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                  <!-- JS Inject -->
+                </div>
+              </div>
+
+              <!-- Projects Management Card -->
+              <div class="glass-card content-card">
+                <div class="card-header"
+                  style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+                  <div>
+                    <h3>Portfolio Projects Gallery</h3>
+                    <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem;">Add or remove images
+                      displayed in "Projects We Delivered".</p>
+                  </div>
+                  <button type="button" class="admin-btn primary-btn" id="add-project-btn"><i class="ri-add-line"></i>
+                    Add Project Image</button>
+                </div>
+                <div class="gallery-grid" id="admin-projects-grid"
+                  style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                  <!-- JS Inject -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- TAB C: SETTINGS -->
+          <div id="tab-settings" class="tab-panel">
+            <div class="settings-grid" style="grid-template-columns: 1fr;">
+              <div class="glass-card settings-card" style="max-width: 600px; margin: 0 auto; width: 100%;">
+                <div class="card-header">
+                  <h3>Local Database Administration</h3>
+                  <p class="subtitle">Manage local storage sessions and database states.</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
+                  <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                    This admin portal is running in offline local content mode. All image assets and configuration
+                    states are saved inside browser storage (localStorage + IndexedDB). Updates to the case studies, gallery and brand logos
+                    will instantly appear on the live website.
+                  </p>
+                  <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button type="button" class="admin-btn danger-btn" id="reset-config-btn"
+                      style="flex: 1; min-width: 200px;">
+                      <i class="ri-delete-bin-4-line"></i> Reset Content Database
+                    </button>
+                    <button type="button" class="admin-btn secondary-btn" id="theme-toggle-settings"
+                      style="flex: 1; min-width: 200px;">
+                      <i class="ri-contrast-line"></i> Toggle Light/Dark Mode
+                    </button>
+                    <button type="button" class="admin-btn secondary-btn" id="settings-logout-btn"
+                      style="flex: 1; min-width: 200px;">
+                      <i class="ri-logout-box-r-line"></i> Sign Out Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==========================================
+       CONTENT UPLOAD OVERLAY MODAL (Brands/Projects)
+       ========================================== -->
+  <div id="content-upload-modal" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 450px; width: 90%;">
+      <div class="modal-header">
+        <h2 id="content-modal-title">Add Content</h2>
+        <button class="close-modal-btn" id="close-upload-btn"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body" style="padding-top: 1rem;">
+        <form id="content-upload-form">
+          <input type="hidden" id="content-type" value="">
+
+          <div class="form-group">
+            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Image Source</label>
+            <div style="display: flex; gap: 1.5rem; margin-bottom: 1rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-primary); font-size: 0.9rem;">
+                <input type="radio" name="img-source" value="file" checked> Local File Upload
+              </label>
+              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; color: var(--text-primary); font-size: 0.9rem;">
+                <input type="radio" name="img-source" value="url"> Remote Image URL
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" id="file-input-group">
+            <label for="content-file" style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Upload Image</label>
+            <input type="file" id="content-file" accept="image/*" class="form-input">
+          </div>
+
+          <div class="form-group hidden" id="url-input-group">
+            <label for="content-url" style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Image URL</label>
+            <input type="text" id="content-url" placeholder="https://example.com/image.png" class="form-input">
+          </div>
+
+          <div class="form-group" id="preview-group" style="margin-top: 1.5rem; display: none;">
+            <label style="display: block; margin-bottom: 0.5rem; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Preview</label>
+            <div style="background: rgba(255,255,255,0.01); border: 1px dashed var(--input-border); border-radius: 8px; padding: 1rem; display: flex; align-items: center; justify-content: center; min-height: 120px;">
+              <img id="upload-preview" src="" alt="Preview" style="max-height: 100px; max-width: 100%; border-radius: 4px; object-fit: contain;">
+            </div>
+          </div>
+
+          <button type="submit" class="admin-btn primary-btn" style="width: 100%; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="ri-save-line"></i> Save Content
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       MEDIA PICKER MODAL (Select asset anywhere in CMS)
+       ========================================== -->
+  <div id="media-picker-modal" class="modal-overlay hidden">
+    <div class="glass-card modal-card" style="max-width: 800px; width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+        <div>
+          <h2 style="font-size: 1.25rem; color: var(--text-primary);">Select Media Asset</h2>
+          <p style="font-size: 0.8rem; color: var(--text-secondary);">Choose an existing asset from the Media Library or upload a new file.</p>
+        </div>
+        <button class="close-modal-btn" id="close-media-picker-btn"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 1rem 0;">
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+          <input type="text" id="picker-search-input" placeholder="Search assets..." class="form-input" style="flex: 1;">
+          <label class="admin-btn primary-btn" style="cursor: pointer; margin: 0; padding: 8px 16px; font-size: 0.85rem;">
+            <i class="ri-upload-2-line"></i> Upload New
+            <input type="file" id="picker-direct-upload" accept="image/*,video/*,.pdf" style="display: none;">
+          </label>
+        </div>
+        <div id="media-picker-grid" class="media-grid-container" style="max-height: 50vh; overflow-y: auto;">
+          <!-- JS Inject Media Items -->
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid var(--panel-border); padding-top: 1rem; display: flex; justify-content: flex-end; gap: 1rem;">
+        <button type="button" class="admin-btn secondary-btn" id="cancel-media-picker-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       REVAMPED CASE STUDY EDITOR MODAL (WEBFLOW/FRAMER STYLE CMS)
+       ========================================== -->
+  <div id="cs-editor-modal" class="modal-overlay hidden">
+    <div class="cs-editor-modal-wrapper">
+      
+      <!-- Top Editor Toolbar -->
+      <div class="cs-editor-toolbar">
+        <div class="toolbar-left">
+          <span class="toolbar-badge"><i class="ri-pages-line"></i> CMS BUILDER</span>
+          <h3 id="cs-modal-title" class="toolbar-title">Create New Case Study</h3>
+        </div>
+
+        <div class="toolbar-center">
+          <!-- Auto Save Status Indicator -->
+          <div id="cs-autosave-indicator" class="cs-autosave-pill status-saved">
+            <i class="ri-checkbox-circle-line icon-saved"></i>
+            <i class="ri-loader-4-line icon-saving spinning"></i>
+            <i class="ri-alert-line icon-unsaved"></i>
+            <span class="autosave-label">Saved</span>
+          </div>
+
+          <!-- Responsive Viewport Switcher -->
+          <div class="cs-viewport-switcher">
+            <button type="button" class="cs-device-btn active" data-device="desktop" title="Desktop View (1200px)">
+              <i class="ri-computer-line"></i> <span>Desktop</span>
+            </button>
+            <button type="button" class="cs-device-btn" data-device="tablet" title="Tablet View (768px)">
+              <i class="ri-tablet-line"></i> <span>Tablet</span>
+            </button>
+            <button type="button" class="cs-device-btn" data-device="mobile" title="Mobile View (375px)">
+              <i class="ri-smartphone-line"></i> <span>Mobile</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar-right">
+          <button type="button" class="admin-btn secondary-btn" id="toggle-cs-preview-btn">
+            <i class="ri-layout-side-by-side-line"></i> <span id="toggle-preview-text">Hide Live Preview</span>
+          </button>
+          <button type="submit" form="cs-editor-form" class="admin-btn primary-btn">
+            <i class="ri-save-3-line"></i> Save Case Study
+          </button>
+          <button type="button" class="close-modal-btn" id="close-cs-modal-btn"><i class="ri-close-line"></i></button>
+        </div>
+      </div>
+
+      <!-- Main Editor Workspace (Split View) -->
+      <div class="cs-editor-workspace">
+        
+        <!-- LEFT: Editor Form Controls -->
+        <div class="cs-editor-left-pane">
+          
+          <!-- Sub-Tab Navigation Bar -->
+          <div class="cs-tabs-nav">
+            <button type="button" class="cs-tab-btn active" data-cstab="header"><i class="ri-pantone-line"></i> Branding</button>
+            <button type="button" class="cs-tab-btn" data-cstab="sections"><i class="ri-article-line"></i> Overview & Details</button>
+            <button type="button" class="cs-tab-btn" data-cstab="tags"><i class="ri-price-tag-3-line"></i> Service Tags</button>
+            <button type="button" class="cs-tab-btn" data-cstab="media"><i class="ri-gallery-upload-line"></i> Gallery & Videos</button>
+            <button type="button" class="cs-tab-btn" data-cstab="gallerysections"><i class="ri-node-tree"></i> Project Sections</button>
+            <button type="button" class="cs-tab-btn" data-cstab="blocks"><i class="ri-drag-drop-line"></i> Content Blocks</button>
+            <button type="button" class="cs-tab-btn" data-cstab="seo"><i class="ri-search-eye-line"></i> SEO Panel</button>
+          </div>
+
+          <form id="cs-editor-form" class="cs-form-body">
+            <input type="hidden" id="cs-edit-id" value="">
+
+            <!-- SUBTAB 1: HEADER & BRANDING -->
+            <div id="cstab-header" class="cs-tab-content active">
+              
+              <div class="form-section-title"><i class="ri-information-line"></i> Core Project Details</div>
+              
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label>Company Name *</label>
+                  <input type="text" id="cs-company-name" placeholder="e.g. MyLaban" required class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>URL Slug * (/portfolio/{slug})</label>
+                  <input type="text" id="cs-slug" placeholder="e.g. mylaban" required class="form-input">
+                </div>
+              </div>
+
+              <div class="form-grid-4">
+                <div class="form-group">
+                  <label>Category</label>
+                  <input type="text" id="cs-category" placeholder="Creative Branding" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>Industry</label>
+                  <input type="text" id="cs-industry" placeholder="Food & Beverage" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>Client Name</label>
+                  <input type="text" id="cs-client-name" placeholder="MyLaban Lounge" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>Status</label>
+                  <select id="cs-status" class="form-input">
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Company Logo Uploader Card -->
+              <div class="form-section-title" style="margin-top: 1.5rem;"><i class="ri-shield-star-line"></i> Company Logo Uploader</div>
+              <div class="asset-upload-card" id="logo-uploader-card">
+                <input type="hidden" id="cs-logo-url" value="">
+                <div class="asset-preview-box" id="logo-preview-box">
+                  <img id="logo-preview-img" src="" alt="Company Logo" class="hidden">
+                  <div id="logo-preview-placeholder" class="preview-placeholder">
+                    <i class="ri-image-add-line"></i>
+                    <span>No Logo Selected</span>
+                  </div>
+                </div>
+                <div class="asset-actions-box">
+                  <div class="drag-drop-trigger" id="logo-dropzone">
+                    <i class="ri-drag-drop-line"></i> Drag & Drop Logo or Browse
+                    <input type="file" id="logo-file-input" accept="image/*" style="display: none;">
+                  </div>
+                  <div id="logo-upload-progress" class="card-upload-status-box hidden">
+                    <div class="card-upload-progress-bar"><div id="logo-upload-progress-fill" class="progress-fill" style="width: 0%;"></div></div>
+                    <div id="logo-upload-status-text" class="card-upload-status-text"><i class="ri-loader-4-line ri-spin"></i> Uploading... 0%</div>
+                  </div>
+                  <div class="asset-btn-group">
+                    <button type="button" class="admin-btn secondary-btn" id="logo-select-library-btn"><i class="ri-folder-open-line"></i> Select from Media Library</button>
+                    <button type="button" class="admin-btn secondary-btn hidden" id="logo-replace-btn"><i class="ri-refresh-line"></i> Replace</button>
+                    <button type="button" class="admin-btn danger-btn hidden" id="logo-delete-btn"><i class="ri-delete-bin-line"></i> Remove</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Portfolio Card Image Uploader Card -->
+              <div class="form-section-title" style="margin-top: 1.5rem;"><i class="ri-image-line"></i> Portfolio Card Image Uploader (Grid Thumbnail)</div>
+              <div class="asset-upload-card" id="cardimg-uploader-card">
+                <input type="hidden" id="cs-cardimg-url" value="">
+                <div class="asset-preview-box banner-box" id="cardimg-preview-box">
+                  <img id="cardimg-preview-img" src="" alt="Portfolio Card Image" class="hidden">
+                  <div id="cardimg-preview-placeholder" class="preview-placeholder">
+                    <i class="ri-image-add-line"></i>
+                    <span>No Card Image Selected (Uses Hero Banner by default)</span>
+                  </div>
+                </div>
+                <div class="asset-actions-box">
+                  <div class="drag-drop-trigger" id="cardimg-dropzone">
+                    <i class="ri-drag-drop-line"></i> Drag & Drop Card Image or Browse
+                    <input type="file" id="cardimg-file-input" accept="image/*" style="display: none;">
+                  </div>
+                  <div id="cardimg-upload-progress" class="card-upload-status-box hidden">
+                    <div class="card-upload-progress-bar"><div id="cardimg-upload-progress-fill" class="progress-fill" style="width: 0%;"></div></div>
+                    <div id="cardimg-upload-status-text" class="card-upload-status-text"><i class="ri-loader-4-line ri-spin"></i> Uploading... 0%</div>
+                  </div>
+                  <div class="asset-btn-group">
+                    <button type="button" class="admin-btn secondary-btn" id="cardimg-select-library-btn"><i class="ri-folder-open-line"></i> Select from Media Library</button>
+                    <button type="button" class="admin-btn secondary-btn hidden" id="cardimg-replace-btn"><i class="ri-refresh-line"></i> Replace</button>
+                    <button type="button" class="admin-btn danger-btn hidden" id="cardimg-delete-btn"><i class="ri-delete-bin-line"></i> Remove</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hero Banner Uploader Card -->
+              <div class="form-section-title" style="margin-top: 1.5rem;"><i class="ri-landscape-line"></i> Hero Banner Uploader</div>
+              <div class="asset-upload-card" id="hero-uploader-card">
+                <input type="hidden" id="cs-hero-url" value="">
+                <div class="asset-preview-box banner-box" id="hero-preview-box">
+                  <img id="hero-preview-img" src="" alt="Hero Banner" class="hidden">
+                  <div id="hero-preview-placeholder" class="preview-placeholder">
+                    <i class="ri-image-add-line"></i>
+                    <span>No Hero Banner Selected</span>
+                  </div>
+                </div>
+                <div class="asset-actions-box">
+                  <div class="drag-drop-trigger" id="hero-dropzone">
+                    <i class="ri-drag-drop-line"></i> Drag & Drop Banner or Browse
+                    <input type="file" id="hero-file-input" accept="image/*" style="display: none;">
+                  </div>
+                  <div id="hero-upload-progress" class="card-upload-status-box hidden">
+                    <div class="card-upload-progress-bar"><div id="hero-upload-progress-fill" class="progress-fill" style="width: 0%;"></div></div>
+                    <div id="hero-upload-status-text" class="card-upload-status-text"><i class="ri-loader-4-line ri-spin"></i> Uploading... 0%</div>
+                  </div>
+                  <div class="asset-btn-group">
+                    <button type="button" class="admin-btn secondary-btn" id="hero-select-library-btn"><i class="ri-folder-open-line"></i> Select from Media Library</button>
+                    <button type="button" class="admin-btn secondary-btn hidden" id="hero-replace-btn"><i class="ri-refresh-line"></i> Replace</button>
+                    <button type="button" class="admin-btn danger-btn hidden" id="hero-delete-btn"><i class="ri-delete-bin-line"></i> Remove</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Desktop Mockup Uploader Card -->
+              <div class="form-section-title" style="margin-top: 1.5rem;"><i class="ri-computer-line"></i> Desktop Mockup Uploader</div>
+              <div class="asset-upload-card" id="desktop-mockup-uploader-card">
+                <input type="hidden" id="cs-desktop-mockup-url" value="">
+                <div class="asset-preview-box banner-box" id="desktop-mockup-preview-box">
+                  <img id="desktop-mockup-preview-img" src="" alt="Desktop Mockup" class="hidden">
+                  <div id="desktop-mockup-preview-placeholder" class="preview-placeholder">
+                    <i class="ri-image-add-line"></i>
+                    <span>No Desktop Mockup Selected</span>
+                  </div>
+                </div>
+                <div class="asset-actions-box">
+                  <div class="drag-drop-trigger" id="desktop-mockup-dropzone">
+                    <i class="ri-drag-drop-line"></i> Drag & Drop Desktop Mockup or Browse
+                    <input type="file" id="desktop-mockup-file-input" accept="image/*" style="display: none;">
+                  </div>
+                  <div id="desktop-mockup-upload-progress" class="card-upload-status-box hidden">
+                    <div class="card-upload-progress-bar"><div id="desktop-mockup-upload-progress-fill" class="progress-fill" style="width: 0%;"></div></div>
+                    <div id="desktop-mockup-upload-status-text" class="card-upload-status-text"><i class="ri-loader-4-line ri-spin"></i> Uploading... 0%</div>
+                  </div>
+                  <div class="asset-btn-group">
+                    <button type="button" class="admin-btn secondary-btn" id="desktop-mockup-select-library-btn"><i class="ri-folder-open-line"></i> Select from Media Library</button>
+                    <button type="button" class="admin-btn secondary-btn hidden" id="desktop-mockup-replace-btn"><i class="ri-refresh-line"></i> Replace</button>
+                    <button type="button" class="admin-btn danger-btn hidden" id="desktop-mockup-delete-btn"><i class="ri-delete-bin-line"></i> Remove</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mobile Mockup Uploader Card -->
+              <div class="form-section-title" style="margin-top: 1.5rem;"><i class="ri-smartphone-line"></i> Mobile Mockup Uploader</div>
+              <div class="asset-upload-card" id="mobile-mockup-uploader-card">
+                <input type="hidden" id="cs-mobile-mockup-url" value="">
+                <div class="asset-preview-box banner-box" id="mobile-mockup-preview-box">
+                  <img id="mobile-mockup-preview-img" src="" alt="Mobile Mockup" class="hidden">
+                  <div id="mobile-mockup-preview-placeholder" class="preview-placeholder">
+                    <i class="ri-image-add-line"></i>
+                    <span>No Mobile Mockup Selected</span>
+                  </div>
+                </div>
+                <div class="asset-actions-box">
+                  <div class="drag-drop-trigger" id="mobile-mockup-dropzone">
+                    <i class="ri-drag-drop-line"></i> Drag & Drop Mobile Mockup or Browse
+                    <input type="file" id="mobile-mockup-file-input" accept="image/*" style="display: none;">
+                  </div>
+                  <div id="mobile-mockup-upload-progress" class="card-upload-status-box hidden">
+                    <div class="card-upload-progress-bar"><div id="mobile-mockup-upload-progress-fill" class="progress-fill" style="width: 0%;"></div></div>
+                    <div id="mobile-mockup-upload-status-text" class="card-upload-status-text"><i class="ri-loader-4-line ri-spin"></i> Uploading... 0%</div>
+                  </div>
+                  <div class="asset-btn-group">
+                    <button type="button" class="admin-btn secondary-btn" id="mobile-mockup-select-library-btn"><i class="ri-folder-open-line"></i> Select from Media Library</button>
+                    <button type="button" class="admin-btn secondary-btn hidden" id="mobile-mockup-replace-btn"><i class="ri-refresh-line"></i> Replace</button>
+                    <button type="button" class="admin-btn danger-btn hidden" id="mobile-mockup-delete-btn"><i class="ri-delete-bin-line"></i> Remove</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+
+            <!-- SUBTAB 2: STRUCTURED CONTENT SECTIONS -->
+            <div id="cstab-sections" class="cs-tab-content">
+              
+              <div class="form-group">
+                <label>Short Introduction (Hero Tagline)</label>
+                <textarea id="cs-short-intro" rows="2" placeholder="Brief 1-2 sentence overview of the project..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Brand Story & Background</label>
+                <textarea id="cs-brand-story" rows="4" placeholder="Full history and background story of the brand..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Project Objectives & Business Goals</label>
+                <textarea id="cs-brand-goals" rows="4" placeholder="Key business targets, campaign objective, and goals..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-section-title" style="margin-top: 1.5rem;"><i class="ri-layout-grid-line"></i> Structured Case Breakdown</div>
+
+              <div class="form-group">
+                <label>The Challenge</label>
+                <textarea id="cs-overview-challenge" rows="2" placeholder="What key hurdles did the client face?" class="form-input"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>The Strategy</label>
+                <textarea id="cs-overview-strategy" rows="2" placeholder="Our strategic approach and creative roadmap..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>The Solution</label>
+                <textarea id="cs-overview-solution" rows="2" placeholder="Visual assets, campaigns, and systems built..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>The Execution</label>
+                <textarea id="cs-overview-execution" rows="2" placeholder="Production, rollout, and distribution channels..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>The Results Summary</label>
+                <textarea id="cs-overview-results" rows="2" placeholder="Overall metrics and outcome statement..." class="form-input"></textarea>
+              </div>
+
+              <!-- Results Stats & Testimonial -->
+              <div class="form-section-title" style="margin-top: 1.5rem;"><i class="ri-bar-chart-box-line"></i> Metrics & Testimonials</div>
+              
+              <div class="form-grid-4">
+                <div class="form-group">
+                  <label>Stat 1 Value</label>
+                  <input type="text" id="cs-stat1-num" placeholder="+500K" class="form-input">
+                  <input type="text" id="cs-stat1-label" placeholder="Reel Views" class="form-input" style="margin-top: 4px;">
+                </div>
+                <div class="form-group">
+                  <label>Stat 2 Value</label>
+                  <input type="text" id="cs-stat2-num" placeholder="+60%" class="form-input">
+                  <input type="text" id="cs-stat2-label" placeholder="Footfall Growth" class="form-input" style="margin-top: 4px;">
+                </div>
+                <div class="form-group">
+                  <label>Stat 3 Value</label>
+                  <input type="text" id="cs-stat3-num" placeholder="4.2x" class="form-input">
+                  <input type="text" id="cs-stat3-label" placeholder="ROI Increase" class="form-input" style="margin-top: 4px;">
+                </div>
+                <div class="form-group">
+                  <label>Stat 4 Value</label>
+                  <input type="text" id="cs-stat4-num" placeholder="100%" class="form-input">
+                  <input type="text" id="cs-stat4-label" placeholder="Satisfaction" class="form-input" style="margin-top: 4px;">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 1rem;">
+                <label>Client Feedback / Quote</label>
+                <textarea id="cs-feedback-quote" rows="2" placeholder="Client feedback quote..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label>Feedback Author</label>
+                  <input type="text" id="cs-feedback-author" placeholder="John Doe" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>Author Role / Designation</label>
+                  <input type="text" id="cs-feedback-role" placeholder="Founder & CEO" class="form-input">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 1rem;">
+                <label>Conclusion Statement</label>
+                <textarea id="cs-conclusion" rows="3" placeholder="Final summary and closing remarks..." class="form-input"></textarea>
+              </div>
+
+            </div>
+
+            <!-- SUBTAB 3: SERVICE TAGS -->
+            <div id="cstab-tags" class="cs-tab-content">
+              
+              <div class="form-section-title"><i class="ri-price-tag-3-line"></i> Service Tag Management</div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Click preset tags below to quick-add, or enter custom tags. Drag or use arrows to reorder tags.
+              </p>
+
+              <!-- Quick Presets Chips -->
+              <div class="preset-tags-container">
+                <span class="preset-label">Quick Add:</span>
+                <button type="button" class="preset-tag-chip" data-tag="Branding">+ Branding</button>
+                <button type="button" class="preset-tag-chip" data-tag="Social Media">+ Social Media</button>
+                <button type="button" class="preset-tag-chip" data-tag="Website Design">+ Website Design</button>
+                <button type="button" class="preset-tag-chip" data-tag="SEO">+ SEO</button>
+                <button type="button" class="preset-tag-chip" data-tag="Video Production">+ Video Production</button>
+                <button type="button" class="preset-tag-chip" data-tag="Photography">+ Photography</button>
+                <button type="button" class="preset-tag-chip" data-tag="Motion Graphics">+ Motion Graphics</button>
+                <button type="button" class="preset-tag-chip" data-tag="UI UX">+ UI UX</button>
+                <button type="button" class="preset-tag-chip" data-tag="Digital Marketing">+ Digital Marketing</button>
+              </div>
+
+              <!-- Custom Tag Input -->
+              <div class="custom-tag-add-bar">
+                <input type="text" id="cs-custom-tag-input" placeholder="Type custom service tag..." class="form-input">
+                <button type="button" class="admin-btn primary-btn" id="cs-add-tag-btn"><i class="ri-add-line"></i> Add Tag</button>
+              </div>
+
+              <!-- Active Tags Pill List -->
+              <div id="cs-tags-list" class="active-tags-list">
+                <!-- JS Inject Tag Chips -->
+              </div>
+
+            </div>
+
+            <!-- SUBTAB 4: SHOWCASE GALLERY & VIDEOS -->
+            <div id="cstab-media" class="cs-tab-content">
+              
+              <!-- Showcase Gallery Section -->
+              <div class="form-section-title"><i class="ri-gallery-line"></i> Creative Showcase Gallery (Unlimited Images)</div>
+              
+              <div class="media-upload-action-bar">
+                <label class="admin-btn primary-btn" style="cursor: pointer; margin: 0;">
+                  <i class="ri-image-add-line"></i> Upload Gallery Images
+                  <input type="file" id="gallery-multi-upload" multiple accept="image/*" style="display: none;">
+                </label>
+                <button type="button" class="admin-btn secondary-btn" id="gallery-select-library-btn">
+                  <i class="ri-folder-open-line"></i> Select from Media Library
+                </button>
+              </div>
+
+              <div id="gallery-dropzone-box" class="gallery-dropzone-area">
+                <i class="ri-landscape-line"></i> Drag & Drop Multiple Images Here to Add to Gallery
+              </div>
+
+              <!-- Showcase Gallery Grid with Drag Reorder -->
+              <div id="cs-gallery-items-grid" class="showcase-items-grid">
+                <!-- JS Inject Images -->
+              </div>
+
+              <!-- Video Showcase Section -->
+              <div class="form-section-title" style="margin-top: 2rem;"><i class="ri-video-add-line"></i> Video Showcase Section</div>
+
+              <div class="video-add-toolbar">
+                <label class="admin-btn primary-btn" style="cursor: pointer; margin: 0;">
+                  <i class="ri-upload-cloud-line"></i> Upload Video File (MP4, WEBM)
+                  <input type="file" id="video-file-upload" accept="video/mp4,video/webm,video/quicktime" style="display: none;">
+                </label>
+                <button type="button" class="admin-btn secondary-btn" id="add-youtube-embed-btn">
+                  <i class="ri-youtube-line"></i> Add YouTube Embed
+                </button>
+                <button type="button" class="admin-btn secondary-btn" id="add-vimeo-embed-btn">
+                  <i class="ri-vimeo-line"></i> Add Vimeo Embed
+                </button>
+              </div>
+
+              <div id="cs-video-items-list" class="video-items-list">
+                <!-- JS Inject Video Cards -->
+              </div>
+
+            </div>
+
+            <!-- SUBTAB 5: PROJECT GALLERY SECTIONS (MULTI-SECTION SHOWCASE) -->
+            <div id="cstab-gallerysections" class="cs-tab-content">
+              
+              <div class="form-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="ri-node-tree"></i> Project Gallery Sections</span>
+                <button type="button" class="admin-btn primary-btn" id="add-gallery-section-btn"><i class="ri-add-line"></i> Add Showcase Section</button>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Organize showcase media into named sections (e.g. <em>Brand Identity, Packaging Design, Social Media Creatives, Website Design, Video Production</em>).
+              </p>
+
+              <div id="cs-gallery-sections-list" class="sections-builder-list">
+                <!-- JS Inject Showcase Sections -->
+              </div>
+
+            </div>
+
+            <!-- SUBTAB 6: MODULAR CONTENT BLOCKS BUILDER -->
+            <div id="cstab-blocks" class="cs-tab-content">
+              
+              <div class="form-section-title"><i class="ri-drag-drop-line"></i> Modular Content Block Builder</div>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Add customizable layout blocks to build structured case study content. Drag to reorder.
+              </p>
+
+              <!-- Add Block Selector Toolbar -->
+              <div class="add-block-toolbar">
+                <span class="block-tool-label">Add Block:</span>
+                <button type="button" class="block-add-btn" data-blocktype="text"><i class="ri-text"></i> Text</button>
+                <button type="button" class="block-add-btn" data-blocktype="image"><i class="ri-image-line"></i> Image</button>
+                <button type="button" class="block-add-btn" data-blocktype="video"><i class="ri-film-line"></i> Video</button>
+                <button type="button" class="block-add-btn" data-blocktype="gallery"><i class="ri-layout-grid-line"></i> Gallery</button>
+                <button type="button" class="block-add-btn" data-blocktype="quote"><i class="ri-double-quotes-l"></i> Quote</button>
+                <button type="button" class="block-add-btn" data-blocktype="statistics"><i class="ri-bar-chart-2-line"></i> Stats</button>
+                <button type="button" class="block-add-btn" data-blocktype="service"><i class="ri-checkbox-multiple-line"></i> Services</button>
+                <button type="button" class="block-add-btn" data-blocktype="beforeafter"><i class="ri-split-cells-horizontal"></i> Before/After</button>
+                <button type="button" class="block-add-btn" data-blocktype="custom"><i class="ri-code-s-slash-line"></i> Custom</button>
+              </div>
+
+              <!-- Blocks List Container -->
+              <div id="cs-blocks-container" class="blocks-container">
+                <!-- JS Inject Blocks -->
+              </div>
+
+            </div>
+
+            <!-- SUBTAB 7: SEO PANEL -->
+            <div id="cstab-seo" class="cs-tab-content">
+              
+              <div class="form-section-title"><i class="ri-search-eye-line"></i> Search Engine & Open Graph Optimization</div>
+
+              <div class="form-group">
+                <label style="display: flex; justify-content: space-between;">
+                  <span>Meta Title</span>
+                  <span id="seo-title-count" class="char-count">0 / 60 chars</span>
+                </label>
+                <input type="text" id="cs-seo-title" placeholder="e.g. MyLaban Case Study | Creative Branding by Betroverse" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label style="display: flex; justify-content: space-between;">
+                  <span>Meta Description</span>
+                  <span id="seo-desc-count" class="char-count">0 / 160 chars</span>
+                </label>
+                <textarea id="cs-seo-desc" rows="3" placeholder="Compelling meta description for Google search snippet..." class="form-input"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Keywords (Comma separated)</label>
+                <input type="text" id="cs-seo-keywords" placeholder="MyLaban, dessert branding, video production, Kochi" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label>Open Graph Image (Social Share Banner)</label>
+                <div style="display: flex; gap: 0.75rem;">
+                  <input type="text" id="cs-seo-ogimage" placeholder="images/p1.jpg" class="form-input" style="flex: 1;">
+                  <button type="button" class="admin-btn secondary-btn" id="seo-og-select-btn"><i class="ri-folder-open-line"></i> Select</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Canonical URL</label>
+                <input type="text" id="cs-seo-canonical" placeholder="https://betroverse.in/portfolio/mylaban" class="form-input">
+              </div>
+
+            </div>
+
+          </form>
+
+        </div>
+
+        <!-- RIGHT: Real-time Responsive Live Preview Pane -->
+        <div class="cs-editor-right-pane" id="cs-preview-pane">
+          
+          <div class="preview-pane-header">
+            <div class="preview-pane-title">
+              <i class="ri-pulse-line"></i> <span>REAL-TIME LIVE PREVIEW</span>
+            </div>
+            <div class="preview-viewport-info">
+              <span id="preview-viewport-label">Desktop View (100%)</span>
+            </div>
+          </div>
+
+          <div class="preview-frame-wrapper" id="preview-frame-wrapper">
+            <!-- Simulated Case Study Container matching public design -->
+            <div id="cs-live-preview-content" class="cs-live-preview-container desktop-mode">
+              <!-- JS Synchronized Live Markup -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JS Logic Modules -->
+  <script src="js/admin.js"></script>
+</body>
+
+</html>

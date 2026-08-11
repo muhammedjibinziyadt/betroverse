@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Portfolio | Betroverse</title>
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+  <link rel="stylesheet" href="css/portfolio-redesign.css" type="text/css" />
+  <script type="text/javascript" src="js/darkmod.js" defer></script>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta property="og:image" content="" />
+  <meta name="description" content="Explore our premium branding, digital designs, video production, and social media campaigns." />
+  <meta name="keywords" content="portfolio, digital solutions, branding, video production, designs, Betroverse" />
+</head>
+
+<body>
+  <div id="preloader">
+    <div class="loader"></div>
+  </div>
+
+  <!-------------------------- Header ------------------------------------------------------------------------- -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="logo-container">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo.png" alt="Betroverse Logo" class="logo-img">
+        </a>
+      </div>
+      
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <ul class="nav-menu">
+          <li><a href="index.html#home" class="nav-item">Home</a></li>
+          <li><a href="index.html#about" class="nav-item">About</a></li>
+          <li><a href="index.html#services" class="nav-item">Services</a></li>
+          <li><a href="portfolio.html" class="nav-item active" style="border-bottom: 2px solid var(--primary-color);">Portfolio</a></li>
+          <li><a href="index.html#process" class="nav-item">Process</a></li>
+          <li><a href="index.html#pricing" class="nav-item">Pricing</a></li>
+          <li><a href="index.html#testimonials" class="nav-item">Testimonials</a></li>
+          <li><a href="index.html#faq" class="nav-item">FAQ</a></li>
+          <li><a href="index.html#contact" class="nav-item">Contact</a></li>
+        </ul>
+      </nav>
+      
+      <div class="header-actions">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark/light mode">
+          <i class="ri-sun-line light-icon"></i>
+          <i class="ri-moon-line dark-icon"></i>
+        </button>
+        
+        <!-- CTA Button -->
+        <a href="https://wa.me/918590417077?text=Hello%20I%20am%20interested%20in%20your%20services" target="_blank" class="cta-btn">
+          <span>Get Started</span>
+          <i class="ri-arrow-right-line"></i>
+        </a>
+        
+        <!-- Hamburger Menu Button (Mobile) -->
+        <button class="mobile-menu-btn" id="menu-toggle" aria-expanded="false" aria-label="Open navigation menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav-drawer" id="mobile-drawer" aria-hidden="true">
+      <div class="mobile-drawer-header">
+        <img src="images/logo.png" alt="Betroverse Logo" class="logo-img">
+        <button class="close-drawer-btn" id="close-drawer" aria-label="Close navigation menu">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <ul class="mobile-menu">
+        <li><a href="index.html#home" class="mobile-nav-item">Home</a></li>
+        <li><a href="index.html#about" class="mobile-nav-item">About</a></li>
+        <li><a href="index.html#services" class="mobile-nav-item">Services</a></li>
+        <li><a href="portfolio.html" class="mobile-nav-item active">Portfolio</a></li>
+        <li><a href="index.html#process" class="mobile-nav-item">Process</a></li>
+        <li><a href="index.html#pricing" class="mobile-nav-item">Pricing</a></li>
+        <li><a href="index.html#testimonials" class="mobile-nav-item">Testimonials</a></li>
+        <li><a href="index.html#faq" class="mobile-nav-item">FAQ</a></li>
+        <li><a href="index.html#contact" class="mobile-nav-item">Contact</a></li>
+      </ul>
+      <div class="mobile-drawer-actions">
+        <a href="https://wa.me/918590417077?text=Hello%20I%20am%20interested%20in%20your%20services" target="_blank" class="mobile-cta-btn">
+          Get Started <i class="ri-arrow-right-line"></i>
+        </a>
+      </div>
+    </div>
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+  </header>
+  <!------------------------------- Header end ---------------------------------------------------------------------------->
+
+  <!------------------------------- Portfolio Hero & Gallery ---------------------------------------------------------------------------- -->
+  <section id="gallery" class="premium-portfolio-section">
+    <div class="portfolio-header-container">
+      <span class="portfolio-subtitle">OUR CREATIVE WORK</span>
+      <h1 class="portfolio-title">Creative Portfolio</h1>
+      <p class="portfolio-desc">
+        Showcasing premium branding, websites, social media creatives, digital campaigns and creative solutions built by Betroverse.
+      </p>
+    </div>
+    
+    <div class="portfolio-grid-container">
+      <div class="portfolio-grid" id="portfolio-grid">
+        <!-- Dynamically rendered project cards from js/portfolio.js -->
+      </div>
+    </div>
+  </section>
+  <!------------------------------- Gallery Section End ------------------------------------------------------------------------- -->
+
+  <!------------------------------- Brands Section ---------------------------------------------------------------------------- -->
+  <section id="brands-section" class="portfolio-brands-section">
+    <div class="portfolio-brands-container">
+      <div class="top_clint">
+        <h5>Brands Who <span>Believe</span> in Us</h5>
+      </div>
+      <div class="brands-marquee-container">
+        <div class="brands-marquee-track" id="brands-marquee-track">
+          <!-- Dynamically populated continuous brand items from js/portfolio.js -->
+        </div>
+      </div>
+    </div>
+  </section>
+  <!------------------------------- Brands Section End ------------------------------------------------------------------------- -->
+
+  <!--------------------------------- Footer -------------------------------------------------------------------------------------- -->
+
+  <footer>
+    <div class="section__container7 footer__container">
+      <div class="footer__col">
+        <div class="footer__logo">
+          <a href="index.html">Betroverse</a>
+        </div>
+        <ul class="footer__socials">
+          <li>
+            <a href="#"><i class="ri-facebook-fill"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="ri-twitter-fill"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="ri-instagram-line"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="ri-behance-fill"></i></a>
+          </li>
+          <li>
+            <a href="#"><i class="ri-dribbble-fill"></i></a>
+          </li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Quick Links</h4>
+        <ul class="footer__links">
+          <li><a href="index.html#home">Home</a></li>
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#services">Services</a></li>
+          <li><a href="portfolio.html">Portfolio</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Support</h4>
+        <ul class="footer__links">
+          <li><a>Help Center</a></li>
+          <li><a>FAQs</a></li>
+          <li><a>Privacy Policy</a></li>
+          <li><a>Report an Issue</a></li>
+          <li><a href="index.html">Get a Quote</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bar">
+      Copyright © 2025 betroverse. All rights reserved.
+    </div>
+  </footer>
+  <!--------------------------------- Footer End ----------------------------------------------------------------------------------- -->
+
+
+
+  <script src="https://unpkg.com/scrollreveal"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="js/case-study.js"></script>
+  <script type="module" src="js/portfolio.js"></script>
+</body>
+
+</html>
