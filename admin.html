@@ -499,6 +499,8 @@
               Branding</button>
             <button type="button" class="cs-tab-btn" data-cstab="sections"><i class="ri-article-line"></i> Overview &
               Details</button>
+            <button type="button" class="cs-tab-btn" data-cstab="visibility"><i class="ri-toggle-line"></i> Section
+              Controls</button>
             <button type="button" class="cs-tab-btn" data-cstab="tags"><i class="ri-price-tag-3-line"></i> Service
               Tags</button>
             <button type="button" class="cs-tab-btn" data-cstab="media"><i class="ri-gallery-upload-line"></i> Gallery &
@@ -1027,6 +1029,38 @@
                 <label>Canonical URL</label>
                 <input type="text" id="cs-seo-canonical" placeholder="https://betroverse.in/portfolio/mylaban"
                   class="form-input">
+              </div>
+
+            </div>
+
+            <!-- SUBTAB 8: SECTION VISIBILITY & ORDER CONTROLS -->
+            <div id="cstab-visibility" class="cs-tab-content">
+
+              <div class="section-vis-toolbar">
+                <div class="section-vis-title">
+                  <i class="ri-toggle-line" style="color: var(--accent-color);"></i>
+                  <span>CASE STUDY SECTIONS CONTROL</span>
+                </div>
+                <div class="section-vis-actions">
+                  <button type="button" class="admin-btn secondary-btn" id="cs-vis-enable-all-btn" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="ri-checkbox-circle-line"></i> Turn All ON
+                  </button>
+                  <button type="button" class="admin-btn secondary-btn" id="cs-vis-disable-all-btn" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="ri-close-circle-line"></i> Turn All OFF
+                  </button>
+                  <button type="button" class="admin-btn secondary-btn" id="cs-vis-reset-order-btn" style="padding: 6px 12px; font-size: 0.8rem;">
+                    <i class="ri-refresh-line"></i> Reset Default Order
+                  </button>
+                </div>
+              </div>
+
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Toggle section visibility ON or OFF for this Case Study. Use the up/down arrows to reorder sections. Only sections marked <strong>ON</strong> will be rendered on the live website.
+              </p>
+
+              <!-- Dynamic Section Controls Grid -->
+              <div id="cs-section-vis-grid" class="section-vis-grid">
+                <!-- JS Inject Section Visibility Cards -->
               </div>
 
             </div>

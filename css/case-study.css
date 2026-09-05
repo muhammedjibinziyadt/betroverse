@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Kalam:wght@400;700&display=swap');
+
 /* ==========================================================================
    Betroverse - Premium Creative Agency Case Study Stylesheet
    ========================================================================== */
@@ -198,10 +200,8 @@
 }
 
 .cs-card h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--primary-color, #4ab96c);
-  margin-bottom: 1.25rem;
+  color: #ffffff;
+  margin-bottom: 1rem;
 }
 
 .cs-card p {
@@ -277,141 +277,406 @@
   line-height: 1.7;
 }
 
-/* --- SECTION 5: CREATIVE SHOWCASE MASONRY & COLLAGE GALLERY --- */
-.cs-showcase-grid,
-.cs-showcase-masonry-gallery {
-  display: block;
-  column-count: 5;
-  column-gap: 18px;
+/* ==========================================================================
+   SECTION 5: CREATIVE SHOWCASE - EDITORIAL DYNAMIC COLLAGE SYSTEM
+   ========================================================================== */
+
+.cs-editorial-collage-wrapper {
+  position: relative;
   width: 100%;
+  margin: 1.5rem 0 3rem 0;
 }
 
-@media (max-width: 1600px) {
-  .cs-showcase-grid,
-  .cs-showcase-masonry-gallery {
-    column-count: 5;
-    column-gap: 18px;
+.cs-editorial-collage {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 22px 18px;
+  width: 100%;
+  position: relative;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* Base Collage Card */
+.cs-collage-card {
+  position: relative;
+  border-radius: 18px;
+  cursor: pointer;
+  transform: rotate(var(--rot, 0deg));
+  z-index: var(--z, 2);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.3s ease, z-index 0s;
+  box-sizing: border-box;
+}
+
+.cs-collage-card:hover {
+  transform: scale(1.04) rotate(0deg) !important;
+  z-index: 30 !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(74, 185, 108, 0.35);
+}
+
+/* Polaroid / Crisp White Framed Media Box */
+.cs-collage-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0f141f;
+  border: 6px solid #ffffff; /* Premium white polaroid frame */
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.cs-collage-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+}
+
+.cs-collage-card:hover .cs-collage-frame img {
+  transform: scale(1.05);
+  filter: brightness(1.06);
+}
+
+/* Video Frame Specifics */
+.cs-collage-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.cs-video-play-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(74, 185, 108, 0.95);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 10px 25px rgba(74, 185, 108, 0.5), 0 0 0 4px rgba(255, 255, 255, 0.3);
+  transition: transform 0.3s ease, background 0.3s ease;
+  z-index: 5;
+}
+
+.cs-collage-card:hover .cs-video-play-badge {
+  transform: translate(-50%, -50%) scale(1.15);
+  background: #4ab96c;
+  box-shadow: 0 14px 32px rgba(74, 185, 108, 0.7), 0 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.cs-media-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(6, 8, 13, 0.85);
+  color: var(--primary-color, #4ab96c);
+  border: 1px solid rgba(74, 185, 108, 0.4);
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 5;
+  backdrop-filter: blur(8px);
+}
+
+/* Hover Overlay for Images */
+.cs-collage-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(6, 8, 13, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.6rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 4;
+}
+
+.cs-collage-card:hover .cs-collage-overlay {
+  opacity: 1;
+}
+
+/* Handwritten Artistic Annotations Inspired by Reference Image */
+.cs-collage-annotation {
+  position: absolute;
+  font-family: 'Caveat', 'Kalam', cursive;
+  color: #4ab96c;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  z-index: 15;
+  pointer-events: none;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0,0,0,0.8);
+  white-space: nowrap;
+}
+
+.cs-collage-annotation.top-left {
+  top: -28px;
+  left: -20px;
+  transform: rotate(-6deg);
+}
+
+.cs-collage-annotation.top-right {
+  top: -25px;
+  right: -15px;
+  transform: rotate(5deg);
+}
+
+.cs-collage-annotation.bottom-left {
+  bottom: -28px;
+  left: -10px;
+  transform: rotate(-4deg);
+}
+
+.cs-collage-annotation.bottom-right {
+  bottom: -28px;
+  right: -15px;
+  transform: rotate(3deg);
+}
+
+/* Dynamic Grid Spanning Classes for Controlled Composition */
+
+/* Hero / Featured Large Card */
+.cs-collage-card.is-hero {
+  grid-column: span 6;
+  aspect-ratio: 4 / 3;
+}
+
+.cs-collage-card.is-tall {
+  grid-column: span 3;
+  aspect-ratio: 3 / 4;
+}
+
+.cs-collage-card.is-wide {
+  grid-column: span 6;
+  aspect-ratio: 16 / 9;
+}
+
+.cs-collage-card.is-square {
+  grid-column: span 3;
+  aspect-ratio: 1 / 1;
+}
+
+.cs-collage-card.is-medium {
+  grid-column: span 4;
+  aspect-ratio: 4 / 3;
+}
+
+/* Composition Rules by Item Count */
+
+/* 1-3 Assets */
+.cs-editorial-collage[data-count="1"] .cs-collage-card {
+  grid-column: span 12;
+  max-width: 900px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+}
+
+.cs-editorial-collage[data-count="2"] .cs-collage-card {
+  grid-column: span 6;
+  aspect-ratio: 4 / 3;
+}
+
+.cs-editorial-collage[data-count="3"] .cs-collage-card:nth-child(1) {
+  grid-column: span 7;
+  aspect-ratio: 4 / 3;
+}
+.cs-editorial-collage[data-count="3"] .cs-collage-card:nth-child(2),
+.cs-editorial-collage[data-count="3"] .cs-collage-card:nth-child(3) {
+  grid-column: span 5;
+  aspect-ratio: 4 / 3;
+}
+
+/* 4-6 Assets Composition */
+.cs-editorial-collage[data-count="4"] .cs-collage-card:nth-child(1) { grid-column: span 6; aspect-ratio: 4/3; }
+.cs-editorial-collage[data-count="4"] .cs-collage-card:nth-child(2) { grid-column: span 6; aspect-ratio: 4/3; }
+.cs-editorial-collage[data-count="4"] .cs-collage-card:nth-child(3) { grid-column: span 6; aspect-ratio: 16/9; }
+.cs-editorial-collage[data-count="4"] .cs-collage-card:nth-child(4) { grid-column: span 6; aspect-ratio: 16/9; }
+
+.cs-editorial-collage[data-count="5"] .cs-collage-card:nth-child(1) { grid-column: span 6; aspect-ratio: 4/3; }
+.cs-editorial-collage[data-count="5"] .cs-collage-card:nth-child(2) { grid-column: span 3; aspect-ratio: 3/4; }
+.cs-editorial-collage[data-count="5"] .cs-collage-card:nth-child(3) { grid-column: span 3; aspect-ratio: 3/4; }
+.cs-editorial-collage[data-count="5"] .cs-collage-card:nth-child(4) { grid-column: span 6; aspect-ratio: 16/9; }
+.cs-editorial-collage[data-count="5"] .cs-collage-card:nth-child(5) { grid-column: span 6; aspect-ratio: 16/9; }
+
+.cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(1) { grid-column: span 6; aspect-ratio: 4/3; }
+.cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(2) { grid-column: span 3; aspect-ratio: 3/4; }
+.cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(3) { grid-column: span 3; aspect-ratio: 3/4; }
+.cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(4) { grid-column: span 4; aspect-ratio: 1/1; }
+.cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(5) { grid-column: span 4; aspect-ratio: 1/1; }
+.cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(6) { grid-column: span 4; aspect-ratio: 1/1; }
+
+/* Responsive Collages (Tablet & Mobile) */
+
+@media (max-width: 1024px) {
+  .cs-editorial-collage {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px 14px;
+  }
+  .cs-collage-card.is-hero { grid-column: span 6; }
+  .cs-collage-card.is-tall { grid-column: span 3; }
+  .cs-collage-card.is-wide { grid-column: span 6; }
+  .cs-collage-card.is-square { grid-column: span 3; }
+  .cs-collage-card.is-medium { grid-column: span 3; }
+
+  .cs-editorial-collage[data-count="3"] .cs-collage-card:nth-child(1) { grid-column: span 6; }
+  .cs-editorial-collage[data-count="3"] .cs-collage-card:nth-child(2),
+  .cs-editorial-collage[data-count="3"] .cs-collage-card:nth-child(3) { grid-column: span 3; }
+
+  .cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(4),
+  .cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(5),
+  .cs-editorial-collage[data-count="6"] .cs-collage-card:nth-child(6) { grid-column: span 2; }
+}
+
+@media (max-width: 768px) {
+  .cs-editorial-collage {
+    grid-template-columns: repeat(2, 1fr); /* Compact 2-column mobile editorial collage */
+    gap: 12px 10px;
+    padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  .cs-collage-card {
+    grid-column: span 1 !important;
+    aspect-ratio: 4 / 3 !important;
+    border-radius: 14px;
+  }
+  .cs-collage-card:nth-child(3n+1) {
+    grid-column: span 2 !important; /* Staggered full-width cards on mobile */
+    aspect-ratio: 16 / 9 !important;
+  }
+  .cs-collage-frame {
+    border-width: 4px; /* Reduced white border on mobile */
+    border-radius: 14px;
+  }
+  .cs-collage-annotation {
+    font-size: 1.1rem;
+  }
+  .cs-video-play-badge {
+    width: 46px;
+    height: 46px;
+    font-size: 1.3rem;
   }
 }
 
-@media (max-width: 1300px) {
-  .cs-showcase-grid,
-  .cs-showcase-masonry-gallery {
-    column-count: 4;
-    column-gap: 16px;
-  }
+/* Lightbox Modal Enhancements for Video & Image */
+.cs-lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(6, 8, 13, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
-@media (max-width: 992px) {
-  .cs-showcase-grid,
-  .cs-showcase-masonry-gallery {
-    column-count: 3;
-    column-gap: 14px;
-  }
+.cs-lightbox-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-@media (max-width: 640px) {
-  .cs-showcase-grid,
-  .cs-showcase-masonry-gallery {
-    column-count: 2; /* Always 2 columns on mobile for dynamic collage */
-    column-gap: 10px;
-  }
+.cs-lightbox-container {
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
+.cs-lightbox-img {
+  max-width: 90vw;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(74, 185, 108, 0.2);
+}
+
+.cs-lightbox-video {
+  width: 80vw;
+  max-width: 1000px;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+}
+
+.cs-lightbox-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(22, 25, 34, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.cs-lightbox-btn:hover {
+  background: var(--primary-color, #4ab96c);
+  border-color: #4ab96c;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Fallback Compatibility Classes */
 .cs-showcase-placeholder,
 .cs-showcase-card,
 .cs-showcase-masonry-item {
   break-inside: avoid;
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
   margin-bottom: 18px;
   position: relative;
   width: 100%;
-  aspect-ratio: auto; /* Allow natural aspect ratio! */
-  height: auto;
+  aspect-ratio: auto;
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
   background: rgba(22, 25, 34, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.3s ease;
-  transform: translate3d(0, 0, 0);
-}
-
-.cs-showcase-placeholder:hover,
-.cs-showcase-card:hover,
-.cs-showcase-masonry-item:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 20px 45px rgba(74, 185, 108, 0.25), 0 0 25px rgba(74, 185, 108, 0.2);
-  border-color: rgba(74, 185, 108, 0.5);
-  z-index: 10;
-}
-
-.cs-showcase-placeholder img,
-.cs-showcase-card img,
-.cs-showcase-masonry-item img {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 16px;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
-}
-
-.cs-showcase-placeholder:hover img,
-.cs-showcase-card:hover img,
-.cs-showcase-masonry-item:hover img {
-  transform: scale(1.04);
-  filter: brightness(1.05);
-}
-
-@media (max-width: 640px) {
-  .cs-showcase-placeholder,
-  .cs-showcase-card,
-  .cs-showcase-masonry-item {
-    margin-bottom: 10px;
-    border-radius: 12px;
-  }
-  .cs-showcase-placeholder img,
-  .cs-showcase-card img,
-  .cs-showcase-masonry-item img {
-    border-radius: 12px;
-  }
-}
-
-.cs-showcase-placeholder {
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  text-align: center;
-}
-.cs-showcase-placeholder.full-width {
-  column-span: all;
-  -webkit-column-span: all;
-  margin-bottom: 18px;
-}
-
-.cs-placeholder-icon {
-  font-size: 2.5rem;
-  color: var(--primary-color, #4ab96c);
-  margin-bottom: 1rem;
-  opacity: 0.8;
-}
-
-.cs-placeholder-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
-}
-
-.cs-placeholder-desc {
-  font-size: 0.85rem;
-  color: var(--text-muted, #a0aec0);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --- SECTION 6: VIDEO SHOWCASE --- */

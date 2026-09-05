@@ -31,7 +31,7 @@
         results: "Over 500k video views and a significant surge in store footfall and brand engagement."
       },
       media: {
-        gallery: ["images/p1.jpg", "images/p5.jpg", "images/s1.jpg"],
+        gallery: ["images/p1.jpg", "images/p5.jpg", "images/s1.jpg", "images/p7.jpg", "images/s8.jpg"],
         videos: ["https://www.youtube.com/embed/dQw4w9WgXcQ"],
         mockups: { desktop: "images/p1.jpg", tablet: "images/p5.jpg", mobile: "images/s1.jpg" }
       },
@@ -75,7 +75,7 @@
         execution: "Multichannel distribution via social media platforms and print media flyers.",
         results: "Widespread community reach and successful event attendance across all sessions."
       },
-      media: { gallery: ["images/p2.jpg"], videos: [], mockups: { desktop: "images/p2.jpg", tablet: "images/p2.jpg", mobile: "images/p2.jpg" } },
+      media: { gallery: ["images/p2.jpg", "images/p7.jpg", "images/s2.jpg", "images/s7.jpg"], videos: [], mockups: { desktop: "images/p2.jpg", tablet: "images/p2.jpg", mobile: "images/p2.jpg" } },
       results: {
         stat1Num: "+100K", stat1Label: "Event Reach",
         stat2Num: "50 Yrs", stat2Label: "Celebrated Legacy",
@@ -111,7 +111,7 @@
         execution: "Professional photo shoots and targeted digital ad campaigns.",
         results: "Substantial increase in cafe weekend visits and online social engagement."
       },
-      media: { gallery: ["images/p3.jpg", "images/p6.jpg", "images/s4.jpg"], videos: [], mockups: { desktop: "images/p3.jpg", tablet: "images/p6.jpg", mobile: "images/s4.jpg" } },
+      media: { gallery: ["images/p3.jpg", "images/p6.jpg", "images/s4.jpg", "images/s3.jpg", "images/p8.jpg"], videos: [], mockups: { desktop: "images/p3.jpg", tablet: "images/p6.jpg", mobile: "images/s4.jpg" } },
       results: {
         stat1Num: "+350K", stat1Label: "Social Reach",
         stat2Num: "+50%", stat2Label: "Weekend Customer Increase",
@@ -147,7 +147,7 @@
         execution: "Multichannel broadcast on social media and print distribution across retail outlets.",
         results: "Increased retail inquiries and store sales conversion during promo periods."
       },
-      media: { gallery: ["images/p4.jpg", "images/s5.jpg"], videos: [], mockups: { desktop: "images/p4.jpg", tablet: "images/s5.jpg", mobile: "images/p4.jpg" } },
+      media: { gallery: ["images/p4.jpg", "images/s5.jpg", "images/s6.jpg", "images/p8.jpg"], videos: [], mockups: { desktop: "images/p4.jpg", tablet: "images/s5.jpg", mobile: "images/p4.jpg" } },
       results: {
         stat1Num: "+200K", stat1Label: "Ad Impressions",
         stat2Num: "+40%", stat2Label: "Store Inquiries",
@@ -554,6 +554,37 @@
       return isInSubdir ? "../" + url : url;
     };
 
+    // Helper to resolve exact portfolio routing HTML links
+    const getCaseStudyUrl = (cs) => {
+      if (!cs || !cs.slug) return "case-study.html";
+      const slug = cs.slug.toLowerCase();
+      const staticFileMap = {
+        "mylaban": "mylaban.html",
+        "sa-adiya": "sa-adiya.html",
+        "toi-cafe": "toi-cafe.html",
+        "ph-mobiles": "ph-mobiles.html",
+        "nice-mobiles": "nice-mobiles.html",
+        "gurumitra": "gurumitra.html",
+        "gurumitra-foundation": "gurumitra.html",
+        "celes": "celes.html",
+        "celes-lifestyle": "celes.html",
+        "celes-lifestyle-brand": "celes.html",
+        "nahdi-mandi": "nahdi-mandi.html",
+        "nahdi-mandi-restaurant": "nahdi-mandi.html",
+        "soofi-mandi": "soofi-mandi.html",
+        "engo": "engo.html",
+        "alain-architecture": "alain-architecture.html",
+        "educart": "educart.html",
+        "independent": "independent.html",
+        "key-factory": "key-factory.html"
+      };
+
+      if (staticFileMap[slug]) {
+        return staticFileMap[slug];
+      }
+      return `${slug}.html`;
+    };
+
     // --- 1. HERO SECTION POPULATION ---
     const heroSection = document.querySelector(".cs-hero");
     if (heroSection && data.heroImage) {
@@ -630,28 +661,111 @@
       if (resultsElem && data.overview.results) resultsElem.textContent = data.overview.results;
     }
 
-    // --- 5. CREATIVE SHOWCASE POPULATION (Masonry Collage Engine) ---
+    // --- 5. CREATIVE SHOWCASE POPULATION (Editorial Dynamic Collage Engine) ---
     const showcaseGrid = document.querySelector(".cs-showcase-grid") || document.querySelector(".cs-showcase-masonry-gallery");
-    if (showcaseGrid && data.media && Array.isArray(data.media.gallery) && data.media.gallery.length > 0) {
-      showcaseGrid.style.cssText = ""; // Clear inline grid overrides
-      showcaseGrid.className = "cs-showcase-grid cs-showcase-masonry-gallery";
-      showcaseGrid.innerHTML = "";
+    
+    // Unified media items array for showcase (images + videos)
+    const showcaseMedia = [];
+    if (data.media) {
+      if (Array.isArray(data.media.gallery)) {
+        data.media.gallery.forEach((img, i) => {
+          if (img) showcaseMedia.push({ type: "image", url: resolveAssetUrl(img), title: `${data.companyName || 'Visual'} Asset ${i + 1}` });
+        });
+      }
+      if (Array.isArray(data.media.videos)) {
+        data.media.videos.forEach((vid, i) => {
+          const url = typeof vid === "string" ? vid : (vid ? vid.url : "");
+          if (url) showcaseMedia.push({ type: "video", url: resolveAssetUrl(url), title: `${data.companyName || 'Motion'} Video ${i + 1}` });
+        });
+      }
+    }
 
-      data.media.gallery.forEach((imgUrl, idx) => {
-        const relativeUrl = resolveAssetUrl(imgUrl);
+    // Fallback if media is empty
+    if (showcaseMedia.length === 0 && data.heroImage) {
+      showcaseMedia.push({ type: "image", url: resolveAssetUrl(data.heroImage), title: `${data.companyName} Campaign Hero` });
+      if (data.cardImage && data.cardImage !== data.heroImage) {
+        showcaseMedia.push({ type: "image", url: resolveAssetUrl(data.cardImage), title: `${data.companyName} Visual Asset` });
+      }
+    }
+
+    if (showcaseGrid && showcaseMedia.length > 0) {
+      showcaseGrid.style.cssText = "";
+      showcaseGrid.className = "cs-showcase-grid cs-editorial-collage-wrapper";
+      
+      const totalCount = showcaseMedia.length;
+      
+      // Rotations and z-indexes array
+      const rotations = [-3.5, 2.5, -1.8, 3.8, -2.4, 4.2, -1.5, 3.0, -2.8, 2.0];
+      const zIndexes = [10, 8, 6, 7, 9, 5, 4, 3, 2, 1];
+      const spanClasses = ["is-hero", "is-tall", "is-square", "is-wide", "is-medium"];
+      
+      // Handwritten Annotations Inspired by Reference Image
+      const annotationsList = [
+        "From Concept to Cravings ↴",
+        "Designing Brands that tell Stories ↗",
+        "Sweet Moments, Stronger Brands ♡",
+        "More Than Dessert, A Story in Every Bite ♡",
+        "Layers of Happiness ↴",
+        "Crafting Iconic Visuals ↗"
+      ];
+      
+      const collageContainer = document.createElement("div");
+      collageContainer.className = "cs-editorial-collage";
+      collageContainer.setAttribute("data-count", totalCount);
+      
+      showcaseMedia.forEach((item, idx) => {
+        const rot = rotations[idx % rotations.length];
+        const z = zIndexes[idx % zIndexes.length];
+        const spanClass = totalCount > 3 ? spanClasses[idx % spanClasses.length] : "";
+        
         const card = document.createElement("div");
-        card.className = "cs-showcase-masonry-item";
+        card.className = `cs-collage-card cs-collage-item-${idx + 1} ${spanClass} ${item.type === 'video' ? 'is-video-item' : ''}`;
+        card.style.setProperty("--rot", `${rot}deg`);
+        card.style.setProperty("--z", `${z}`);
         card.setAttribute("data-index", idx);
-
-        card.innerHTML = `
-          <img src="${relativeUrl}" alt="${data.companyName || 'Creative'} Showcase ${idx + 1}" loading="lazy">
-        `;
-
-        const imgElem = card.querySelector("img");
-        if (imgElem) attachImgErrorHandler(imgElem);
-
-        showcaseGrid.appendChild(card);
+        
+        // Optionally attach an artistic handwritten annotation on specific cards
+        let annotationHtml = "";
+        if (idx === 0 && annotationsList[0]) {
+          annotationHtml = `<span class="cs-collage-annotation top-left">${annotationsList[0]}</span>`;
+        } else if (idx === 1 && annotationsList[1]) {
+          annotationHtml = `<span class="cs-collage-annotation top-right">${annotationsList[1]}</span>`;
+        } else if (idx === 2 && annotationsList[2]) {
+          annotationHtml = `<span class="cs-collage-annotation bottom-left">${annotationsList[2]}</span>`;
+        } else if (idx === 3 && annotationsList[3]) {
+          annotationHtml = `<span class="cs-collage-annotation bottom-right">${annotationsList[3]}</span>`;
+        }
+        
+        if (item.type === "video") {
+          const isEmbed = item.url.includes("youtube.com") || item.url.includes("vimeo.com") || item.url.includes("embed");
+          card.innerHTML = `
+            ${annotationHtml}
+            <div class="cs-collage-frame">
+              ${isEmbed 
+                ? `<iframe src="${item.url}" style="width:100%; height:100%; border:none; border-radius:12px; pointer-events:none;"></iframe>`
+                : `<video src="${item.url}" preload="metadata" muted style="width:100%; height:100%; object-fit:cover; border-radius:12px;"></video>`
+              }
+              <div class="cs-video-play-badge"><i class="ri-play-fill"></i></div>
+              <span class="cs-media-badge"><i class="ri-film-line"></i> VIDEO</span>
+            </div>
+          `;
+        } else {
+          card.innerHTML = `
+            ${annotationHtml}
+            <div class="cs-collage-frame">
+              <img src="${item.url}" alt="${item.title}" loading="lazy">
+              <div class="cs-collage-overlay"><i class="ri-fullscreen-line"></i></div>
+            </div>
+          `;
+          const imgElem = card.querySelector("img");
+          if (imgElem) attachImgErrorHandler(imgElem);
+        }
+        
+        collageContainer.appendChild(card);
       });
+      
+      showcaseGrid.innerHTML = "";
+      showcaseGrid.appendChild(collageContainer);
     }
 
     // --- 6. VIDEO SHOWCASE POPULATION ---
@@ -728,27 +842,7 @@
       if (roleElem && data.results.feedbackRole) roleElem.textContent = data.results.feedbackRole;
     }
 
-    // --- 9. NEXT / PREV NAVIGATION ---
-    const currentIndex = caseStudies.findIndex(cs => cs.slug.toLowerCase() === data.slug.toLowerCase());
-    if (currentIndex !== -1) {
-      const nextIndex = (currentIndex + 1) % caseStudies.length;
-      const prevIndex = (currentIndex - 1 + caseStudies.length) % caseStudies.length;
-
-      const nextStudy = caseStudies[nextIndex];
-      const prevStudy = caseStudies[prevIndex];
-
-      const navCards = document.querySelectorAll(".cs-nav-card");
-      if (navCards[0] && prevStudy) {
-        navCards[0].href = `${prevStudy.slug}.html`;
-        const title = navCards[0].querySelector(".cs-nav-title");
-        if (title) title.textContent = prevStudy.companyName;
-      }
-      if (navCards[1] && nextStudy) {
-        navCards[1].href = `${nextStudy.slug}.html`;
-        const title = navCards[1].querySelector(".cs-nav-title");
-        if (title) title.textContent = nextStudy.companyName;
-      }
-    }
+    // (Next/Prev navigation handled in End Sections Engine below)
 
     // --- SEO HEAD POPULATION & JSON-LD SCHEMA ---
     if (data.seo) {
@@ -793,8 +887,62 @@
       schemaScript.textContent = JSON.stringify(schemaData);
     }
 
+    // --- SECTION VISIBILITY & REORDERING ENGINE ---
+    const vis = data.sectionVisibility || {};
+    const order = Array.isArray(data.sectionOrder) && data.sectionOrder.length > 0
+      ? data.sectionOrder
+      : ["hero", "company_overview", "brand_story", "project_objectives", "services", "project_overview", "challenge", "strategy", "solution", "execution", "results_summary", "results_impact", "performance_metrics", "client_testimonial", "creative_showcase", "gallery", "video_showcase", "website_mockups", "mobile_mockups", "desktop_mockups", "brand_identity", "social_media_campaign", "marketing_campaign", "additional_info", "custom_sections"];
+
+    // Helper: Map section keys to DOM elements
+    const getDomSection = (key) => {
+      const explicit = document.querySelector(`[data-section="${key}"]`);
+      if (explicit) return explicit;
+
+      // Heuristic fallback matching for existing static markup
+      if (key === "hero") return document.querySelector(".cs-hero");
+      if (key === "services") return document.querySelector(".cs-services-flex")?.closest("section, .cs-section");
+      if (key === "project_overview") return document.querySelector(".cs-overview-grid")?.closest("section, .cs-section");
+      if (key === "creative_showcase" || key === "gallery") return document.querySelector(".cs-showcase-grid, .cs-showcase-masonry-gallery")?.closest("section, .cs-section");
+      if (key === "video_showcase") return document.querySelector(".cs-video-grid")?.closest("section, .cs-section");
+      if (key === "website_mockups" || key === "desktop_mockups" || key === "mobile_mockups") return document.querySelector(".cs-device-mockups")?.closest("section, .cs-section");
+      if (key === "results_impact" || key === "performance_metrics") return document.querySelector(".cs-stats-grid")?.closest("section, .cs-section");
+      if (key === "client_testimonial") return document.querySelector(".cs-feedback-card")?.closest("section, .cs-section");
+      if (key === "brand_story" || key === "company_overview" || key === "project_objectives") return document.querySelector(".cs-about-grid")?.closest("section, .cs-section");
+      return null;
+    };
+
+    // Apply ON / OFF visibility rules (completely hide disabled sections)
+    Object.keys(vis).forEach(secKey => {
+      if (vis[secKey] === false) {
+        const secElem = getDomSection(secKey);
+        if (secElem) {
+          secElem.style.display = "none";
+          secElem.style.margin = "0";
+          secElem.style.padding = "0";
+          secElem.classList.add("cs-section-disabled");
+        }
+      }
+    });
+
+    // Apply custom section ordering if specified
+    const pageWrapper = document.querySelector(".cs-page-wrapper") || document.body;
+    if (pageWrapper && Array.isArray(data.sectionOrder) && data.sectionOrder.length > 0) {
+      order.forEach(secKey => {
+        if (vis[secKey] !== false) {
+          const secElem = getDomSection(secKey);
+          if (secElem && secElem.parentNode === pageWrapper) {
+            pageWrapper.appendChild(secElem); // Append in configured sequence
+          }
+        }
+      });
+      const footer = document.querySelector("footer");
+      if (footer && footer.parentNode === pageWrapper) {
+        pageWrapper.appendChild(footer); // Ensure footer remains at bottom
+      }
+    }
+
     // --- SCROLL REVEAL OBSERVER ---
-    const sections = document.querySelectorAll(".cs-section");
+    const sections = document.querySelectorAll(".cs-section:not(.cs-section-disabled)");
     sections.forEach(sec => sec.classList.add("cs-reveal"));
 
     if ("IntersectionObserver" in window) {
@@ -820,9 +968,9 @@
       lightboxOverlay.setAttribute("aria-hidden", "true");
       lightboxOverlay.innerHTML = `
         <button class="cs-lightbox-close" id="cs-lightbox-close-btn" aria-label="Close Lightbox"><i class="ri-close-line"></i></button>
-        <button class="cs-lightbox-btn cs-lightbox-prev" id="cs-lightbox-prev-btn" aria-label="Previous Image"><i class="ri-arrow-left-s-line"></i></button>
-        <button class="cs-lightbox-btn cs-lightbox-next" id="cs-lightbox-next-btn" aria-label="Next Image"><i class="ri-arrow-right-s-line"></i></button>
-        <div class="cs-lightbox-container">
+        <button class="cs-lightbox-btn cs-lightbox-prev" id="cs-lightbox-prev-btn" aria-label="Previous Media"><i class="ri-arrow-left-s-line"></i></button>
+        <button class="cs-lightbox-btn cs-lightbox-next" id="cs-lightbox-next-btn" aria-label="Next Media"><i class="ri-arrow-right-s-line"></i></button>
+        <div class="cs-lightbox-container" id="cs-lightbox-container">
           <img id="cs-lightbox-img" class="cs-lightbox-img" src="" alt="Showcase Preview">
         </div>
         <div id="cs-lightbox-caption" class="cs-lightbox-caption"></div>
@@ -830,26 +978,45 @@
       document.body.appendChild(lightboxOverlay);
     }
 
-    const lightboxImg = document.getElementById("cs-lightbox-img");
+    const lightboxContainer = document.getElementById("cs-lightbox-container");
     const lightboxCaption = document.getElementById("cs-lightbox-caption");
     const closeBtn = document.getElementById("cs-lightbox-close-btn");
     const prevBtn = document.getElementById("cs-lightbox-prev-btn");
     const nextBtn = document.getElementById("cs-lightbox-next-btn");
 
-    const galleryItems = Array.from(document.querySelectorAll(".cs-showcase-masonry-item, .cs-showcase-placeholder, .cs-video-placeholder, .cs-mockup-screen"));
+    const collageCards = Array.from(document.querySelectorAll(".cs-collage-card, .cs-showcase-masonry-item, .cs-showcase-placeholder, .cs-video-placeholder, .cs-mockup-screen"));
     let currentGalleryIndex = 0;
 
     const openLightbox = (index) => {
       currentGalleryIndex = index;
-      const item = galleryItems[index];
-      if (!item) return;
+      const targetMedia = showcaseMedia[index];
 
-      const title = item.querySelector(".cs-placeholder-title")?.textContent || "Creative Showcase Item";
-      const desc = item.querySelector(".cs-placeholder-desc")?.textContent || "";
-      const img = item.querySelector("img")?.src || data.heroImage || "../images/p1.jpg";
+      lightboxContainer.innerHTML = "";
 
-      lightboxImg.src = resolveAssetUrl(img);
-      lightboxCaption.textContent = title + (desc ? " — " + desc : "");
+      if (targetMedia) {
+        if (targetMedia.type === "video") {
+          const isEmbed = targetMedia.url.includes("youtube.com") || targetMedia.url.includes("vimeo.com") || targetMedia.url.includes("embed");
+          if (isEmbed) {
+            lightboxContainer.innerHTML = `<iframe src="${targetMedia.url}?autoplay=1" class="cs-lightbox-video" style="border:none;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+          } else {
+            lightboxContainer.innerHTML = `<video src="${targetMedia.url}" controls autoplay class="cs-lightbox-video"></video>`;
+          }
+        } else {
+          lightboxContainer.innerHTML = `<img id="cs-lightbox-img" class="cs-lightbox-img" src="${targetMedia.url}" alt="${targetMedia.title || 'Showcase Image'}">`;
+          const imgElem = lightboxContainer.querySelector("img");
+          if (imgElem) attachImgErrorHandler(imgElem);
+        }
+
+        if (lightboxCaption) {
+          lightboxCaption.textContent = `${data.companyName || 'Case Study'} Showcase — ${targetMedia.title || 'Visual Asset'} (${index + 1} of ${showcaseMedia.length})`;
+        }
+      } else {
+        const item = collageCards[index];
+        const title = item?.querySelector(".cs-placeholder-title")?.textContent || "Creative Showcase Item";
+        const img = item?.querySelector("img")?.src || data.heroImage || "../images/p1.jpg";
+        lightboxContainer.innerHTML = `<img id="cs-lightbox-img" class="cs-lightbox-img" src="${resolveAssetUrl(img)}" alt="Preview">`;
+        if (lightboxCaption) lightboxCaption.textContent = title;
+      }
 
       lightboxOverlay.classList.add("active");
       lightboxOverlay.setAttribute("aria-hidden", "false");
@@ -860,9 +1027,10 @@
       lightboxOverlay.classList.remove("active");
       lightboxOverlay.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
+      if (lightboxContainer) lightboxContainer.innerHTML = "";
     };
 
-    galleryItems.forEach((item, index) => {
+    collageCards.forEach((item, index) => {
       item.style.cursor = "pointer";
       item.setAttribute("role", "button");
       item.setAttribute("tabindex", "0");
@@ -877,20 +1045,25 @@
 
     if (closeBtn) closeBtn.addEventListener("click", closeLightbox);
     lightboxOverlay.addEventListener("click", (e) => {
-      if (e.target === lightboxOverlay) closeLightbox();
+      if (e.target === lightboxOverlay || e.target === lightboxContainer) closeLightbox();
     });
 
+    const maxItems = Math.max(showcaseMedia.length, collageCards.length);
     if (prevBtn) {
       prevBtn.addEventListener("click", () => {
-        currentGalleryIndex = (currentGalleryIndex - 1 + galleryItems.length) % galleryItems.length;
-        openLightbox(currentGalleryIndex);
+        if (maxItems > 0) {
+          currentGalleryIndex = (currentGalleryIndex - 1 + maxItems) % maxItems;
+          openLightbox(currentGalleryIndex);
+        }
       });
     }
 
     if (nextBtn) {
       nextBtn.addEventListener("click", () => {
-        currentGalleryIndex = (currentGalleryIndex + 1) % galleryItems.length;
-        openLightbox(currentGalleryIndex);
+        if (maxItems > 0) {
+          currentGalleryIndex = (currentGalleryIndex + 1) % maxItems;
+          openLightbox(currentGalleryIndex);
+        }
       });
     }
 
@@ -960,26 +1133,35 @@
       }
     }
 
-    // --- RELATED PROJECTS SECTION ---
-    const section9Container = document.querySelector(".cs-project-nav")?.closest(".cs-container");
-    if (section9Container && !document.querySelector(".cs-related-section")) {
-      const otherProjects = caseStudies.filter(cs => cs.slug.toLowerCase() !== data.slug.toLowerCase());
-      const relatedProjects = otherProjects.slice(0, 3); // Top 3 related projects
+    // --- 9. END SECTIONS ENGINE (Exact Sequence: 1. Related Projects -> 2. Previous/Next Nav -> 3. Brand CTA -> 4. Footer) ---
+    const currentIndex = caseStudies.findIndex(cs => cs.slug.toLowerCase() === data.slug.toLowerCase() || cs.id === data.id);
 
-      if (relatedProjects.length > 0) {
-        const relatedSection = document.createElement("div");
-        relatedSection.className = "cs-related-section";
-        relatedSection.style.marginBottom = "4rem";
-        relatedSection.innerHTML = `
+    // 1. RELATED PROJECTS SECTION
+    let relatedSection = document.querySelector(".cs-related-section");
+    if (!relatedSection) {
+      relatedSection = document.createElement("section");
+      relatedSection.className = "cs-section cs-related-section";
+      relatedSection.setAttribute("data-section", "related_projects");
+    }
+
+    // Filter out current case study so current project NEVER appears inside Related Projects!
+    const otherProjects = caseStudies.filter(cs => cs.slug.toLowerCase() !== data.slug.toLowerCase() && cs.id !== data.id);
+    const relatedProjects = otherProjects.slice(0, 3); // Pick top 3 other relevant projects
+
+    if (relatedProjects.length > 0) {
+      relatedSection.style.display = "";
+      relatedSection.innerHTML = `
+        <div class="cs-container">
           <div class="cs-section-header" style="margin-bottom: 2rem;">
             <span class="cs-section-subtitle">EXPLORE MORE WORK</span>
             <h2 class="cs-section-title">Related Projects</h2>
           </div>
           <div class="cs-related-grid">
             ${relatedProjects.map(rp => {
-              const bgImg = rp.heroImage ? (rp.heroImage.startsWith("http") || rp.heroImage.startsWith("../") ? rp.heroImage : "../" + rp.heroImage) : "../images/p1.jpg";
+              const bgImg = rp.heroImage ? resolveAssetUrl(rp.heroImage) : resolveAssetUrl("images/p1.jpg");
+              const targetUrl = getCaseStudyUrl(rp);
               return `
-                <a href="${rp.slug}.html" class="cs-related-card">
+                <a href="${targetUrl}" class="cs-related-card">
                   <div class="cs-related-thumb" style="background-image: url('${bgImg}');"></div>
                   <div class="cs-related-body">
                     <span class="cs-related-cat">${rp.category || 'Creative Branding'}</span>
@@ -990,18 +1172,81 @@
               `;
             }).join("")}
           </div>
-        `;
-        section9Container.insertBefore(relatedSection, section9Container.firstChild);
-      }
+        </div>
+      `;
+    } else {
+      relatedSection.style.display = "none";
     }
 
-    // --- HIGH CONVERTING CONTACT CTA SECTION ---
-    const mainWrapper = document.querySelector(".cs-page-wrapper") || document.body;
-    const footerElem = document.querySelector("footer");
-    if (footerElem && !document.querySelector(".cs-cta-section")) {
-      const ctaContainer = document.createElement("div");
-      ctaContainer.className = "cs-container";
-      ctaContainer.innerHTML = `
+    // 2. PREVIOUS / NEXT PROJECT NAVIGATION SECTION
+    let projectNavSection = document.querySelector(".cs-project-nav-section") || document.querySelector(".cs-project-nav")?.closest("section, .cs-section");
+    if (!projectNavSection) {
+      projectNavSection = document.createElement("section");
+      projectNavSection.className = "cs-section cs-project-nav-section";
+      projectNavSection.setAttribute("data-section", "project_nav");
+    }
+    projectNavSection.style.borderBottom = "none";
+
+    const prevStudy = (currentIndex > 0 && currentIndex < caseStudies.length) ? caseStudies[currentIndex - 1] : null;
+    const nextStudy = (currentIndex >= 0 && currentIndex < caseStudies.length - 1) ? caseStudies[currentIndex + 1] : null;
+
+    let prevCardHtml = "";
+    if (prevStudy) {
+      prevCardHtml = `
+        <a href="${getCaseStudyUrl(prevStudy)}" class="cs-nav-card cs-nav-prev">
+          <div class="cs-nav-dir"><i class="ri-arrow-left-line"></i> Previous Project</div>
+          <div class="cs-nav-title">${prevStudy.companyName}</div>
+        </a>
+      `;
+    } else {
+      // First project in dataset -> Previous Project disabled / hidden (no invalid routes, no wrapping around!)
+      prevCardHtml = `
+        <div class="cs-nav-card cs-nav-prev cs-nav-disabled" style="visibility: hidden; pointer-events: none;" aria-hidden="true">
+          <div class="cs-nav-dir"><i class="ri-arrow-left-line"></i> Previous Project</div>
+          <div class="cs-nav-title">No Previous Project</div>
+        </div>
+      `;
+    }
+
+    let nextCardHtml = "";
+    if (nextStudy) {
+      nextCardHtml = `
+        <a href="${getCaseStudyUrl(nextStudy)}" class="cs-nav-card cs-nav-next" style="text-align: right;">
+          <div class="cs-nav-dir">Next Project <i class="ri-arrow-right-line"></i></div>
+          <div class="cs-nav-title">${nextStudy.companyName}</div>
+        </a>
+      `;
+    } else {
+      // Last project in dataset -> Next Project disabled / hidden
+      nextCardHtml = `
+        <div class="cs-nav-card cs-nav-next cs-nav-disabled" style="visibility: hidden; pointer-events: none; text-align: right;" aria-hidden="true">
+          <div class="cs-nav-dir">Next Project <i class="ri-arrow-right-line"></i></div>
+          <div class="cs-nav-title">No Next Project</div>
+        </div>
+      `;
+    }
+
+    projectNavSection.innerHTML = `
+      <div class="cs-container">
+        <div class="cs-project-nav">
+          ${prevCardHtml}
+          ${nextCardHtml}
+        </div>
+      </div>
+    `;
+
+    // 3. READY TO BUILD YOUR BRAND? CTA SECTION
+    let ctaSection = document.querySelector(".cs-cta-wrapper-section") || document.querySelector(".cs-cta-section")?.closest("section, .cs-section");
+    if (!ctaSection || !ctaSection.classList.contains("cs-cta-wrapper-section")) {
+      ctaSection = document.createElement("section");
+      ctaSection.className = "cs-section cs-cta-wrapper-section";
+      ctaSection.setAttribute("data-section", "brand_cta");
+    }
+    ctaSection.style.borderBottom = "none";
+    ctaSection.style.paddingTop = "0";
+
+    ctaSection.innerHTML = `
+      <div class="cs-container">
         <div class="cs-cta-section">
           <h2 class="cs-cta-title">Ready to build your brand?</h2>
           <p class="cs-cta-desc">Partner with Betroverse to elevate your digital identity, produce viral video content, and create high-converting agency marketing assets.</p>
@@ -1017,8 +1262,31 @@
             </a>
           </div>
         </div>
-      `;
-      footerElem.parentNode.insertBefore(ctaContainer, footerElem);
+      </div>
+    `;
+
+    // 4. CLEAN UP DUPLICATE DOM NODES AND ENFORCE ABSOLUTE DOM SEQUENCING RIGHT BEFORE FOOTER
+    const footerElem = document.querySelector("footer");
+
+    // Clean up any extra static project-nav or CTA sections that might exist in static HTML markup
+    document.querySelectorAll(".cs-project-nav, .cs-cta-section").forEach(el => {
+      const parentSec = el.closest("section, .cs-section");
+      if (parentSec && parentSec !== projectNavSection && parentSec !== ctaSection && parentSec !== relatedSection) {
+        parentSec.remove();
+      }
+    });
+
+    if (footerElem && footerElem.parentNode) {
+      const parent = footerElem.parentNode;
+      parent.insertBefore(relatedSection, footerElem);
+      parent.insertBefore(projectNavSection, footerElem);
+      parent.insertBefore(ctaSection, footerElem);
+    } else {
+      const pageWrapper = document.querySelector(".cs-page-wrapper") || document.body;
+      pageWrapper.appendChild(relatedSection);
+      pageWrapper.appendChild(projectNavSection);
+      pageWrapper.appendChild(ctaSection);
+      if (footerElem) pageWrapper.appendChild(footerElem);
     }
   };
 

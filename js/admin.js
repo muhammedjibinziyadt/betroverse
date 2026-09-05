@@ -1160,12 +1160,43 @@ document.addEventListener("DOMContentLoaded", () => {
     window.dispatchEvent(new CustomEvent("betro_storage_updated", { detail: { key: "betro_casestudies", list } }));
   };
 
+  // Standard 25 Case Study Sections Master Definition
+  const STANDARD_CASE_STUDY_SECTIONS = [
+    { key: "hero", name: "1. Case Study Hero", defaultVisible: true },
+    { key: "company_overview", name: "2. Company Overview", defaultVisible: true },
+    { key: "brand_story", name: "3. Brand Story & Background", defaultVisible: true },
+    { key: "project_objectives", name: "4. Project Objectives", defaultVisible: true },
+    { key: "services", name: "5. Services Provided", defaultVisible: true },
+    { key: "project_overview", name: "6. Project Overview", defaultVisible: true },
+    { key: "challenge", name: "7. Challenge", defaultVisible: true },
+    { key: "strategy", name: "8. Strategy", defaultVisible: true },
+    { key: "solution", name: "9. Solution", defaultVisible: true },
+    { key: "execution", name: "10. Execution", defaultVisible: true },
+    { key: "results_summary", name: "11. Results", defaultVisible: true },
+    { key: "results_impact", name: "12. Results & Impact", defaultVisible: true },
+    { key: "performance_metrics", name: "13. Performance & Metrics", defaultVisible: true },
+    { key: "client_testimonial", name: "14. Client Testimonial", defaultVisible: true },
+    { key: "creative_showcase", name: "15. Creative Showcase", defaultVisible: true },
+    { key: "gallery", name: "16. Gallery", defaultVisible: true },
+    { key: "video_showcase", name: "17. Video Showcase", defaultVisible: true },
+    { key: "website_mockups", name: "18. Website Mockups", defaultVisible: true },
+    { key: "mobile_mockups", name: "19. Mobile Mockups", defaultVisible: true },
+    { key: "desktop_mockups", name: "20. Desktop Mockups", defaultVisible: true },
+    { key: "brand_identity", name: "21. Brand Identity", defaultVisible: true },
+    { key: "social_media_campaign", name: "22. Social Media Campaign", defaultVisible: true },
+    { key: "marketing_campaign", name: "23. Marketing Campaign", defaultVisible: true },
+    { key: "additional_info", name: "24. Additional Information", defaultVisible: true },
+    { key: "custom_sections", name: "25. Custom Sections", defaultVisible: true }
+  ];
+
   // State Variables for currently opened Case Study Editor
   let activeTags = [];
   let activeGallery = [];
   let activeVideos = [];
   let activeGallerySections = [];
   let activeBlocks = [];
+  let activeSectionVisibility = {};
+  let activeSectionOrder = [];
   let isEditorDirty = false;
   let autoSaveTimer = null;
 
@@ -1530,12 +1561,36 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <img src="${url}" alt="Gallery Image ${idx + 1}">
         <div class="showcase-item-actions">
+          <button type="button" class="admin-btn secondary-btn move-left-gal-btn" ${idx === 0 ? 'disabled' : ''} title="Move Left"><i class="ri-arrow-left-s-line"></i></button>
+          <button type="button" class="admin-btn secondary-btn move-right-gal-btn" ${idx === activeGallery.length - 1 ? 'disabled' : ''} title="Move Right"><i class="ri-arrow-right-s-line"></i></button>
           <button type="button" class="admin-btn secondary-btn replace-gal-btn" title="Replace"><i class="ri-refresh-line"></i></button>
           <button type="button" class="admin-btn danger-btn del-gal-btn" title="Delete"><i class="ri-delete-bin-line"></i></button>
         </div>
       `;
 
-      card.querySelector(".replace-gal-btn").addEventListener("click", () => {
+      card.querySelector(".move-left-gal-btn")?.addEventListener("click", () => {
+        if (idx > 0) {
+          const temp = activeGallery[idx];
+          activeGallery[idx] = activeGallery[idx - 1];
+          activeGallery[idx - 1] = temp;
+          renderShowcaseGallery();
+          markEditorDirty();
+          updateLivePreview();
+        }
+      });
+
+      card.querySelector(".move-right-gal-btn")?.addEventListener("click", () => {
+        if (idx < activeGallery.length - 1) {
+          const temp = activeGallery[idx];
+          activeGallery[idx] = activeGallery[idx + 1];
+          activeGallery[idx + 1] = temp;
+          renderShowcaseGallery();
+          markEditorDirty();
+          updateLivePreview();
+        }
+      });
+
+      card.querySelector(".replace-gal-btn")?.addEventListener("click", () => {
         openMediaPicker((newUrl) => {
           activeGallery[idx] = newUrl;
           renderShowcaseGallery();
@@ -1544,7 +1599,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      card.querySelector(".del-gal-btn").addEventListener("click", () => {
+      card.querySelector(".del-gal-btn")?.addEventListener("click", () => {
         activeGallery.splice(idx, 1);
         renderShowcaseGallery();
         markEditorDirty();
@@ -1644,10 +1699,36 @@ document.addEventListener("DOMContentLoaded", () => {
           <strong style="display: block; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 4px;">Video Asset ${idx + 1}</strong>
           <span style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace;">${vid.url.substring(0, 45)}...</span>
         </div>
-        <button type="button" class="admin-btn danger-btn del-vid-btn" style="padding: 6px 10px;"><i class="ri-delete-bin-line"></i> Remove</button>
+        <div style="display: flex; gap: 4px;">
+          <button type="button" class="admin-btn secondary-btn move-up-vid-btn" ${idx === 0 ? 'disabled' : ''} style="padding: 6px 10px;" title="Move Up"><i class="ri-arrow-up-s-line"></i></button>
+          <button type="button" class="admin-btn secondary-btn move-down-vid-btn" ${idx === activeVideos.length - 1 ? 'disabled' : ''} style="padding: 6px 10px;" title="Move Down"><i class="ri-arrow-down-s-line"></i></button>
+          <button type="button" class="admin-btn danger-btn del-vid-btn" style="padding: 6px 10px;"><i class="ri-delete-bin-line"></i> Remove</button>
+        </div>
       `;
 
-      item.querySelector(".del-vid-btn").addEventListener("click", () => {
+      item.querySelector(".move-up-vid-btn")?.addEventListener("click", () => {
+        if (idx > 0) {
+          const temp = activeVideos[idx];
+          activeVideos[idx] = activeVideos[idx - 1];
+          activeVideos[idx - 1] = temp;
+          renderVideosList();
+          markEditorDirty();
+          updateLivePreview();
+        }
+      });
+
+      item.querySelector(".move-down-vid-btn")?.addEventListener("click", () => {
+        if (idx < activeVideos.length - 1) {
+          const temp = activeVideos[idx];
+          activeVideos[idx] = activeVideos[idx + 1];
+          activeVideos[idx + 1] = temp;
+          renderVideosList();
+          markEditorDirty();
+          updateLivePreview();
+        }
+      });
+
+      item.querySelector(".del-vid-btn")?.addEventListener("click", () => {
         activeVideos.splice(idx, 1);
         renderVideosList();
         markEditorDirty();
@@ -1863,6 +1944,130 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
+  // --- SECTION VISIBILITY & ORDER CONTROL ENGINE ---
+  const renderSectionVisibilityTab = () => {
+    const grid = document.getElementById("cs-section-vis-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    // Guarantee activeSectionOrder contains all keys
+    STANDARD_CASE_STUDY_SECTIONS.forEach(s => {
+      if (!activeSectionOrder.includes(s.key)) {
+        activeSectionOrder.push(s.key);
+      }
+      if (activeSectionVisibility[s.key] === undefined) {
+        activeSectionVisibility[s.key] = s.defaultVisible;
+      }
+    });
+
+    activeSectionOrder.forEach((secKey, idx) => {
+      const secDef = STANDARD_CASE_STUDY_SECTIONS.find(s => s.key === secKey) || { key: secKey, name: secKey.replace(/_/g, " ").toUpperCase(), defaultVisible: true };
+      const isVisible = activeSectionVisibility[secKey] !== false;
+
+      const card = document.createElement("div");
+      card.className = `section-vis-card ${isVisible ? '' : 'disabled'}`;
+      card.innerHTML = `
+        <div class="section-vis-left">
+          <div class="section-order-controls">
+            <button type="button" class="section-order-btn move-up-btn" ${idx === 0 ? 'disabled' : ''} title="Move Up"><i class="ri-arrow-up-s-line"></i></button>
+            <button type="button" class="section-order-btn move-down-btn" ${idx === activeSectionOrder.length - 1 ? 'disabled' : ''} title="Move Down"><i class="ri-arrow-down-s-line"></i></button>
+          </div>
+          <div class="section-info">
+            <span class="section-info-name">${secDef.name}</span>
+            <span class="section-info-key">Section key: ${secDef.key}</span>
+          </div>
+        </div>
+        <div class="section-vis-right">
+          <span class="vis-status-badge ${isVisible ? 'on' : 'off'}">${isVisible ? '<i class="ri-eye-line"></i> Visible' : '<i class="ri-eye-off-line"></i> Hidden'}</span>
+          <label class="vis-switch-label">
+            <input type="checkbox" class="vis-switch-input" ${isVisible ? 'checked' : ''} data-key="${secKey}">
+            <span class="vis-switch-slider"></span>
+          </label>
+        </div>
+      `;
+
+      card.querySelector(".vis-switch-input").addEventListener("change", (e) => {
+        const checked = e.target.checked;
+        activeSectionVisibility[secKey] = checked;
+        renderSectionVisibilityTab();
+        markEditorDirty();
+        updateLivePreview();
+        triggerInstantSave();
+      });
+
+      card.querySelector(".move-up-btn").addEventListener("click", () => {
+        if (idx > 0) {
+          const temp = activeSectionOrder[idx];
+          activeSectionOrder[idx] = activeSectionOrder[idx - 1];
+          activeSectionOrder[idx - 1] = temp;
+          renderSectionVisibilityTab();
+          markEditorDirty();
+          updateLivePreview();
+          triggerInstantSave();
+        }
+      });
+
+      card.querySelector(".move-down-btn").addEventListener("click", () => {
+        if (idx < activeSectionOrder.length - 1) {
+          const temp = activeSectionOrder[idx];
+          activeSectionOrder[idx] = activeSectionOrder[idx + 1];
+          activeSectionOrder[idx + 1] = temp;
+          renderSectionVisibilityTab();
+          markEditorDirty();
+          updateLivePreview();
+          triggerInstantSave();
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  };
+
+  const triggerInstantSave = () => {
+    const badge = document.getElementById("cs-autosave-indicator");
+    if (badge) {
+      badge.className = "cs-autosave-pill status-saving";
+      badge.querySelector(".autosave-label").textContent = "Saving...";
+    }
+    setTimeout(() => {
+      try {
+        saveActiveEditorState();
+        setEditorSaved();
+      } catch (err) {
+        if (badge) {
+          badge.className = "cs-autosave-pill status-unsaved";
+          badge.querySelector(".autosave-label").textContent = "Save Failed (Retry)";
+        }
+        showAdminToast("Save Failed: " + (err.message || "Error saving state"), "error", 5000);
+      }
+    }, 200);
+  };
+
+  document.getElementById("cs-vis-enable-all-btn")?.addEventListener("click", () => {
+    STANDARD_CASE_STUDY_SECTIONS.forEach(s => activeSectionVisibility[s.key] = true);
+    renderSectionVisibilityTab();
+    markEditorDirty();
+    updateLivePreview();
+    triggerInstantSave();
+  });
+
+  document.getElementById("cs-vis-disable-all-btn")?.addEventListener("click", () => {
+    STANDARD_CASE_STUDY_SECTIONS.forEach(s => activeSectionVisibility[s.key] = false);
+    renderSectionVisibilityTab();
+    markEditorDirty();
+    updateLivePreview();
+    triggerInstantSave();
+  });
+
+  document.getElementById("cs-vis-reset-order-btn")?.addEventListener("click", () => {
+    activeSectionOrder = STANDARD_CASE_STUDY_SECTIONS.map(s => s.key);
+    renderSectionVisibilityTab();
+    markEditorDirty();
+    updateLivePreview();
+    triggerInstantSave();
+  });
+
+
   // --- REAL-TIME RESPONSIVE LIVE PREVIEW SYNCHRONIZER ---
   const updateLivePreview = () => {
     const container = document.getElementById("cs-live-preview-content");
@@ -1900,41 +2105,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let galleryHtml = activeGallery.map(img => `<div class="pv-gallery-thumb"><img src="${img}"></div>`).join("");
 
-    container.innerHTML = `
-      <div class="pv-hero" style="background-image: url('${heroUrl}');">
-        <div class="pv-hero-overlay"></div>
-        <div class="pv-hero-content">
-          <img src="${logoUrl}" class="pv-logo" alt="Logo">
-          <span class="pv-pill">${category}</span>
-          <h1 class="pv-title">${companyName}</h1>
-          <p style="color: #9ca3af; font-size: 0.95rem;">${shortIntro}</p>
+    // Section Dictionary matching activeSectionVisibility
+    const previewSectionBlocks = {
+      hero: `
+        <div class="pv-hero" style="background-image: url('${heroUrl}');">
+          <div class="pv-hero-overlay"></div>
+          <div class="pv-hero-content">
+            <img src="${logoUrl}" class="pv-logo" alt="Logo">
+            <span class="pv-pill">${category}</span>
+            <h1 class="pv-title">${companyName}</h1>
+            <p style="color: #9ca3af; font-size: 0.95rem;">${shortIntro}</p>
+          </div>
         </div>
-      </div>
-      <div class="pv-body">
+      `,
+      company_overview: `
         <div class="pv-section">
-          <h3 class="pv-section-heading">Brand Story & Objectives</h3>
-          <p class="pv-text">${brandStory}</p>
-          <p class="pv-text" style="margin-top: 0.75rem;">${brandGoals}</p>
+          <h3 class="pv-section-heading">Company Overview</h3>
+          <p class="pv-text">${shortIntro || brandStory}</p>
         </div>
-
+      `,
+      brand_story: `
+        <div class="pv-section">
+          <h3 class="pv-section-heading">Brand Story & Background</h3>
+          <p class="pv-text">${brandStory}</p>
+        </div>
+      `,
+      project_objectives: `
+        <div class="pv-section">
+          <h3 class="pv-section-heading">Project Objectives & Business Goals</h3>
+          <p class="pv-text">${brandGoals}</p>
+        </div>
+      `,
+      services: `
         <div class="pv-section">
           <h3 class="pv-section-heading">Services Provided</h3>
           <div class="pv-services-grid">${tagsHtml}</div>
         </div>
-
-        ${challenge ? `
+      `,
+      project_overview: (challenge || strategy || solution || execution) ? `
         <div class="pv-section">
-          <h3 class="pv-section-heading">Project Breakdown</h3>
-          <p class="pv-text"><strong>Challenge:</strong> ${challenge}</p>
+          <h3 class="pv-section-heading">Project Overview</h3>
+          ${challenge ? `<p class="pv-text"><strong>Challenge:</strong> ${challenge}</p>` : ''}
           ${strategy ? `<p class="pv-text" style="margin-top: 0.5rem;"><strong>Strategy:</strong> ${strategy}</p>` : ''}
           ${solution ? `<p class="pv-text" style="margin-top: 0.5rem;"><strong>Solution:</strong> ${solution}</p>` : ''}
           ${execution ? `<p class="pv-text" style="margin-top: 0.5rem;"><strong>Execution:</strong> ${execution}</p>` : ''}
         </div>
-        ` : ''}
-
+      ` : '',
+      challenge: challenge ? `<div class="pv-section"><h3 class="pv-section-heading">Challenge</h3><p class="pv-text">${challenge}</p></div>` : '',
+      strategy: strategy ? `<div class="pv-section"><h3 class="pv-section-heading">Strategy</h3><p class="pv-text">${strategy}</p></div>` : '',
+      solution: solution ? `<div class="pv-section"><h3 class="pv-section-heading">Solution</h3><p class="pv-text">${solution}</p></div>` : '',
+      execution: execution ? `<div class="pv-section"><h3 class="pv-section-heading">Execution</h3><p class="pv-text">${execution}</p></div>` : '',
+      results_summary: resultsText ? `<div class="pv-section"><h3 class="pv-section-heading">Results</h3><p class="pv-text">${resultsText}</p></div>` : '',
+      results_impact: `
         <div class="pv-section">
-          <h3 class="pv-section-heading">Campaign Results</h3>
-          <p class="pv-text">${resultsText || 'Key campaign metric achievements:'}</p>
+          <h3 class="pv-section-heading">Results & Impact</h3>
           <div class="pv-stats-grid">
             <div class="pv-stat-card"><div class="pv-stat-num">${stat1Num}</div><div class="pv-stat-lbl">${stat1Label}</div></div>
             <div class="pv-stat-card"><div class="pv-stat-num">${stat2Num}</div><div class="pv-stat-lbl">${stat2Label}</div></div>
@@ -1942,29 +2166,73 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="pv-stat-card"><div class="pv-stat-num">${stat4Num}</div><div class="pv-stat-lbl">${stat4Label}</div></div>
           </div>
         </div>
-
-        ${activeGallery.length > 0 ? `
+      `,
+      performance_metrics: `
         <div class="pv-section">
-          <h3 class="pv-section-heading">Creative Showcase</h3>
-          <div class="pv-gallery-grid">${galleryHtml}</div>
+          <h3 class="pv-section-heading">Performance & Metrics</h3>
+          <div class="pv-stats-grid">
+            <div class="pv-stat-card"><div class="pv-stat-num">${stat1Num}</div><div class="pv-stat-lbl">${stat1Label}</div></div>
+            <div class="pv-stat-card"><div class="pv-stat-num">${stat2Num}</div><div class="pv-stat-lbl">${stat2Label}</div></div>
+          </div>
         </div>
-        ` : ''}
-
-        ${feedbackQuote ? `
+      `,
+      client_testimonial: feedbackQuote ? `
         <div class="pv-section" style="background: rgba(255,255,255,0.02); border: 1px solid var(--panel-border); padding: 1.25rem; border-radius: 12px;">
           <p style="font-style: italic; color: #fff; font-size: 0.95rem;">"${feedbackQuote}"</p>
           <span style="display: block; margin-top: 6px; font-size: 0.8rem; color: var(--accent-color); font-weight: 700;">- ${feedbackAuthor}</span>
         </div>
-        ` : ''}
-
-        ${conclusion ? `
-        <div class="pv-section" style="margin-top: 2rem;">
-          <h3 class="pv-section-heading">Conclusion</h3>
-          <p class="pv-text">${conclusion}</p>
+      ` : '',
+      creative_showcase: activeGallery.length > 0 ? `
+        <div class="pv-section">
+          <h3 class="pv-section-heading">Creative Showcase</h3>
+          <div class="pv-gallery-grid">${galleryHtml}</div>
         </div>
-        ` : ''}
-      </div>
-    `;
+      ` : '',
+      gallery: activeGallery.length > 0 ? `
+        <div class="pv-section">
+          <h3 class="pv-section-heading">Gallery</h3>
+          <div class="pv-gallery-grid">${galleryHtml}</div>
+        </div>
+      ` : '',
+      video_showcase: activeVideos.length > 0 ? `
+        <div class="pv-section">
+          <h3 class="pv-section-heading">Video Showcase</h3>
+          <p class="pv-text">${activeVideos.length} Video asset(s) active</p>
+        </div>
+      ` : '',
+      website_mockups: `<div class="pv-section"><h3 class="pv-section-heading">Website Mockups</h3><p class="pv-text">Desktop & mobile preview interface</p></div>`,
+      mobile_mockups: `<div class="pv-section"><h3 class="pv-section-heading">Mobile Mockups</h3><p class="pv-text">Mobile device screen layout</p></div>`,
+      desktop_mockups: `<div class="pv-section"><h3 class="pv-section-heading">Desktop Mockups</h3><p class="pv-text">Desktop display screen mockup</p></div>`,
+      brand_identity: `<div class="pv-section"><h3 class="pv-section-heading">Brand Identity</h3><p class="pv-text">Color palettes & typography identity</p></div>`,
+      social_media_campaign: `<div class="pv-section"><h3 class="pv-section-heading">Social Media Campaign</h3><p class="pv-text">Social grid layout & viral short-form assets</p></div>`,
+      marketing_campaign: `<div class="pv-section"><h3 class="pv-section-heading">Marketing Campaign</h3><p class="pv-text">Digital offer flyers & holiday marketing</p></div>`,
+      additional_info: conclusion ? `<div class="pv-section"><h3 class="pv-section-heading">Additional Information</h3><p class="pv-text">${conclusion}</p></div>` : '',
+      custom_sections: activeBlocks.length > 0 ? `
+        <div class="pv-section">
+          <h3 class="pv-section-heading">Custom Sections</h3>
+          ${activeBlocks.map(b => `<div style="margin-bottom: 6px;"><strong>${b.heading}:</strong> ${b.body}</div>`).join('')}
+        </div>
+      ` : ''
+    };
+
+    // Render enabled sections in configured order
+    let renderedHtml = "";
+    const currentOrder = (activeSectionOrder && activeSectionOrder.length > 0)
+      ? activeSectionOrder
+      : STANDARD_CASE_STUDY_SECTIONS.map(s => s.key);
+
+    currentOrder.forEach(secKey => {
+      // Check if section is ON / Visible
+      if (activeSectionVisibility[secKey] !== false) {
+        if (secKey === "hero") {
+          renderedHtml += previewSectionBlocks.hero;
+        } else if (previewSectionBlocks[secKey]) {
+          renderedHtml += `<div class="pv-body">${previewSectionBlocks[secKey]}</div>`;
+        }
+      }
+    });
+
+    container.innerHTML = renderedHtml || `<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">All sections are turned OFF for this Case Study.</div>`;
   };
 
   // Bind live sync to form inputs
@@ -2037,6 +2305,9 @@ document.addEventListener("DOMContentLoaded", () => {
     activeVideos = [];
     activeGallerySections = [];
     activeBlocks = [];
+    activeSectionVisibility = {};
+    STANDARD_CASE_STUDY_SECTIONS.forEach(s => activeSectionVisibility[s.key] = s.defaultVisible);
+    activeSectionOrder = STANDARD_CASE_STUDY_SECTIONS.map(s => s.key);
 
     if (csId) {
       const list = getBetroCaseStudies();
@@ -2052,6 +2323,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("cs-logo-url").value = cs.companyLogo || "";
         document.getElementById("cs-hero-url").value = cs.heroImage || "";
+
+        // Section visibility & ordering loading
+        if (cs.sectionVisibility && typeof cs.sectionVisibility === "object") {
+          activeSectionVisibility = { ...cs.sectionVisibility };
+        }
+        if (Array.isArray(cs.sectionOrder) && cs.sectionOrder.length > 0) {
+          activeSectionOrder = [...cs.sectionOrder];
+        }
 
         // Trigger previews for logo & hero
         if (cs.companyLogo) {
@@ -2160,6 +2439,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderVideosList();
     renderGallerySections();
     renderBlocksContainer();
+    renderSectionVisibilityTab();
     updateLivePreview();
     setEditorSaved();
 
@@ -2260,6 +2540,8 @@ document.addEventListener("DOMContentLoaded", () => {
             media,
             gallerySections: [...activeGallerySections],
             blocks: [...activeBlocks],
+            sectionVisibility: { ...activeSectionVisibility },
+            sectionOrder: [...activeSectionOrder],
             seo
           };
         }
@@ -2287,6 +2569,8 @@ document.addEventListener("DOMContentLoaded", () => {
         media,
         gallerySections: [...activeGallerySections],
         blocks: [...activeBlocks],
+        sectionVisibility: { ...activeSectionVisibility },
+        sectionOrder: [...activeSectionOrder],
         seo
       };
       list.push(newCS);
