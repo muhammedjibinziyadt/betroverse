@@ -35,19 +35,10 @@
          ========================================== -->
     <div id="login-view" class="auth-view">
       <div class="glass-card auth-card">
-        <!-- Floating Theme Toggle in Login -->
-        <button class="theme-toggle-btn login-toggle" id="theme-toggle-login" aria-label="Toggle dark/light mode">
-          <i class="ri-sun-line light-icon"></i>
-          <i class="ri-moon-line dark-icon"></i>
-        </button>
-
         <div class="auth-header">
           <img src="images/logo.png" alt="Betroverse Logo" class="auth-logo">
           <h2>Admin Portal</h2>
           <p>Login to manage leads, view metrics, and customize campaigns.</p>
-          <p style="font-size: 0.85rem; color: #4ab96c; margin-top: 0.5rem; text-align: center;">
-            Use email <strong>admin@betroverse.in</strong> and password <strong>admin123</strong>
-          </p>
         </div>
 
         <div id="login-error-alert" class="alert-box error hidden">
@@ -60,7 +51,7 @@
             <label for="login-email">Email Address</label>
             <div class="input-wrapper">
               <i class="ri-mail-line input-icon"></i>
-              <input type="email" id="login-email" placeholder="admin@betroverse.in" required autocomplete="username">
+              <input type="email" id="login-email" placeholder="Enter your email" required autocomplete="username">
             </div>
           </div>
           <div class="form-group">
@@ -72,10 +63,6 @@
             </div>
           </div>
           <button type="submit" class="admin-btn primary-btn">Sign In</button>
-          <div class="demo-divider"><span>Or Explore</span></div>
-          <button type="button" class="admin-btn secondary-btn" id="demo-login-btn">
-            <i class="ri-slideshow-3-line"></i> Enter Demo Mode
-          </button>
         </form>
       </div>
     </div>

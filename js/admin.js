@@ -114,13 +114,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 400);
   });
 
-  // Demo Mode entry button (directly logs in)
-  document.getElementById("demo-login-btn").addEventListener("click", () => {
-    localStorage.setItem("betro_admin_logged_in", "true");
-    localStorage.setItem("betro_admin_email", "demo@betroverse.in");
-    window.location.reload();
-  });
-
   // Sign out button
   document.getElementById("logout-btn").addEventListener("click", () => {
     localStorage.removeItem("betro_admin_logged_in");
@@ -1812,11 +1805,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.innerHTML = `
         ${mediaHtml}
+        <button type="button" class="gal-delete-badge del-gal-btn" title="Delete Image">
+          <i class="ri-delete-bin-line"></i>
+        </button>
         <div class="showcase-item-actions">
-          <button type="button" class="admin-btn secondary-btn move-left-gal-btn" ${idx === 0 ? 'disabled' : ''} title="Move Left"><i class="ri-arrow-left-s-line"></i></button>
-          <button type="button" class="admin-btn secondary-btn move-right-gal-btn" ${idx === activeGallery.length - 1 ? 'disabled' : ''} title="Move Right"><i class="ri-arrow-right-s-line"></i></button>
-          <button type="button" class="admin-btn secondary-btn replace-gal-btn" title="Replace"><i class="ri-refresh-line"></i></button>
-          <button type="button" class="admin-btn danger-btn del-gal-btn" title="Delete"><i class="ri-delete-bin-line"></i></button>
+          <button type="button" class="mini-gal-btn move-left-gal-btn" ${idx === 0 ? 'disabled' : ''} title="Move Left"><i class="ri-arrow-left-s-line"></i></button>
+          <button type="button" class="mini-gal-btn move-right-gal-btn" ${idx === activeGallery.length - 1 ? 'disabled' : ''} title="Move Right"><i class="ri-arrow-right-s-line"></i></button>
+          <button type="button" class="mini-gal-btn replace-gal-btn" title="Replace Image"><i class="ri-refresh-line"></i></button>
         </div>
       `;
 
@@ -1856,13 +1851,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      card.querySelector(".del-gal-btn")?.addEventListener("click", async () => {
+      card.querySelector(".del-gal-btn")?.addEventListener("click", async (e) => {
+        e.stopPropagation();
         activeGallery.splice(idx, 1);
         await persistCurrentCaseStudyMedia();
         renderShowcaseGallery();
         markEditorDirty();
         updateLivePreview();
-        showAdminToast("Asset deleted from Case Study.", "info");
+        showAdminToast("Image removed from gallery.", "info");
       });
 
       grid.appendChild(card);
