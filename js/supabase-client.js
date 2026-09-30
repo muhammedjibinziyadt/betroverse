@@ -63,6 +63,13 @@
     return clean.replace(/\/+$/, "");
   }
 
+  function cleanBucket(bucket) {
+    if (!bucket || typeof bucket !== "string") return DEFAULT_BUCKET;
+    const b = bucket.trim().toLowerCase();
+    if (b === "betodata" || b === "portfolio-media") return b;
+    return DEFAULT_BUCKET;
+  }
+
   /**
    * Helper: Normalize & validate Anon Key (recovers truncated or corrupted keys)
    */
@@ -634,7 +641,7 @@
       }
 
       try {
-        const bucket = activeConfig.storageBucket || DEFAULT_BUCKET;
+        let bucket = cleanBucket(activeConfig.storageBucket || DEFAULT_BUCKET);
         const safeSlug = (slug || "general").toLowerCase().replace(/[^a-z0-9-]/g, "-");
         const cleanName = cleanFileName(file.name);
         const storagePath = `case-studies/${safeSlug}/${Date.now()}_${cleanName}`;
@@ -642,12 +649,30 @@
         if (onProgress) onProgress({ status: "uploading", pct: 45, text: `Uploading "${file.name}" to Supabase Storage...` });
 
         // Direct upload to Supabase Storage
-        const { data: uploadData, error: uploadErr } = await client.storage
+        let uploadResult = await client.storage
           .from(bucket)
           .upload(storagePath, file, {
             cacheControl: "31536000",
             upsert: true
           });
+
+        // Auto-retry with the other verified bucket if first bucket returns not found
+        if (uploadResult.error && uploadResult.error.message && uploadResult.error.message.toLowerCase().includes("not found")) {
+          const fallback = bucket === "betodata" ? "portfolio-media" : "betodata";
+          console.warn(`[BetroDB] Bucket "${bucket}" not found. Retrying with "${fallback}"...`);
+          const retry = await client.storage
+            .from(fallback)
+            .upload(storagePath, file, {
+              cacheControl: "31536000",
+              upsert: true
+            });
+          if (!retry.error) {
+            bucket = fallback;
+            uploadResult = retry;
+          }
+        }
+
+        const { data: uploadData, error: uploadErr } = uploadResult;
 
         if (uploadErr) {
           console.error("[BetroDB] Storage upload failed:", uploadErr);
