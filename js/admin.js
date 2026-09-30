@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Auth State Check ---
   let checkAuth = () => {
     const isLoggedIn = localStorage.getItem("betro_admin_logged_in") === "true";
-    
+
     if (isLoggedIn) {
       const email = localStorage.getItem("betro_admin_email") || "admin@betroverse.in";
       const displayElem = document.getElementById("user-display-email");
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("login-password").value.trim();
     const errorAlert = document.getElementById("login-error-alert");
     const submitBtn = e.target.querySelector("button[type='submit']");
-    
+
     errorAlert.classList.add("hidden");
     submitBtn.disabled = true;
     submitBtn.textContent = "Signing In...";
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       brands = defaultBrands;
     }
-    
+
     // Render brands
     const brandsGrid = document.getElementById("admin-brands-grid");
     if (brandsGrid) {
@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const type = contentTypeInput.value;
       const source = uploadForm.querySelector('input[name="img-source"]:checked').value;
-      
+
       let imgSrc = "";
       if (source === "file") {
         imgSrc = uploadPreview.src;
@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Delete Content Item
   const deleteContentItem = (type, itemId) => {
     if (!confirm(`Are you sure you want to remove this ${type === "brand" ? "brand logo" : "project image"}?`)) return;
-    
+
     if (type === "brand") {
       const stored = localStorage.getItem("betro_brands");
       let list = stored ? JSON.parse(stored) : [...defaultBrands];
@@ -327,7 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
       list = list.filter(item => item.id !== itemId);
       localStorage.setItem("betro_projects", JSON.stringify(list));
     }
-    
+
     renderContentTab();
   };
 
@@ -441,7 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
             this.cache[key] = val;
             return val;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       const ls = localStorage.getItem(key);
@@ -477,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isObj = typeof item === "object" && item !== null;
     const url = isObj ? (item.url || item.src || "") : String(item);
     const defaultName = url.startsWith("data:") ? `${type}_${index + 1}` : (url.split("/").pop() || "media_asset");
-    
+
     return {
       id: (isObj && item.id) ? item.id : `media-${caseStudyId || "cs"}-${type}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
       case_study_id: (isObj && item.case_study_id) ? item.case_study_id : (caseStudyId || "cs-general"),
@@ -709,7 +709,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.BetroDB && BetroDB.isConfigured()) {
       try {
         if (onProgress) onProgress({ status: "uploading", pct: 20, text: `Uploading "${file.name}" to Supabase Storage...` });
-        
+
         const asset = await BetroDB.uploadMedia(file, {
           folder: folder,
           caseStudyId: currentCsId,
@@ -778,9 +778,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Render Central Media Library Tab Panel
   let currentMediaTypeFilter = "all";
-  const renderMediaLibraryTab = () => {
+  const renderMediaLibraryTab = async () => {
     const grid = document.getElementById("media-library-grid");
     if (!grid) return;
+
+    if (window.BetroDB && BetroDB.isConfigured()) {
+      try {
+        const cloudAssets = await BetroDB.getAllMediaAssets();
+        if (cloudAssets && cloudAssets.length > 0) {
+          BetroStorage.cache["betro_media_assets"] = cloudAssets;
+        }
+      } catch (e) {
+        console.warn("[MediaLibrary] Cloud assets load error:", e);
+      }
+    }
 
     let assets = getMediaAssets();
     const searchVal = (document.getElementById("media-library-search")?.value || "").toLowerCase().trim();
@@ -903,7 +914,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 800);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     });
   };
 
@@ -924,8 +935,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const mediaPickerGrid = document.getElementById("media-picker-grid");
   let activePickerCallback = null;
 
-  const openMediaPicker = (callback) => {
+  const openMediaPicker = async (callback) => {
     activePickerCallback = callback;
+    if (window.BetroDB && BetroDB.isConfigured()) {
+      try {
+        const cloudAssets = await BetroDB.getAllMediaAssets();
+        if (cloudAssets && cloudAssets.length > 0) {
+          BetroStorage.cache["betro_media_assets"] = cloudAssets;
+        }
+      } catch (e) {
+        console.warn("[MediaPicker] Error loading cloud media:", e);
+      }
+    }
     renderMediaPickerItems();
     mediaPickerModal?.classList.remove("hidden");
   };
@@ -954,7 +975,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let thumbHtml = asset.type === "image"
         ? `<img src="${asset.url}" alt="${asset.name}">`
         : asset.type === "video" ? `<video src="${asset.url}" muted></video>`
-        : `<i class="ri-file-pdf-fill doc-icon"></i>`;
+          : `<i class="ri-file-pdf-fill doc-icon"></i>`;
 
       card.innerHTML = `
         <div class="media-asset-thumb">${thumbHtml}</div>
@@ -1279,7 +1300,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const channel = new BroadcastChannel("betro_portfolio_sync");
         channel.postMessage({ type: "CASE_STUDY_UPDATED", timestamp: Date.now(), data: list });
       }
-    } catch (e) {}
+    } catch (e) { }
     window.dispatchEvent(new CustomEvent("betro_storage_updated", { detail: { key: "betro_casestudies", list } }));
   };
 
@@ -1448,7 +1469,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const isPublished = (cs.status || "published") === "published";
       const isFeatured = !!cs.featured;
 
-      const statusBadge = isPublished 
+      const statusBadge = isPublished
         ? `<span style="background: rgba(74, 185, 108, 0.15); color: #4ab96c; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">${isFeatured ? '★ FEATURED' : 'PUBLISHED'}</span>`
         : `<span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">DRAFT</span>`;
 
@@ -1662,15 +1683,15 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
       })
-      .then(asset => {
-        updatePreview(asset.url);
-        setTimeout(() => {
-          if (progressBox) progressBox.classList.add("hidden");
-        }, 1800);
-      })
-      .catch(err => {
-        console.error("Single asset upload failed:", err);
-      });
+        .then(asset => {
+          updatePreview(asset.url);
+          setTimeout(() => {
+            if (progressBox) progressBox.classList.add("hidden");
+          }, 1800);
+        })
+        .catch(err => {
+          console.error("Single asset upload failed:", err);
+        });
     };
 
     if (dropzone) {
@@ -2800,6 +2821,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if (addCSBtn) addCSBtn.addEventListener("click", () => openCSModal());
   if (closeCSModalBtn) closeCSModalBtn.addEventListener("click", closeCSModal);
 
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (mediaPickerModal && !mediaPickerModal.classList.contains("hidden")) {
+        closeMediaPicker();
+      } else if (csModal && !csModal.classList.contains("hidden")) {
+        closeCSModal();
+      }
+    }
+  });
+
   const saveActiveEditorState = async () => {
     const editId = document.getElementById("cs-edit-id").value;
     const companyName = document.getElementById("cs-company-name").value.trim() || "New Case Study";
@@ -2966,7 +2997,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }));
     try {
       localStorage.setItem("betro_projects", JSON.stringify(legacyProjects));
-    } catch (e) {}
+    } catch (e) { }
 
     renderCaseStudiesTab();
   };

@@ -739,6 +739,38 @@
     },
 
     /**
+     * Retrieve all media assets from Supabase cloud
+     */
+    async getAllMediaAssets() {
+      const client = await this.ensureInit();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from("media_assets")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            return data.map(item => ({
+              id: item.id,
+              name: item.name || "Asset",
+              type: item.type || "image",
+              url: item.url,
+              folder: item.target_section || "general",
+              size: item.size || "Cloud Asset",
+              caseStudyId: item.case_study_id,
+              caseStudySlug: item.case_study_slug,
+              date: item.created_at ? new Date(item.created_at).toLocaleDateString() : "Recent"
+            }));
+          }
+        } catch (e) {
+          console.warn("[BetroDB] Error fetching all media assets:", e);
+        }
+      }
+      return null;
+    },
+
+    /**
      * Fetch Brand Logos
      */
     async getBrandLogos() {

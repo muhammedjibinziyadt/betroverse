@@ -948,6 +948,15 @@ body.light-mode .leads-table tbody tr:hover {
   display: none !important;
 }
 
+#media-picker-modal {
+  z-index: 100000 !important;
+}
+#media-picker-modal .modal-card {
+  z-index: 100001 !important;
+  background: var(--dashboard-bg, #0f121d) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+}
+
 .modal-card {
   width: 100%;
   max-width: 600px;
