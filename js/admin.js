@@ -379,25 +379,51 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     },
 
-    async setItem(key, value) {
-      this.cache[key] = value;
-      // 1. Primary High-Capacity Store: IndexedDB (Gigabytes limit)
-      const db = await this.init();
-      if (db) {
-        try {
-          const tx = db.transaction("app_store", "readwrite");
-          tx.objectStore("app_store").put(value, key);
-        } catch (e) {
-          console.warn("IndexedDB set error:", e);
-        }
-      }
+    invalidateCache(key = null) {
+      if (key) delete this.cache[key];
+      else this.cache = {};
+    },
 
-      // 2. Secondary Store: LocalStorage (Silently ignore QuotaExceededError since IndexedDB holds full data)
-      try {
-        localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
-      } catch (lsErr) {
-        console.warn("LocalStorage quota exceeded for key:", key, "— IndexedDB still holds the data.", lsErr);
-      }
+    setItem(key, value) {
+      return new Promise(async (resolve) => {
+        this.cache[key] = value;
+        // 1. Primary High-Capacity Store: IndexedDB (Gigabytes limit)
+        const db = await this.init();
+        if (db) {
+          try {
+            const tx = db.transaction("app_store", "readwrite");
+            const store = tx.objectStore("app_store");
+            store.put(value, key);
+            tx.oncomplete = () => {
+              // 2. Safe Secondary Store: LocalStorage (guard against quota exceeded)
+              try {
+                const str = typeof value === "string" ? value : JSON.stringify(value);
+                if (str.length < 2000000) { // Keep under 2MB to prevent QuotaExceededError
+                  localStorage.setItem(key, str);
+                }
+              } catch (lsErr) {
+                // Quota safely handled; IndexedDB is the authoritative store
+              }
+              resolve(true);
+            };
+            tx.onerror = (e) => {
+              console.warn("IndexedDB transaction error:", e);
+              resolve(false);
+            };
+            tx.onabort = () => resolve(false);
+          } catch (e) {
+            console.warn("IndexedDB set error:", e);
+            resolve(false);
+          }
+        } else {
+          try {
+            localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+            resolve(true);
+          } catch (e) {
+            resolve(false);
+          }
+        }
+      });
     },
 
     async getItem(key) {
@@ -445,6 +471,79 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Structured Media Asset Normalizer
+  const normalizeMediaAsset = (item, caseStudyId, caseStudySlug, type = "image", section = "creative_showcase", index = 0) => {
+    if (!item) return null;
+    const isObj = typeof item === "object" && item !== null;
+    const url = isObj ? (item.url || item.src || "") : String(item);
+    const defaultName = url.startsWith("data:") ? `${type}_${index + 1}` : (url.split("/").pop() || "media_asset");
+    
+    return {
+      id: (isObj && item.id) ? item.id : `media-${caseStudyId || "cs"}-${type}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      case_study_id: (isObj && item.case_study_id) ? item.case_study_id : (caseStudyId || "cs-general"),
+      case_study_slug: (isObj && item.case_study_slug) ? item.case_study_slug : (caseStudySlug || "general"),
+      type: (isObj && item.type) ? item.type : type,
+      target_section: (isObj && item.target_section) ? item.target_section : section,
+      url: url,
+      display_order: (isObj && typeof item.display_order === "number") ? item.display_order : index,
+      status: (isObj && item.status) ? item.status : "published",
+      name: (isObj && item.name) ? item.name : defaultName,
+      size: (isObj && item.size) ? item.size : "Optimized",
+      created_at: (isObj && item.created_at) ? item.created_at : Date.now(),
+      updated_at: Date.now()
+    };
+  };
+
+  // Auto-migration for existing portfolio media records
+  const migrateExistingPortfolioMedia = async (caseStudies) => {
+    if (!Array.isArray(caseStudies) || caseStudies.length === 0) return caseStudies;
+    let modified = false;
+
+    const migrated = caseStudies.map(cs => {
+      if (!cs || !cs.id) return cs;
+      const slug = cs.slug || cs.id.replace("cs-", "");
+      let gallery = (cs.media && Array.isArray(cs.media.gallery)) ? cs.media.gallery : [];
+      let videos = (cs.media && Array.isArray(cs.media.videos)) ? cs.media.videos : [];
+      let assets = (cs.media && Array.isArray(cs.media.assets)) ? cs.media.assets : [];
+
+      // Clean out hard-coded demo Rickroll embeds
+      const cleanVideos = videos.filter(v => {
+        const url = typeof v === "string" ? v : (v ? v.url : "");
+        return url && !url.includes("dQw4w9WgXcQ");
+      });
+      if (cleanVideos.length !== videos.length) {
+        videos = cleanVideos;
+        modified = true;
+      }
+
+      // If structured assets are missing, build them from gallery and videos
+      if (assets.length === 0 && (gallery.length > 0 || videos.length > 0)) {
+        const newAssets = [];
+        gallery.forEach((img, idx) => {
+          const norm = normalizeMediaAsset(img, cs.id, slug, "image", "creative_showcase", idx);
+          if (norm && norm.url) newAssets.push(norm);
+        });
+        videos.forEach((vid, idx) => {
+          const norm = normalizeMediaAsset(vid, cs.id, slug, "video", "video_showcase", idx);
+          if (norm && norm.url) newAssets.push(norm);
+        });
+        cs.media = {
+          ...(cs.media || {}),
+          gallery: gallery.map(g => typeof g === "string" ? g : g.url),
+          videos: videos.map(v => typeof v === "string" ? v : v.url),
+          assets: newAssets
+        };
+        modified = true;
+      }
+      return cs;
+    });
+
+    if (modified) {
+      await BetroStorage.setItem("betro_casestudies", migrated);
+    }
+    return migrated;
+  };
+
   // Pre-warm storage cache from IndexedDB on initial load
   BetroStorage.init().then(() => {
     BetroStorage.getItem("betro_media_assets").then(assets => {
@@ -453,9 +552,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof renderMediaLibraryTab === "function") renderMediaLibraryTab();
       }
     });
-    BetroStorage.getItem("betro_casestudies").then(csList => {
-      if (csList && Array.isArray(csList)) {
-        BetroStorage.cache["betro_casestudies"] = csList;
+    BetroStorage.getItem("betro_casestudies").then(async csList => {
+      if (csList && Array.isArray(csList) && csList.length > 0) {
+        const migrated = await migrateExistingPortfolioMedia(csList);
+        BetroStorage.cache["betro_casestudies"] = migrated;
         if (typeof renderCaseStudiesTab === "function") renderCaseStudiesTab();
       }
     });
@@ -574,87 +674,106 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  // Robust Upload Engine with Real-time Progress, Auto Optimization & Error Handling
-  const uploadMediaFile = (file, folder = "showcase", onProgress = null) => {
-    return new Promise(async (resolve, reject) => {
+  // Robust Upload Engine with Supabase Storage Cloud Integration
+  const uploadMediaFile = async (file, folder = "showcase", onProgress = null) => {
+    if (!file) throw new Error("No file selected.");
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    const validImages = ['jpg', 'jpeg', 'png', 'webp', 'svg'];
+    const validVideos = ['mp4', 'webm', 'mov'];
+    const validDocs = ['pdf'];
+
+    let fileType = "unknown";
+    if (validImages.includes(ext)) fileType = "image";
+    else if (validVideos.includes(ext)) fileType = "video";
+    else if (validDocs.includes(ext)) fileType = "pdf";
+    else {
+      const err = `Unsupported file format (.${ext}). Supported: JPG, JPEG, PNG, WEBP, SVG, MP4, WEBM, MOV, PDF.`;
+      showAdminToast(err, "error", 5000);
+      if (onProgress) onProgress({ status: "error", pct: 0, text: `Unsupported format (.${ext})` });
+      throw new Error(err);
+    }
+
+    const maxBytes = 50 * 1024 * 1024; // 50MB limit
+    if (file.size > maxBytes) {
+      const err = `File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds 50MB limit.`;
+      showAdminToast(err, "error", 5000);
+      if (onProgress) onProgress({ status: "error", pct: 0, text: "File Too Large (>50MB)" });
+      throw new Error(err);
+    }
+
+    const currentCsId = document.getElementById("cs-edit-id")?.value || "general";
+    const currentSlug = document.getElementById("cs-slug")?.value || "project";
+
+    // 1. If Supabase is configured, upload directly to Supabase Storage bucket
+    if (window.BetroDB && BetroDB.isConfigured()) {
       try {
-        if (!file) return reject("No file selected.");
-
-        const ext = file.name.split('.').pop().toLowerCase();
-        const validImages = ['jpg', 'jpeg', 'png', 'webp', 'svg'];
-        const validVideos = ['mp4', 'webm', 'mov'];
-        const validDocs = ['pdf'];
-
-        let fileType = "unknown";
-        if (validImages.includes(ext)) fileType = "image";
-        else if (validVideos.includes(ext)) fileType = "video";
-        else if (validDocs.includes(ext)) fileType = "pdf";
-        else {
-          const err = `Unsupported file format (.${ext}). Supported: JPG, JPEG, PNG, WEBP, SVG, MP4, WEBM, MOV, PDF.`;
-          showAdminToast(err, "error", 5000);
-          if (onProgress) onProgress({ status: "error", pct: 0, text: `Unsupported format (.${ext})` });
-          return reject(err);
-        }
-
-        const maxBytes = 50 * 1024 * 1024; // 50MB limit
-        if (file.size > maxBytes) {
-          const err = `File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds 50MB limit.`;
-          showAdminToast(err, "error", 5000);
-          if (onProgress) onProgress({ status: "error", pct: 0, text: "File Too Large (>50MB)" });
-          return reject(err);
-        }
-
-        if (onProgress) onProgress({ status: "uploading", pct: 30, text: "Reading file..." });
-
-        let dataUrl = "";
-        let sizeKb = (file.size / 1024).toFixed(0) + " KB";
-
-        if (fileType === "image") {
-          if (onProgress) onProgress({ status: "processing", pct: 65, text: "Processing & Optimizing image..." });
-          const optimized = await optimizeImageFile(file);
-          dataUrl = optimized.dataUrl;
-          sizeKb = optimized.sizeKb;
-        } else {
-          if (onProgress) onProgress({ status: "uploading", pct: 75, text: "Processing media..." });
-          dataUrl = await new Promise((res, rej) => {
-            const reader = new FileReader();
-            reader.onload = (e) => res(e.target.result);
-            reader.onerror = rej;
-            reader.readAsDataURL(file);
-          });
-        }
-
-        if (onProgress) onProgress({ status: "saving", pct: 90, text: "Saving to storage engine..." });
-
-        const newAsset = {
-          id: "asset-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-          name: file.name,
-          type: fileType,
+        if (onProgress) onProgress({ status: "uploading", pct: 20, text: `Uploading "${file.name}" to Supabase Storage...` });
+        
+        const asset = await BetroDB.uploadMedia(file, {
           folder: folder,
-          size: sizeKb,
-          url: dataUrl,
-          date: new Date().toLocaleDateString()
-        };
+          caseStudyId: currentCsId,
+          slug: currentSlug,
+          onProgress: onProgress
+        });
 
         const assets = getMediaAssets();
-        assets.unshift(newAsset);
-
-        // Store into High-Capacity IndexedDB engine
+        assets.unshift(asset);
         await saveMediaAssets(assets);
-
         renderMediaLibraryTab();
 
-        if (onProgress) onProgress({ status: "success", pct: 100, text: "Upload Complete — File Saved & Media Linked Successfully" });
-        showAdminToast(`Uploaded "${file.name}" successfully! Media linked.`, "success");
-        resolve(newAsset);
-
-      } catch (err) {
-        const errMsg = typeof err === "string" ? err : (err.message || "Failed to process upload.");
+        showAdminToast(`Uploaded "${file.name}" to Cloud Storage!`, "success");
+        return asset;
+      } catch (cloudErr) {
+        console.error("Cloud storage upload error:", cloudErr);
+        const errMsg = cloudErr.message || "Cloud storage upload failed";
         if (onProgress) onProgress({ status: "error", pct: 0, text: errMsg });
-        showAdminToast(errMsg, "error", 5000);
-        reject(errMsg);
+        showAdminToast("Upload Error: " + errMsg, "error", 6000);
+        throw cloudErr;
       }
-    });
+    }
+
+    // 2. Safe Fallback buffer if Supabase credentials are not yet entered
+    if (onProgress) onProgress({ status: "uploading", pct: 30, text: "Reading file (Local Fallback)..." });
+
+    let dataUrl = "";
+    let sizeKb = (file.size / 1024).toFixed(0) + " KB";
+
+    if (fileType === "image") {
+      if (onProgress) onProgress({ status: "processing", pct: 65, text: "Optimizing image..." });
+      const optimized = await optimizeImageFile(file);
+      dataUrl = optimized.dataUrl;
+      sizeKb = optimized.sizeKb;
+    } else {
+      if (onProgress) onProgress({ status: "uploading", pct: 75, text: "Processing media..." });
+      dataUrl = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = (e) => res(e.target.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (onProgress) onProgress({ status: "saving", pct: 90, text: "Saving to local buffer..." });
+
+    const newAsset = {
+      id: "asset-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+      name: file.name,
+      type: fileType,
+      folder: folder,
+      size: sizeKb,
+      url: dataUrl,
+      date: new Date().toLocaleDateString()
+    };
+
+    const assets = getMediaAssets();
+    assets.unshift(newAsset);
+    await saveMediaAssets(assets);
+    renderMediaLibraryTab();
+
+    if (onProgress) onProgress({ status: "success", pct: 100, text: "Saved locally (Connect Supabase in Settings for live cloud CDN)" });
+    showAdminToast(`File buffered locally. Connect Supabase in Settings for production.`, "info", 5000);
+    return newAsset;
   };
 
   // Render Central Media Library Tab Panel
@@ -885,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
       projectObjective: "Craft a comprehensive brand identity, mouth-watering food photography, viral AI video reels, and aesthetic social media campaigns to maximize engagement.",
       services: ["Creative Design", "Social Media Management", "Video Production", "AI Video Creation", "Video Content Creation", "Brand Identity", "Photography"],
       overview: { challenge: "Differentiating MyLaban in a competitive food scene by highlighting unique Egyptian dessert flavors.", strategy: "Developing viral short-form video reels, AI-enhanced food visuals, and aesthetic Instagram layouts.", solution: "Creating mouth-watering video content showcasing signature desserts and authentic preparation techniques.", execution: "Multichannel distribution across Instagram, YouTube Shorts, and local influencer campaigns.", results: "Over 500k video views and a significant surge in store footfall and brand engagement." },
-      media: { gallery: ["images/p1.jpg", "images/p5.jpg", "images/s1.jpg"], videos: ["https://www.youtube.com/embed/dQw4w9WgXcQ"], mockups: { desktop: "images/p1.jpg", tablet: "images/p5.jpg", mobile: "images/s1.jpg" } },
+      media: { gallery: ["images/p1.jpg", "images/p5.jpg", "images/s1.jpg"], videos: [], mockups: { desktop: "images/p1.jpg", tablet: "images/p5.jpg", mobile: "images/s1.jpg" } },
       results: { stat1Num: "+500K", stat1Label: "Social Reel Views", stat2Num: "+60%", stat2Label: "Footfall Growth", stat3Num: "4.2x", stat3Label: "ROI Increase", stat4Num: "100%", stat4Label: "Brand Satisfaction", feedbackQuote: "Betroverse completely transformed our video marketing. Their reels and short-form content brought us viral traction and customer engagement!", feedbackAuthor: "MyLaban Founder", feedbackRole: "Kochi Dessert Lounge" },
       seo: { title: "MyLaban Case Study | Creative Branding & Video Production by Betroverse", description: "Explore how Betroverse built viral video campaigns, brand strategy, and social media growth for MyLaban Dessert Shop.", keywords: "MyLaban, dessert branding, video production, Kochi marketing, Betroverse", ogImage: "images/p1.jpg", canonicalUrl: "https://betroverse.in/portfolio/mylaban" }
     },
@@ -1133,6 +1252,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   ];
 
+  window.getBetroCaseStudiesSeed = () => defaultCaseStudies;
+
   const getBetroCaseStudies = () => {
     const cached = BetroStorage.cache["betro_casestudies"];
     if (cached && Array.isArray(cached) && cached.length > 0) return cached;
@@ -1142,22 +1263,44 @@ document.addEventListener("DOMContentLoaded", () => {
       BetroStorage.cache["betro_casestudies"] = storedSync;
       return storedSync;
     }
-    // Fallback to default seed data (critical for GitHub Pages where storage is empty)
     return defaultCaseStudies;
   };
 
-  const saveBetroCaseStudies = (list) => {
+  const saveBetroCaseStudies = async (list) => {
     BetroStorage.cache["betro_casestudies"] = list;
-    BetroStorage.setItem("betro_casestudies", list);
+    await BetroStorage.setItem("betro_casestudies", list);
 
     // Real-time synchronization broadcast across windows/tabs
     try {
+      if (window.BetroDB) {
+        BetroDB.broadcastChange("CASE_STUDY_UPDATED", list);
+      }
       if ("BroadcastChannel" in window) {
         const channel = new BroadcastChannel("betro_portfolio_sync");
         channel.postMessage({ type: "CASE_STUDY_UPDATED", timestamp: Date.now(), data: list });
       }
     } catch (e) {}
     window.dispatchEvent(new CustomEvent("betro_storage_updated", { detail: { key: "betro_casestudies", list } }));
+  };
+
+  const getFreshBetroCaseStudies = async () => {
+    if (window.BetroDB) {
+      try {
+        const fromDb = await BetroDB.getCaseStudies({ forceRefresh: true, includeDrafts: true });
+        if (fromDb && Array.isArray(fromDb) && fromDb.length > 0) {
+          BetroStorage.cache["betro_casestudies"] = fromDb;
+          return fromDb;
+        }
+      } catch (e) {
+        console.warn("[Admin] Cloud database fetch failed, checking local:", e);
+      }
+    }
+    const fresh = await BetroStorage.getItem("betro_casestudies");
+    if (fresh && Array.isArray(fresh) && fresh.length > 0) {
+      BetroStorage.cache["betro_casestudies"] = fresh;
+      return fresh;
+    }
+    return getBetroCaseStudies();
   };
 
   // Standard 25 Case Study Sections Master Definition
@@ -1199,6 +1342,71 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeSectionOrder = [];
   let isEditorDirty = false;
   let autoSaveTimer = null;
+
+  // Dedicated Upload Status Indicator
+  const updateUploadStatus = (type, state, message) => {
+    const statusElem = document.getElementById(type === "video" ? "video-upload-status" : "gallery-upload-status");
+    if (!statusElem) return;
+
+    statusElem.style.display = "flex";
+    if (state === "uploading" || state === "processing" || state === "saving") {
+      statusElem.style.background = "rgba(59, 130, 246, 0.15)";
+      statusElem.style.color = "#60a5fa";
+      statusElem.style.border = "1px solid rgba(59, 130, 246, 0.3)";
+      statusElem.innerHTML = `<i class="ri-loader-4-line ri-spin" style="font-size: 1.1rem;"></i> <span>${message}</span>`;
+    } else if (state === "success") {
+      statusElem.style.background = "rgba(16, 185, 129, 0.15)";
+      statusElem.style.color = "#4ab96c";
+      statusElem.style.border = "1px solid rgba(16, 185, 129, 0.3)";
+      statusElem.innerHTML = `<i class="ri-checkbox-circle-fill" style="font-size: 1.1rem;"></i> <span>${message}</span>`;
+      setTimeout(() => {
+        if (statusElem.innerHTML.includes(message)) {
+          statusElem.style.display = "none";
+        }
+      }, 4000);
+    } else if (state === "error") {
+      statusElem.style.background = "rgba(239, 68, 68, 0.15)";
+      statusElem.style.color = "#ef4444";
+      statusElem.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+      statusElem.innerHTML = `<i class="ri-error-warning-fill" style="font-size: 1.1rem;"></i> <span>${message}</span>`;
+    }
+  };
+
+  // Immediate Persistent Case Study Media Sync
+  const persistCurrentCaseStudyMedia = async () => {
+    const editId = document.getElementById("cs-edit-id")?.value;
+    if (!editId) return;
+
+    let list = await getFreshBetroCaseStudies();
+    const targetIdx = list.findIndex(item => item.id === editId);
+    if (targetIdx === -1) return;
+
+    // Ensure strictly indexed display_order
+    activeGallery.forEach((item, idx) => {
+      if (typeof item === "object" && item) item.display_order = idx;
+    });
+    activeVideos.forEach((item, idx) => {
+      if (typeof item === "object" && item) item.display_order = idx;
+    });
+
+    const slug = list[targetIdx].slug || editId.replace("cs-", "");
+    const structuredAssets = [
+      ...activeGallery.map((item, idx) => normalizeMediaAsset(item, editId, slug, "image", "creative_showcase", idx)),
+      ...activeVideos.map((item, idx) => normalizeMediaAsset(item, editId, slug, "video", "video_showcase", idx))
+    ];
+
+    list[targetIdx].media = {
+      ...(list[targetIdx].media || {}),
+      gallery: activeGallery.map(g => typeof g === "string" ? g : (g ? g.url : "")),
+      videos: activeVideos.map(v => typeof v === "string" ? v : (v ? v.url : "")),
+      assets: structuredAssets
+    };
+
+    activeGallery = structuredAssets.filter(a => a.type === "image" || a.target_section === "creative_showcase");
+    activeVideos = structuredAssets.filter(a => a.type === "video" || a.target_section === "video_showcase");
+
+    await saveBetroCaseStudies(list);
+  };
 
   // Render Case Studies List Grid
   const renderCaseStudiesTab = () => {
@@ -1284,40 +1492,55 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const duplicateCS = (csId) => {
-    let list = getBetroCaseStudies();
+  const duplicateCS = async (csId) => {
+    let list = await getFreshBetroCaseStudies();
     const target = list.find(item => item.id === csId);
     if (!target) return;
 
     const copyCS = JSON.parse(JSON.stringify(target));
     copyCS.id = "cs-" + Date.now();
     copyCS.companyName = target.companyName + " (Copy)";
-    copyCS.slug = target.slug + "-copy";
+    copyCS.slug = (target.slug || "project") + "-copy-" + Math.floor(Math.random() * 1000);
     copyCS.status = "draft";
 
     list.push(copyCS);
-    saveBetroCaseStudies(list);
+    if (window.BetroDB) {
+      try { await BetroDB.saveCaseStudy(copyCS); } catch (e) { console.error("Cloud duplicate error:", e); }
+    }
+    await saveBetroCaseStudies(list);
     renderCaseStudiesTab();
+    showAdminToast(`Duplicated "${target.companyName}" as draft.`, "success");
   };
 
-  const toggleCSStatus = (csId) => {
-    let list = getBetroCaseStudies();
+  const toggleCSStatus = async (csId) => {
+    let list = await getFreshBetroCaseStudies();
+    let updatedCS = null;
     list = list.map(cs => {
       if (cs.id === csId) {
-        return { ...cs, status: cs.status === "draft" ? "published" : "draft" };
+        const newStatus = cs.status === "draft" ? "published" : "draft";
+        updatedCS = { ...cs, status: newStatus };
+        return updatedCS;
       }
       return cs;
     });
-    saveBetroCaseStudies(list);
+    if (updatedCS && window.BetroDB) {
+      try { await BetroDB.saveCaseStudy(updatedCS); } catch (e) { console.error("Cloud status toggle error:", e); }
+    }
+    await saveBetroCaseStudies(list);
     renderCaseStudiesTab();
+    showAdminToast(`Project is now ${updatedCS?.status === "published" ? "Live (Published)" : "Draft (Hidden)"}.`, "info");
   };
 
-  const deleteCS = (csId) => {
-    if (!confirm("Are you sure you want to delete this Case Study?")) return;
-    let list = getBetroCaseStudies();
+  const deleteCS = async (csId) => {
+    if (!confirm("Are you sure you want to delete this Case Study? This cannot be undone.")) return;
+    if (window.BetroDB) {
+      try { await BetroDB.deleteCaseStudy(csId); } catch (e) { console.error("Cloud delete error:", e); }
+    }
+    let list = await getFreshBetroCaseStudies();
     list = list.filter(cs => cs.id !== csId);
-    saveBetroCaseStudies(list);
+    await saveBetroCaseStudies(list);
     renderCaseStudiesTab();
+    showAdminToast("Case Study removed successfully.", "info");
   };
 
   // Case Study Editor Controls & Tabs Initialization
@@ -1551,15 +1774,23 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.innerHTML = "";
 
     if (activeGallery.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">No gallery images added yet.</div>`;
+      grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 1.5rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">No gallery images in database. Drag and drop images above to upload!</div>`;
       return;
     }
 
-    activeGallery.forEach((url, idx) => {
+    activeGallery.forEach((item, idx) => {
+      const url = typeof item === "string" ? item : (item ? item.url : "");
+      const isVideo = (typeof item === "object" && item.type === "video") || url.endsWith(".mp4") || url.endsWith(".webm");
+
       const card = document.createElement("div");
       card.className = "showcase-item-card";
+
+      const mediaHtml = isVideo
+        ? `<video src="${url}" muted style="width: 100%; height: 100%; object-fit: cover;"></video>`
+        : `<img src="${url}" alt="Gallery Image ${idx + 1}">`;
+
       card.innerHTML = `
-        <img src="${url}" alt="Gallery Image ${idx + 1}">
+        ${mediaHtml}
         <div class="showcase-item-actions">
           <button type="button" class="admin-btn secondary-btn move-left-gal-btn" ${idx === 0 ? 'disabled' : ''} title="Move Left"><i class="ri-arrow-left-s-line"></i></button>
           <button type="button" class="admin-btn secondary-btn move-right-gal-btn" ${idx === activeGallery.length - 1 ? 'disabled' : ''} title="Move Right"><i class="ri-arrow-right-s-line"></i></button>
@@ -1568,22 +1799,24 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      card.querySelector(".move-left-gal-btn")?.addEventListener("click", () => {
+      card.querySelector(".move-left-gal-btn")?.addEventListener("click", async () => {
         if (idx > 0) {
           const temp = activeGallery[idx];
           activeGallery[idx] = activeGallery[idx - 1];
           activeGallery[idx - 1] = temp;
+          await persistCurrentCaseStudyMedia();
           renderShowcaseGallery();
           markEditorDirty();
           updateLivePreview();
         }
       });
 
-      card.querySelector(".move-right-gal-btn")?.addEventListener("click", () => {
+      card.querySelector(".move-right-gal-btn")?.addEventListener("click", async () => {
         if (idx < activeGallery.length - 1) {
           const temp = activeGallery[idx];
           activeGallery[idx] = activeGallery[idx + 1];
           activeGallery[idx + 1] = temp;
+          await persistCurrentCaseStudyMedia();
           renderShowcaseGallery();
           markEditorDirty();
           updateLivePreview();
@@ -1591,51 +1824,73 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       card.querySelector(".replace-gal-btn")?.addEventListener("click", () => {
-        openMediaPicker((newUrl) => {
-          activeGallery[idx] = newUrl;
+        openMediaPicker(async (newUrl) => {
+          const currentCsId = document.getElementById("cs-edit-id")?.value;
+          const currentSlug = document.getElementById("cs-slug")?.value || "project";
+          activeGallery[idx] = normalizeMediaAsset(newUrl, currentCsId, currentSlug, "image", "creative_showcase", idx);
+          await persistCurrentCaseStudyMedia();
           renderShowcaseGallery();
           markEditorDirty();
           updateLivePreview();
         });
       });
 
-      card.querySelector(".del-gal-btn")?.addEventListener("click", () => {
+      card.querySelector(".del-gal-btn")?.addEventListener("click", async () => {
         activeGallery.splice(idx, 1);
+        await persistCurrentCaseStudyMedia();
         renderShowcaseGallery();
         markEditorDirty();
         updateLivePreview();
+        showAdminToast("Asset deleted from Case Study.", "info");
       });
 
       grid.appendChild(card);
     });
   };
 
-  const handleGalleryFilesUpload = (files) => {
+  const handleGalleryFilesUpload = async (files) => {
     if (!files || files.length === 0) return;
-    showAdminToast(`Uploading ${files.length} gallery file(s)...`, "processing");
+    const currentCsId = document.getElementById("cs-edit-id")?.value;
+    const currentSlug = document.getElementById("cs-slug")?.value || "project";
 
-    let completed = 0;
-    const total = files.length;
+    updateUploadStatus("gallery", "uploading", `Uploading ${files.length} gallery image(s)...`);
+    showAdminToast(`Uploading ${files.length} gallery image(s)...`, "processing");
 
-    files.forEach(file => {
-      uploadMediaFile(file, "showcase", (prog) => {
-        if (prog.status === "error") {
-          showAdminToast(`Failed to upload ${file.name}: ${prog.text}`, "error", 5000);
-        }
-      })
-      .then(asset => {
-        activeGallery.push(asset.url);
-        completed++;
-        renderShowcaseGallery();
-        markEditorDirty();
-        updateLivePreview();
+    let successCount = 0;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        updateUploadStatus("gallery", "processing", `Processing & optimizing (${i + 1}/${files.length}): ${file.name}...`);
+        const asset = await uploadMediaFile(file, "showcase");
 
-        if (completed === total) {
-          showAdminToast(`All ${total} gallery image(s) uploaded & saved successfully!`, "success");
-        }
-      })
-      .catch(err => console.error("Gallery upload error:", err));
-    });
+        updateUploadStatus("gallery", "saving", `Saving (${i + 1}/${files.length}): ${file.name} to database...`);
+        const structured = normalizeMediaAsset(
+          asset,
+          currentCsId || "cs-new",
+          currentSlug,
+          "image",
+          "creative_showcase",
+          activeGallery.length
+        );
+        activeGallery.push(structured);
+        successCount++;
+      } catch (err) {
+        console.error("Gallery upload error on", file.name, err);
+        const errText = typeof err === "string" ? err : (err.message || "Upload failed");
+        updateUploadStatus("gallery", "error", `Upload failed on ${file.name}: ${errText}`);
+        showAdminToast(`Failed to upload ${file.name}: ${errText}`, "error", 5000);
+      }
+    }
+
+    if (successCount > 0) {
+      updateUploadStatus("gallery", "saving", "Persisting media records to database...");
+      await persistCurrentCaseStudyMedia();
+      renderShowcaseGallery();
+      markEditorDirty();
+      updateLivePreview();
+      updateUploadStatus("gallery", "success", `Saved successfully! ${successCount} image(s) active in database & live on site.`);
+      showAdminToast(`All ${successCount} gallery image(s) saved & synchronized successfully!`, "success");
+    }
   };
 
   const galleryUploadInput = document.getElementById("gallery-multi-upload");
@@ -1643,6 +1898,7 @@ document.addEventListener("DOMContentLoaded", () => {
     galleryUploadInput.addEventListener("change", (e) => {
       const files = Array.from(e.target.files);
       handleGalleryFilesUpload(files);
+      e.target.value = "";
     });
   }
 
@@ -1665,12 +1921,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("gallery-select-library-btn")?.addEventListener("click", () => {
-    openMediaPicker((url) => {
-      activeGallery.push(url);
+    openMediaPicker(async (url) => {
+      const currentCsId = document.getElementById("cs-edit-id")?.value;
+      const currentSlug = document.getElementById("cs-slug")?.value || "project";
+      const structured = normalizeMediaAsset(
+        url,
+        currentCsId || "cs-new",
+        currentSlug,
+        "image",
+        "creative_showcase",
+        activeGallery.length
+      );
+      activeGallery.push(structured);
+      await persistCurrentCaseStudyMedia();
       renderShowcaseGallery();
       markEditorDirty();
       updateLivePreview();
-      showAdminToast("Selected asset linked to gallery!", "success");
+      showAdminToast("Selected asset linked to gallery & saved!", "success");
     });
   });
 
@@ -1681,23 +1948,26 @@ document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = "";
 
     if (activeVideos.length === 0) {
-      list.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">No showcase videos added yet.</div>`;
+      list.innerHTML = `<div style="padding: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">No showcase videos in database. Upload an MP4/WEBM or add an embed above!</div>`;
       return;
     }
 
     activeVideos.forEach((vid, idx) => {
+      const vidUrl = typeof vid === "string" ? vid : (vid ? vid.url : "");
+      const isEmbed = vidUrl.includes("youtube.com") || vidUrl.includes("vimeo.com") || vidUrl.includes("embed");
+
       const item = document.createElement("div");
       item.className = "video-item-card";
 
-      let thumb = vid.type === "youtube" || vid.type === "vimeo" || vid.url.includes("embed")
-        ? `<iframe src="${vid.url}" allowfullscreen></iframe>`
-        : `<video src="${vid.url}" controls></video>`;
+      let thumb = isEmbed
+        ? `<iframe src="${vidUrl}" allowfullscreen style="border: none;"></iframe>`
+        : `<video src="${vidUrl}" controls preload="metadata"></video>`;
 
       item.innerHTML = `
         <div class="video-thumb-preview">${thumb}</div>
         <div style="flex: 1;">
           <strong style="display: block; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 4px;">Video Asset ${idx + 1}</strong>
-          <span style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace;">${vid.url.substring(0, 45)}...</span>
+          <span style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace;">${vidUrl.substring(0, 45)}...</span>
         </div>
         <div style="display: flex; gap: 4px;">
           <button type="button" class="admin-btn secondary-btn move-up-vid-btn" ${idx === 0 ? 'disabled' : ''} style="padding: 6px 10px;" title="Move Up"><i class="ri-arrow-up-s-line"></i></button>
@@ -1706,76 +1976,128 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      item.querySelector(".move-up-vid-btn")?.addEventListener("click", () => {
+      item.querySelector(".move-up-vid-btn")?.addEventListener("click", async () => {
         if (idx > 0) {
           const temp = activeVideos[idx];
           activeVideos[idx] = activeVideos[idx - 1];
           activeVideos[idx - 1] = temp;
+          await persistCurrentCaseStudyMedia();
           renderVideosList();
           markEditorDirty();
           updateLivePreview();
         }
       });
 
-      item.querySelector(".move-down-vid-btn")?.addEventListener("click", () => {
+      item.querySelector(".move-down-vid-btn")?.addEventListener("click", async () => {
         if (idx < activeVideos.length - 1) {
           const temp = activeVideos[idx];
           activeVideos[idx] = activeVideos[idx + 1];
           activeVideos[idx + 1] = temp;
+          await persistCurrentCaseStudyMedia();
           renderVideosList();
           markEditorDirty();
           updateLivePreview();
         }
       });
 
-      item.querySelector(".del-vid-btn")?.addEventListener("click", () => {
+      item.querySelector(".del-vid-btn")?.addEventListener("click", async () => {
         activeVideos.splice(idx, 1);
+        await persistCurrentCaseStudyMedia();
         renderVideosList();
         markEditorDirty();
         updateLivePreview();
+        showAdminToast("Video removed from Case Study.", "info");
       });
 
       list.appendChild(item);
     });
   };
 
-  document.getElementById("video-file-upload")?.addEventListener("change", (e) => {
+  document.getElementById("video-file-upload")?.addEventListener("change", async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (!file) return;
+
+    const currentCsId = document.getElementById("cs-edit-id")?.value;
+    const currentSlug = document.getElementById("cs-slug")?.value || "project";
+
+    try {
+      updateUploadStatus("video", "uploading", `Uploading video "${file.name}"...`);
       showAdminToast(`Processing video "${file.name}"...`, "processing");
-      uploadMediaFile(file, "videos", (prog) => {
-        if (prog.status === "error") {
-          showAdminToast(`Video upload failed: ${prog.text}`, "error", 5000);
-        }
-      })
-      .then(asset => {
-        activeVideos.push({ type: "file", url: asset.url });
-        renderVideosList();
-        markEditorDirty();
-        updateLivePreview();
-        showAdminToast(`Video "${file.name}" linked successfully!`, "success");
-      })
-      .catch(err => console.error("Video upload error:", err));
-    }
-  });
 
-  document.getElementById("add-youtube-embed-btn")?.addEventListener("click", () => {
-    const url = prompt("Enter YouTube Embed URL (e.g. https://www.youtube.com/embed/dQw4w9WgXcQ):");
-    if (url) {
-      activeVideos.push({ type: "youtube", url: url.trim() });
+      const asset = await uploadMediaFile(file, "videos", (prog) => {
+        if (prog.status === "uploading") updateUploadStatus("video", "uploading", prog.text);
+        if (prog.status === "processing") updateUploadStatus("video", "processing", prog.text);
+        if (prog.status === "saving") updateUploadStatus("video", "saving", prog.text);
+      });
+
+      updateUploadStatus("video", "saving", `Saving video to database...`);
+      const structured = normalizeMediaAsset(
+        asset,
+        currentCsId || "cs-new",
+        currentSlug,
+        "video",
+        "video_showcase",
+        activeVideos.length
+      );
+      activeVideos.push(structured);
+
+      await persistCurrentCaseStudyMedia();
       renderVideosList();
       markEditorDirty();
       updateLivePreview();
+      updateUploadStatus("video", "success", `Video "${file.name}" saved successfully & live on site.`);
+      showAdminToast(`Video "${file.name}" saved & linked successfully!`, "success");
+    } catch (err) {
+      console.error("Video upload error:", err);
+      const errText = typeof err === "string" ? err : (err.message || "Video upload failed");
+      updateUploadStatus("video", "error", `Video upload failed: ${errText}`);
+      showAdminToast(`Video upload failed: ${errText}`, "error", 5000);
+    } finally {
+      e.target.value = "";
     }
   });
 
-  document.getElementById("add-vimeo-embed-btn")?.addEventListener("click", () => {
+  document.getElementById("add-youtube-embed-btn")?.addEventListener("click", async () => {
+    const url = prompt("Enter YouTube Embed URL (e.g. https://www.youtube.com/embed/YOUR_VIDEO_ID):");
+    if (url && url.trim()) {
+      const currentCsId = document.getElementById("cs-edit-id")?.value;
+      const currentSlug = document.getElementById("cs-slug")?.value || "project";
+      const structured = normalizeMediaAsset(
+        { url: url.trim(), name: "YouTube Video" },
+        currentCsId || "cs-new",
+        currentSlug,
+        "video",
+        "video_showcase",
+        activeVideos.length
+      );
+      activeVideos.push(structured);
+      await persistCurrentCaseStudyMedia();
+      renderVideosList();
+      markEditorDirty();
+      updateLivePreview();
+      showAdminToast("YouTube video added & synchronized!", "success");
+    }
+  });
+
+  document.getElementById("add-vimeo-embed-btn")?.addEventListener("click", async () => {
     const url = prompt("Enter Vimeo Embed URL (e.g. https://player.vimeo.com/video/123456789):");
-    if (url) {
-      activeVideos.push({ type: "vimeo", url: url.trim() });
+    if (url && url.trim()) {
+      const currentCsId = document.getElementById("cs-edit-id")?.value;
+      const currentSlug = document.getElementById("cs-slug")?.value || "project";
+      const structured = normalizeMediaAsset(
+        { url: url.trim(), name: "Vimeo Video" },
+        currentCsId || "cs-new",
+        currentSlug,
+        "video",
+        "video_showcase",
+        activeVideos.length
+      );
+      activeVideos.push(structured);
+      await persistCurrentCaseStudyMedia();
       renderVideosList();
       markEditorDirty();
       updateLivePreview();
+      showAdminToast("Vimeo video added & synchronized!", "success");
     }
   });
 
@@ -2294,11 +2616,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // --- OPEN / CLOSE EDITOR MODAL & SAVE DATA ENGINE ---
-  const openCSModal = (csId = null) => {
+  const openCSModal = async (csId = null) => {
     if (!csModal) return;
     csForm.reset();
     document.getElementById("cs-edit-id").value = "";
     document.getElementById("cs-modal-title").textContent = csId ? "Edit Case Study" : "Create New Case Study";
+
+    // Reset upload status indicators
+    const galStatus = document.getElementById("gallery-upload-status");
+    if (galStatus) { galStatus.style.display = "none"; galStatus.innerHTML = ""; }
+    const vidStatus = document.getElementById("video-upload-status");
+    if (vidStatus) { vidStatus.style.display = "none"; vidStatus.innerHTML = ""; }
 
     activeTags = ["Branding", "Social Media"];
     activeGallery = [];
@@ -2310,7 +2638,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeSectionOrder = STANDARD_CASE_STUDY_SECTIONS.map(s => s.key);
 
     if (csId) {
-      const list = getBetroCaseStudies();
+      const list = await getFreshBetroCaseStudies();
       const cs = list.find(item => item.id === csId);
       if (cs) {
         document.getElementById("cs-edit-id").value = cs.id;
@@ -2417,10 +2745,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (Array.isArray(cs.services)) activeTags = [...cs.services];
-        if (Array.isArray(cs.media?.gallery)) activeGallery = [...cs.media.gallery];
-        if (Array.isArray(cs.media?.videos)) {
-          activeVideos = cs.media.videos.map(v => typeof v === "string" ? { type: "url", url: v } : v);
+
+        // Load media using structured assets as single source of truth
+        if (Array.isArray(cs.media?.assets) && cs.media.assets.length > 0) {
+          activeGallery = cs.media.assets
+            .filter(a => a.type === "image" || a.target_section === "creative_showcase")
+            .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+          activeVideos = cs.media.assets
+            .filter(a => a.type === "video" || a.target_section === "video_showcase")
+            .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+        } else {
+          if (Array.isArray(cs.media?.gallery)) {
+            activeGallery = cs.media.gallery.map((g, idx) => normalizeMediaAsset(g, cs.id, cs.slug, "image", "creative_showcase", idx));
+          }
+          if (Array.isArray(cs.media?.videos)) {
+            activeVideos = cs.media.videos
+              .filter(v => {
+                const u = typeof v === "string" ? v : (v ? v.url : "");
+                return u && !u.includes("dQw4w9WgXcQ");
+              })
+              .map((v, idx) => normalizeMediaAsset(v, cs.id, cs.slug, "video", "video_showcase", idx));
+          }
         }
+
         if (Array.isArray(cs.gallerySections)) activeGallerySections = [...cs.gallerySections];
         if (Array.isArray(cs.blocks)) activeBlocks = [...cs.blocks];
 
@@ -2453,7 +2800,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (addCSBtn) addCSBtn.addEventListener("click", () => openCSModal());
   if (closeCSModalBtn) closeCSModalBtn.addEventListener("click", closeCSModal);
 
-  const saveActiveEditorState = () => {
+  const saveActiveEditorState = async () => {
     const editId = document.getElementById("cs-edit-id").value;
     const companyName = document.getElementById("cs-company-name").value.trim() || "New Case Study";
     const rawSlug = document.getElementById("cs-slug").value.trim() || companyName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
@@ -2495,12 +2842,25 @@ document.addEventListener("DOMContentLoaded", () => {
       feedbackRole: document.getElementById("cs-feedback-role")?.value.trim() || ""
     };
 
-    const deskMockUrl = document.getElementById("cs-desktop-mockup-url")?.value.trim() || activeGallery[0] || heroUrl;
-    const mobMockUrl = document.getElementById("cs-mobile-mockup-url")?.value.trim() || activeGallery[1] || logoUrl;
+    // Re-index display_order before saving
+    activeGallery.forEach((item, idx) => { if (typeof item === 'object' && item) item.display_order = idx; });
+    activeVideos.forEach((item, idx) => { if (typeof item === 'object' && item) item.display_order = idx; });
+
+    const firstGalUrl = activeGallery[0] ? (typeof activeGallery[0] === 'string' ? activeGallery[0] : activeGallery[0].url) : "";
+    const secondGalUrl = activeGallery[1] ? (typeof activeGallery[1] === 'string' ? activeGallery[1] : activeGallery[1].url) : "";
+
+    const deskMockUrl = document.getElementById("cs-desktop-mockup-url")?.value.trim() || firstGalUrl || heroUrl;
+    const mobMockUrl = document.getElementById("cs-mobile-mockup-url")?.value.trim() || secondGalUrl || logoUrl;
+
+    const allStructuredAssets = [
+      ...activeGallery.map((g, idx) => normalizeMediaAsset(g, editId || "cs-" + Date.now(), slug, "image", "creative_showcase", idx)),
+      ...activeVideos.map((v, idx) => normalizeMediaAsset(v, editId || "cs-" + Date.now(), slug, "video", "video_showcase", idx))
+    ];
 
     const media = {
-      gallery: [...activeGallery],
-      videos: activeVideos.map(v => v.url),
+      gallery: activeGallery.map(g => typeof g === "string" ? g : (g ? g.url : "")),
+      videos: activeVideos.map(v => typeof v === "string" ? v : (v ? v.url : "")),
+      assets: allStructuredAssets,
       mockups: {
         desktop: deskMockUrl,
         mobile: mobMockUrl
@@ -2515,7 +2875,7 @@ document.addEventListener("DOMContentLoaded", () => {
       canonicalUrl: document.getElementById("cs-seo-canonical")?.value.trim() || `https://betroverse.in/portfolio/${slug}`
     };
 
-    let list = getBetroCaseStudies();
+    let list = await getFreshBetroCaseStudies();
 
     if (editId) {
       list = list.map(cs => {
@@ -2576,7 +2936,21 @@ document.addEventListener("DOMContentLoaded", () => {
       list.push(newCS);
     }
 
-    saveBetroCaseStudies(list);
+    // Authoritative Cloud Database Save
+    const targetItem = editId ? list.find(cs => cs.id === editId) : newCS;
+    if (window.BetroDB && targetItem) {
+      try {
+        const cloudResult = await BetroDB.saveCaseStudy(targetItem);
+        if (cloudResult.warning) {
+          console.warn("[Admin]", cloudResult.warning);
+        }
+      } catch (cloudErr) {
+        console.error("Cloud database save failed:", cloudErr);
+        throw new Error("File uploaded, but project record could not be saved to cloud database: " + (cloudErr.message || cloudErr));
+      }
+    }
+
+    await saveBetroCaseStudies(list);
 
     // Sync to legacy betro_projects for full backward compatibility
     const legacyProjects = list.map(cs => ({
@@ -2590,26 +2964,214 @@ document.addEventListener("DOMContentLoaded", () => {
       companyId: cs.slug,
       logo: cs.companyLogo
     }));
-    localStorage.setItem("betro_projects", JSON.stringify(legacyProjects));
+    try {
+      localStorage.setItem("betro_projects", JSON.stringify(legacyProjects));
+    } catch (e) {}
 
     renderCaseStudiesTab();
   };
 
   if (csForm) {
-    csForm.addEventListener("submit", (e) => {
+    csForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const submitBtn = csForm.querySelector("button[type='submit']");
+      const origText = submitBtn ? submitBtn.innerHTML : "Save";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Saving to Cloud...`;
+      }
       try {
-        saveActiveEditorState();
+        await saveActiveEditorState();
         setEditorSaved();
         closeCSModal();
         renderCaseStudiesTab();
         showAdminToast("Save Successful! Case Study updated in live portfolio.", "success");
       } catch (err) {
         console.error("CS Save error:", err);
-        showAdminToast("Save Failed: " + (err.message || "Unknown error"), "error");
+        showAdminToast("Save Failed: " + (err.message || "Unknown error"), "error", 6000);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origText;
+        }
       }
     });
   }
+
+  // ==========================================
+  // SUPABASE CLOUD DATABASE SETTINGS & DIAGNOSTICS
+  // ==========================================
+  const updateSupabaseStatusUI = async () => {
+    const pill = document.getElementById("supabase-status-pill");
+    const diag = document.getElementById("supabase-diag-box");
+    const syncInd = document.getElementById("sync-indicator");
+    const urlInput = document.getElementById("cfg-supabase-url");
+    const keyInput = document.getElementById("cfg-supabase-anon-key");
+    const bktInput = document.getElementById("cfg-supabase-bucket");
+
+    if (!window.BetroDB) return;
+
+    await BetroDB.ensureInit();
+    const cfg = BetroDB.getConfig();
+
+    if (urlInput) urlInput.value = cfg.supabaseUrl || "";
+    if (keyInput) keyInput.value = cfg.supabaseAnonKey || "";
+    if (bktInput) bktInput.value = cfg.storageBucket || "betodata";
+
+    if (cfg.isConfigured) {
+      if (pill) {
+        pill.innerHTML = `<i class="ri-checkbox-circle-fill"></i> Cloud Connected (${cfg.source})`;
+        pill.style.background = "rgba(74, 185, 108, 0.15)";
+        pill.style.color = "#4ab96c";
+        pill.style.borderColor = "rgba(74, 185, 108, 0.3)";
+      }
+      if (diag) {
+        diag.innerHTML = `<strong>Production Cloud Database Active:</strong> ${cfg.supabaseUrl}<br><span style="color:var(--text-secondary); font-size:0.8rem;">Bucket: ${cfg.storageBucket} | Source: ${cfg.source}</span>`;
+      }
+      if (syncInd) {
+        syncInd.innerHTML = `<i class="ri-cloud-line" style="color: #4ab96c;"></i> Cloud DB Synced`;
+        syncInd.style.borderColor = "rgba(74, 185, 108, 0.3)";
+        syncInd.style.color = "#4ab96c";
+      }
+    } else {
+      if (pill) {
+        pill.innerHTML = `<i class="ri-alert-line"></i> Local Fallback Mode`;
+        pill.style.background = "rgba(234, 179, 8, 0.15)";
+        pill.style.color = "#eab308";
+        pill.style.borderColor = "rgba(234, 179, 8, 0.3)";
+      }
+      if (diag) {
+        diag.innerHTML = `<span style="color:#eab308; font-weight:600;"><i class="ri-information-line"></i> Supabase Not Connected</span><br><span style="color:var(--text-secondary);">Enter your Supabase Project URL and Anon Key below or add <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> in Vercel Project Settings.</span>`;
+      }
+      if (syncInd) {
+        syncInd.innerHTML = `<i class="ri-database-2-line"></i> Local Fallback Engine`;
+        syncInd.style.borderColor = "rgba(234, 179, 8, 0.3)";
+        syncInd.style.color = "#eab308";
+      }
+    }
+  };
+
+  // Test Connection Button
+  document.getElementById("test-supabase-cfg-btn")?.addEventListener("click", async () => {
+    const btn = document.getElementById("test-supabase-cfg-btn");
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Testing Connection...`;
+
+    try {
+      const url = document.getElementById("cfg-supabase-url")?.value.trim();
+      const key = document.getElementById("cfg-supabase-anon-key")?.value.trim();
+      const bucket = document.getElementById("cfg-supabase-bucket")?.value.trim() || "betodata";
+
+      if (url && key) {
+        await BetroDB.updateConfig({ supabaseUrl: url, supabaseAnonKey: key, storageBucket: bucket });
+      }
+
+      const res = await BetroDB.testConnection();
+      if (res.success) {
+        showAdminToast(`Connection Verified! (Latency: ${res.latency}ms)`, "success", 4000);
+      } else if (res.needTables) {
+        showAdminToast(`Supabase Connected! Tables need initialization. Run supabase/full_migration.sql in SQL Editor.`, "warning", 8000);
+      } else {
+        showAdminToast(`Connection Failed: ${res.error}`, "error", 6000);
+      }
+      await updateSupabaseStatusUI();
+    } catch (e) {
+      showAdminToast("Connection Error: " + e.message, "error", 5000);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    }
+  });
+
+  // Reset Credentials Button
+  document.getElementById("reset-supabase-cfg-btn")?.addEventListener("click", async () => {
+    try {
+      localStorage.removeItem("betro_supabase_config");
+      await BetroDB.ensureInit(true);
+      await updateSupabaseStatusUI();
+      const res = await BetroDB.testConnection();
+      if (res.success) {
+        showAdminToast(`Reset & Connected to Supabase Cloud! (Latency: ${res.latency}ms)`, "success", 4000);
+      } else {
+        showAdminToast(`Reset complete. ${res.error}`, "info", 5000);
+      }
+      await renderCaseStudiesTab();
+    } catch (e) {
+      showAdminToast("Reset error: " + e.message, "error");
+    }
+  });
+
+  // Save Supabase Configuration Form
+  document.getElementById("supabase-config-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const url = document.getElementById("cfg-supabase-url")?.value.trim();
+    const key = document.getElementById("cfg-supabase-anon-key")?.value.trim();
+    const bucket = document.getElementById("cfg-supabase-bucket")?.value.trim() || "betodata";
+
+    if (!url || !key) {
+      showAdminToast("Please provide both Supabase URL and Anon Key.", "error");
+      return;
+    }
+
+    try {
+      const res = await BetroDB.updateConfig({ supabaseUrl: url, supabaseAnonKey: key, storageBucket: bucket });
+      if (res.success) {
+        showAdminToast("Supabase Configured & Connected Successfully!", "success");
+      } else {
+        showAdminToast("Credentials Saved. Note: " + res.error, "info", 5000);
+      }
+      await updateSupabaseStatusUI();
+      await renderCaseStudiesTab();
+    } catch (err) {
+      showAdminToast("Config Error: " + err.message, "error");
+    }
+  });
+
+  // One-Click Database Seed Button
+  document.getElementById("sync-cloud-seed-btn")?.addEventListener("click", async () => {
+    if (!confirm("This will populate your connected Supabase database with all 16 portfolio projects and assets. Existing matching projects will be safely updated without data loss. Proceed?")) return;
+
+    const btn = document.getElementById("sync-cloud-seed-btn");
+    const prog = document.getElementById("seed-sync-progress");
+    const orig = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Initializing Migration...`;
+    if (prog) { prog.style.display = "block"; prog.textContent = "Connecting to Supabase..."; }
+
+    try {
+      const res = await BetroDB.syncAllSeedData(defaultCaseStudies, (p) => {
+        if (prog) prog.textContent = `Syncing project ${p.current} of ${p.total}: "${p.name}" (${p.pct}%)...`;
+      });
+
+      if (prog) {
+        prog.textContent = `Migration Complete! Successfully synchronized ${res.count} of ${res.total} projects into Supabase.`;
+        prog.style.color = "#4ab96c";
+      }
+      showAdminToast(`Cloud Migration Complete: ${res.count} projects live!`, "success", 5000);
+      await renderCaseStudiesTab();
+    } catch (err) {
+      if (prog) {
+        prog.textContent = `Migration Failed: ${err.message}`;
+        prog.style.color = "#ef4444";
+      }
+      showAdminToast("Migration Error: " + err.message, "error", 6000);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    }
+  });
+
+  // Clear Client Cache Button
+  document.getElementById("clear-cache-btn")?.addEventListener("click", () => {
+    localStorage.removeItem("betro_casestudies_cache");
+    showAdminToast("Client cache cleared.", "info");
+    setTimeout(() => window.location.reload(), 500);
+  });
+
+  // Trigger Supabase status check
+  setTimeout(updateSupabaseStatusUI, 300);
 
   // Search & Filter Listeners
   document.getElementById("cs-search-input")?.addEventListener("input", renderCaseStudiesTab);

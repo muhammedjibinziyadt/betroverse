@@ -117,7 +117,7 @@ const initPortfolio = () => {
 
       if (window.indexedDB) {
         try {
-          const req = indexedDB.open("BetroverseMediaDB", 1);
+          const req = indexedDB.open("BetroversePortfolioDB", 1);
           req.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains("app_store")) {
@@ -162,7 +162,24 @@ const initPortfolio = () => {
   };
 
   const loadDynamicProjects = async () => {
-    let caseStudies = await fetchCaseStudiesFromStore();
+    let caseStudies = [];
+
+    // 1. Authoritative Cloud Database fetch from Supabase
+    if (window.BetroDB) {
+      try {
+        const fromCloud = await BetroDB.getCaseStudies({ includeDrafts: false });
+        if (Array.isArray(fromCloud) && fromCloud.length > 0) {
+          caseStudies = fromCloud;
+        }
+      } catch (err) {
+        console.warn("[Portfolio] Cloud database fetch failed, using fallback:", err);
+      }
+    }
+
+    // 2. Local fallback if offline or Supabase not yet configured
+    if (!Array.isArray(caseStudies) || caseStudies.length === 0) {
+      caseStudies = await fetchCaseStudiesFromStore();
+    }
 
     if (!Array.isArray(caseStudies) || caseStudies.length === 0) {
       const rawProj = localStorage.getItem("betro_projects");
@@ -580,6 +597,35 @@ const initPortfolio = () => {
     resizeTimer = setTimeout(() => {
       positionFloatingCards();
     }, 150);
+  });
+
+  // Real-time synchronization listeners across windows/tabs
+  const handlePortfolioSync = async () => {
+    await loadDynamicProjects();
+    positionFloatingCards();
+    if (typeof renderGalleryProjects === "function") renderGalleryProjects();
+  };
+
+  if ("BroadcastChannel" in window) {
+    try {
+      const channel = new BroadcastChannel("betro_portfolio_sync");
+      channel.onmessage = (e) => {
+        if (e.data && (e.data.type === "CASE_STUDY_UPDATED" || e.data.type === "MEDIA_SYNC" || e.data.type === "CASE_STUDY_DELETED")) {
+          handlePortfolioSync();
+        }
+      };
+    } catch (e) {}
+  }
+  window.addEventListener("storage", (e) => {
+    if (e.key === "betro_casestudies" || e.key === "betro_projects" || e.key === "betro_casestudies_cache") {
+      handlePortfolioSync();
+    }
+  });
+  window.addEventListener("betro_storage_updated", () => {
+    handlePortfolioSync();
+  });
+  window.addEventListener("betro_db_updated", () => {
+    handlePortfolioSync();
   });
 };
 

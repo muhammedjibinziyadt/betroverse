@@ -6,11 +6,14 @@
   <title>Case Study: Celes Lifestyle | Betroverse</title>
   <link rel="stylesheet" href="../css/style.css" type="text/css" />
   <link rel="stylesheet" href="../css/portfolio-redesign.css" type="text/css" />
+  <link rel="stylesheet" href="../css/case-study.css" type="text/css" />
   <script type="text/javascript" src="../js/darkmod.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png" />
 </head>
-<body>
+<body class="cs-page-wrapper">
+
+  <!-- ================= HEADER / NAVBAR ================= -->
   <header class="site-header scrolled">
     <div class="header-container">
       <div class="logo-container">
@@ -42,48 +45,327 @@
     </div>
   </header>
 
-  <main style="padding: 140px 24px 80px 24px; min-height: 80vh; max-width: 1000px; margin: 0 auto;">
-    <div style="margin-bottom: 2rem;">
-      <a href="../portfolio.html" style="color: var(--primary-color, #4ab96c); font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500;">
+  <!-- ================= SECTION 1: HERO SECTION ================= -->
+  <section class="cs-hero" style="background-image: url('../images/p1.jpg');">
+    <div class="cs-hero-overlay"></div>
+    <div class="cs-container cs-hero-content">
+      <a href="../portfolio.html" class="cs-back-link">
         <i class="ri-arrow-left-line"></i> Back to Portfolio
       </a>
-    </div>
-
-    <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 2.5rem; flex-wrap: wrap; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 2rem; border-radius: 20px; backdrop-filter: blur(10px);">
-      <div style="width: 90px; height: 90px; background: rgba(0,0,0,0.4); border-radius: 16px; display: flex; align-items: center; justify-content: center; padding: 12px; border: 1px solid rgba(255,255,255,0.05);">
-        <img src="../images/celes.png" alt="Celes Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      
+      <div class="cs-hero-header-badge">
+        <div class="cs-hero-logo-box">
+          <img id="cs-logo" src="../images/celes.png" alt="Company Logo">
+        </div>
+        <span id="cs-category" class="cs-category-pill">Luxury Brand Campaign</span>
       </div>
-      <div>
-        <span style="background: rgba(74, 185, 108, 0.1); color: var(--primary-color, #4ab96c); padding: 4px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">DEDICATED CASE STUDY</span>
-        <h1 style="font-size: 2.8rem; font-weight: 800; color: var(--text-dark, #ffffff); margin-top: 6px; font-family: 'Poppins', sans-serif;">Celes Lifestyle</h1>
+
+      <h1 id="cs-title" class="cs-hero-title">Celes Lifestyle</h1>
+      <p id="cs-intro" class="cs-hero-intro">Short introduction paragraph outlining the project scope, brand vision, and creative partnership delivered by Betroverse.</p>
+
+      <div class="cs-meta-grid">
+        <div class="cs-meta-item">
+          <h5>Client</h5>
+          <p id="cs-meta-client">Celes Lifestyle</p>
+        </div>
+        <div class="cs-meta-item">
+          <h5>Industry</h5>
+          <p id="cs-meta-industry">Creative & Digital Marketing</p>
+        </div>
+        <div class="cs-meta-item">
+          <h5>Year</h5>
+          <p id="cs-meta-year">2024 - 2025</p>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div style="background: rgba(22, 25, 34, 0.7); border: 1px solid rgba(255,255,255,0.08); padding: 3rem; border-radius: 24px; backdrop-filter: blur(15px);">
-      <h2 style="font-size: 1.8rem; color: var(--primary-color, #4ab96c); margin-bottom: 1.2rem; font-family: 'Poppins', sans-serif;">Celes Lifestyle Case Study Overview</h2>
-      <p style="font-size: 1.05rem; color: var(--text-light, #a0aec0); line-height: 1.8; margin-bottom: 2rem; max-width: 800px;">
-        Detailed case study content, luxury brand campaign design, minimalist Instagram layouts, and aesthetic creative direction for <strong>Celes Lifestyle</strong> will be presented here.
-      </p>
+  <!-- ================= SECTION 2: ABOUT THE BRAND ================= -->
+  <section class="cs-section">
+    <div class="cs-container">
+      <div class="cs-section-header">
+        <span class="cs-section-subtitle">BACKGROUND & OBJECTIVES</span>
+        <h2 class="cs-section-title">About The Brand</h2>
+      </div>
 
-      <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 2rem; display: flex; gap: 16px; flex-wrap: wrap;">
-        <a href="../portfolio.html" class="btn" style="padding: 12px 28px; border-radius: 50px; background: var(--primary-color, #4ab96c); color: #fff; text-decoration: none; font-weight: 600;">
-          Explore All Projects
+      <div class="cs-about-grid">
+        <div class="cs-card">
+          <h3>Brand Story & Background</h3>
+          <p id="cs-brand-story">Detailed company description and brand background story highlighting business origins and market position.</p>
+        </div>
+        <div class="cs-card">
+          <h3>Business Goals & Objectives</h3>
+          <p id="cs-brand-goals">Business goals, target growth milestones, and key strategic project objectives aimed at boosting brand visibility and client engagement.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 3: SERVICES PROVIDED ================= -->
+  <section class="cs-section">
+    <div class="cs-container">
+      <div class="cs-section-header">
+        <span class="cs-section-subtitle">CAPABILITIES</span>
+        <h2 class="cs-section-title">Services Provided</h2>
+      </div>
+
+      <div id="cs-services-list" class="cs-services-flex">
+        <span class="cs-service-tag">Brand Identity</span>
+        <span class="cs-service-tag">Logo Design</span>
+        <span class="cs-service-tag">Social Media Design</span>
+        <span class="cs-service-tag">Website Design</span>
+        <span class="cs-service-tag">Video Production</span>
+        <span class="cs-service-tag">Photography</span>
+        <span class="cs-service-tag">Packaging</span>
+        <span class="cs-service-tag">UI/UX</span>
+        <span class="cs-service-tag">Content Creation</span>
+        <span class="cs-service-tag">Digital Marketing</span>
+        <span class="cs-service-tag">Motion Graphics</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4: PROJECT OVERVIEW ================= -->
+  <section class="cs-section">
+    <div class="cs-container">
+      <div class="cs-section-header">
+        <span class="cs-section-subtitle">APPROACH & EXECUTION</span>
+        <h2 class="cs-section-title">Project Overview</h2>
+      </div>
+
+      <div class="cs-overview-grid">
+        <div class="cs-overview-card">
+          <span class="cs-overview-num">01</span>
+          <h4>Challenge</h4>
+          <p id="cs-overview-challenge">Key challenges faced by the brand prior to project execution.</p>
+        </div>
+        <div class="cs-overview-card">
+          <span class="cs-overview-num">02</span>
+          <h4>Strategy</h4>
+          <p id="cs-overview-strategy">Tailored strategy and conceptual roadmap developed by Betroverse.</p>
+        </div>
+        <div class="cs-overview-card">
+          <span class="cs-overview-num">03</span>
+          <h4>Solution</h4>
+          <p id="cs-overview-solution">High-impact creative solutions and digital implementation.</p>
+        </div>
+        <div class="cs-overview-card">
+          <span class="cs-overview-num">04</span>
+          <h4>Execution</h4>
+          <p id="cs-overview-execution">Production execution, design crafting, and multichannel distribution.</p>
+        </div>
+        <div class="cs-overview-card">
+          <span class="cs-overview-num">05</span>
+          <h4>Results</h4>
+          <p id="cs-overview-results">Key outcomes, reach growth, and performance milestones achieved.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 5: CREATIVE SHOWCASE ================= -->
+  <section class="cs-section">
+    <div class="cs-container">
+      <div class="cs-section-header">
+        <span class="cs-section-subtitle">VISUAL ASSETS</span>
+        <h2 class="cs-section-title">Creative Showcase</h2>
+      </div>
+
+      <div class="cs-showcase-grid">
+        <div class="cs-showcase-placeholder full-width">
+          <i class="ri-image-line cs-placeholder-icon"></i>
+          <h3 class="cs-placeholder-title">Large Campaign Banner Placeholder</h3>
+          <p class="cs-placeholder-desc">Reserved for high-resolution brand campaign hero visuals</p>
+        </div>
+        <div class="cs-showcase-placeholder">
+          <i class="ri-poster-line cs-placeholder-icon"></i>
+          <h3 class="cs-placeholder-title">Posters & Print Creatives</h3>
+          <p class="cs-placeholder-desc">Placeholder for promotional flyers, print layouts, and event posters</p>
+        </div>
+        <div class="cs-showcase-placeholder">
+          <i class="ri-palette-line cs-placeholder-icon"></i>
+          <h3 class="cs-placeholder-title">Brand Identity & Packaging</h3>
+          <p class="cs-placeholder-desc">Placeholder for packaging designs, merchandise, and brand guidelines</p>
+        </div>
+        <div class="cs-showcase-placeholder">
+          <i class="ri-layout-grid-line cs-placeholder-icon"></i>
+          <h3 class="cs-placeholder-title">Social Media Feed Creatives</h3>
+          <p class="cs-placeholder-desc">Placeholder for grid post layouts, promotional flyers, and ad creatives</p>
+        </div>
+        <div class="cs-showcase-placeholder">
+          <i class="ri-book-open-line cs-placeholder-icon"></i>
+          <h3 class="cs-placeholder-title">Menus & Catalogues</h3>
+          <p class="cs-placeholder-desc">Placeholder for digital and print menu designs</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 6: VIDEO SHOWCASE ================= -->
+  <section class="cs-section">
+    <div class="cs-container">
+      <div class="cs-section-header">
+        <span class="cs-section-subtitle">MOTION & FILM</span>
+        <h2 class="cs-section-title">Video Showcase</h2>
+      </div>
+
+      <div class="cs-video-grid">
+        <div class="cs-video-placeholder">
+          <div class="cs-play-btn"><i class="ri-play-fill"></i></div>
+          <h3 class="cs-placeholder-title">Brand Film / Commercial Video Placeholder</h3>
+          <p class="cs-placeholder-desc">Reserved for high-quality corporate films & commercial YouTube videos</p>
+        </div>
+        <div class="cs-video-placeholder reel">
+          <div class="cs-play-btn"><i class="ri-smartphone-line"></i></div>
+          <h3 class="cs-placeholder-title">Instagram Reel / Short 1</h3>
+          <p class="cs-placeholder-desc">Vertical short-form video placeholder</p>
+        </div>
+        <div class="cs-video-placeholder reel">
+          <div class="cs-play-btn"><i class="ri-smartphone-line"></i></div>
+          <h3 class="cs-placeholder-title">Instagram Reel / Short 2</h3>
+          <p class="cs-placeholder-desc">Vertical short-form video placeholder</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 7: WEBSITE SHOWCASE ================= -->
+  <section class="cs-section">
+    <div class="cs-container">
+      <div class="cs-section-header">
+        <span class="cs-section-subtitle">DIGITAL EXPERIENCE</span>
+        <h2 class="cs-section-title">Website Showcase</h2>
+      </div>
+
+      <div class="cs-device-mockups">
+        <div class="cs-mockup-item">
+          <div class="cs-device-bar">
+            <span class="cs-dot"></span>
+            <span class="cs-dot"></span>
+            <span class="cs-dot"></span>
+          </div>
+          <div class="cs-mockup-screen">
+            <i class="ri-computer-line cs-placeholder-icon"></i>
+            <h3 class="cs-placeholder-title">Desktop & Laptop Interface Mockup Placeholder</h3>
+            <p class="cs-placeholder-desc">Reserved for interactive website screenshots and web app layouts</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+          <div class="cs-mockup-item">
+            <div class="cs-mockup-screen" style="min-height: 220px;">
+              <i class="ri-tablet-line cs-placeholder-icon"></i>
+              <h3 class="cs-placeholder-title">Tablet Preview</h3>
+              <p class="cs-placeholder-desc">Responsive tablet layout placeholder</p>
+            </div>
+          </div>
+          <div class="cs-mockup-item">
+            <div class="cs-mockup-screen" style="min-height: 220px;">
+              <i class="ri-cellphone-line cs-placeholder-icon"></i>
+              <h3 class="cs-placeholder-title">Mobile Preview</h3>
+              <p class="cs-placeholder-desc">Mobile viewport placeholder</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 8: RESULTS ================= -->
+  <section class="cs-section">
+    <div class="cs-container">
+      <div class="cs-section-header">
+        <span class="cs-section-subtitle">PERFORMANCE & METRICS</span>
+        <h2 class="cs-section-title">Results & Impact</h2>
+      </div>
+
+      <div class="cs-stats-grid">
+        <div class="cs-stat-card">
+          <div class="cs-stat-number">+500K</div>
+          <div class="cs-stat-label">Total Impressions</div>
+        </div>
+        <div class="cs-stat-card">
+          <div class="cs-stat-number">+45%</div>
+          <div class="cs-stat-label">Engagement Growth</div>
+        </div>
+        <div class="cs-stat-card">
+          <div class="cs-stat-number">3.5x</div>
+          <div class="cs-stat-label">ROI Increase</div>
+        </div>
+        <div class="cs-stat-card">
+          <div class="cs-stat-number">100%</div>
+          <div class="cs-stat-label">Client Satisfaction</div>
+        </div>
+      </div>
+
+      <div class="cs-feedback-card">
+        <div class="cs-quote-icon"><i class="ri-double-quotes-l"></i></div>
+        <p id="cs-feedback-text" class="cs-feedback-text">"Working with Betroverse transformed our digital presence. Their creative video production and brand strategy delivered measurable business growth!"</p>
+        <div id="cs-feedback-author" class="cs-feedback-author">Client Leadership Team</div>
+        <div id="cs-feedback-role" class="cs-feedback-role">Founders & Marketing Directors</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 9: NEXT / PREV PROJECT ================= -->
+  <section class="cs-section" style="border-bottom: none;">
+    <div class="cs-container">
+      <div class="cs-project-nav">
+        <a href="../portfolio.html" class="cs-nav-card">
+          <div class="cs-nav-dir"><i class="ri-arrow-left-line"></i> Previous Project</div>
+          <div class="cs-nav-title">Explore All Portfolio Projects</div>
+        </a>
+        <a href="../portfolio.html" class="cs-nav-card" style="text-align: right;">
+          <div class="cs-nav-dir">Next Project <i class="ri-arrow-right-line"></i></div>
+          <div class="cs-nav-title">View Next Creative Case Study</div>
         </a>
       </div>
     </div>
-  </main>
+  </section>
 
+  <!-- ================= SECTION 10: FOOTER ================= -->
   <footer>
     <div class="section__container7 footer__container">
       <div class="footer__col">
         <div class="footer__logo">
           <a href="../index.html">Betroverse</a>
         </div>
+        <ul class="footer__socials">
+          <li><a href="#"><i class="ri-facebook-fill"></i></a></li>
+          <li><a href="#"><i class="ri-twitter-fill"></i></a></li>
+          <li><a href="#"><i class="ri-instagram-line"></i></a></li>
+          <li><a href="#"><i class="ri-behance-fill"></i></a></li>
+          <li><a href="#"><i class="ri-dribbble-fill"></i></a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Quick Links</h4>
+        <ul class="footer__links">
+          <li><a href="../index.html#home">Home</a></li>
+          <li><a href="../index.html#about">About</a></li>
+          <li><a href="../index.html#services">Services</a></li>
+          <li><a href="../portfolio.html">Portfolio</a></li>
+          <li><a href="../index.html#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Support</h4>
+        <ul class="footer__links">
+          <li><a>Help Center</a></li>
+          <li><a>Privacy Policy</a></li>
+          <li><a>Report an Issue</a></li>
+          <li><a href="../index.html">Get a Quote</a></li>
+        </ul>
       </div>
     </div>
     <div class="footer__bar">
       Copyright © 2025 betroverse. All rights reserved.
     </div>
   </footer>
+
+  <!-- Cloud Backend & Dynamic Case Study Renderer -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase-client.js"></script>
+  <script src="../js/case-study.js"></script>
 </body>
 </html>

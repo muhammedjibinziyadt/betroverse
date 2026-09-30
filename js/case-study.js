@@ -32,7 +32,7 @@
       },
       media: {
         gallery: ["images/p1.jpg", "images/p5.jpg", "images/s1.jpg", "images/p7.jpg", "images/s8.jpg"],
-        videos: ["https://www.youtube.com/embed/dQw4w9WgXcQ"],
+        videos: [],
         mockups: { desktop: "images/p1.jpg", tablet: "images/p5.jpg", mobile: "images/s1.jpg" }
       },
       results: {
@@ -449,8 +449,12 @@
       });
     },
 
-    async getCaseStudies() {
-      if (this.cache && Array.isArray(this.cache) && this.cache.length > 0) return this.cache;
+    invalidateCache() {
+      this.cache = null;
+    },
+
+    async getCaseStudies(forceRefresh = false) {
+      if (!forceRefresh && this.cache && Array.isArray(this.cache) && this.cache.length > 0) return this.cache;
       const db = await this.init();
       if (db) {
         try {
@@ -495,18 +499,15 @@
     return defaultCaseStudies;
   };
 
-  // Pre-warm case studies from IndexedDB
+  // Pre-warm case studies from IndexedDB / BetroDB
   BetroStorage.getCaseStudies().then(csList => {
     if (csList && Array.isArray(csList) && csList.length > 0) {
       BetroStorage.cache = csList;
-      renderCaseStudyPage();
     }
   });
 
   // Main rendering logic when on a Case Study page
-  const renderCaseStudyPage = function () {
-    const caseStudies = window.getBetroCaseStudies();
-
+  const renderCaseStudyPage = async function (explicitData = null, explicitList = null) {
     // Determine current slug from URL path (e.g. /portfolio/mylaban.html) or query param (?id=mylaban)
     const urlParams = new URLSearchParams(window.location.search);
     let currentSlug = urlParams.get("id") || urlParams.get("project");
@@ -516,6 +517,8 @@
       const lastPart = pathParts[pathParts.length - 1];
       if (lastPart && lastPart.endsWith(".html")) {
         currentSlug = lastPart.replace(".html", "");
+      } else if (lastPart && !lastPart.includes(".")) {
+        currentSlug = lastPart;
       }
     }
 
@@ -523,8 +526,31 @@
       currentSlug = "mylaban"; // Default fallback demo
     }
 
-    // Find matching case study or use first available
-    const data = caseStudies.find(cs => cs.slug.toLowerCase() === currentSlug.toLowerCase()) || caseStudies[0];
+    let data = explicitData;
+    let caseStudies = explicitList;
+
+    // 1. Authoritative Cloud Database fetch from Supabase
+    if (!data && window.BetroDB) {
+      try {
+        data = await BetroDB.getCaseStudyBySlug(currentSlug);
+      } catch (e) {
+        console.warn("[CaseStudy] Cloud fetch error:", e);
+      }
+    }
+
+    if (!caseStudies && window.BetroDB) {
+      try {
+        caseStudies = await BetroDB.getCaseStudies({ includeDrafts: false });
+      } catch (e) {}
+    }
+
+    if (!caseStudies || caseStudies.length === 0) {
+      caseStudies = window.getBetroCaseStudies();
+    }
+
+    if (!data) {
+      data = caseStudies.find(cs => cs.slug.toLowerCase() === currentSlug.toLowerCase()) || caseStudies[0];
+    }
     if (!data) return;
 
     // Image Load Error Helper
@@ -579,10 +605,13 @@
         "key-factory": "key-factory.html"
       };
 
+      if (window.location.pathname.includes("case-study.html") || !window.location.pathname.endsWith(".html")) {
+        return `case-study.html?id=${slug}`;
+      }
       if (staticFileMap[slug]) {
         return staticFileMap[slug];
       }
-      return `${slug}.html`;
+      return `case-study.html?id=${slug}`;
     };
 
     // --- 1. HERO SECTION POPULATION ---
@@ -662,94 +691,97 @@
     }
 
     // --- 5. CREATIVE SHOWCASE POPULATION (Editorial Dynamic Collage Engine) ---
+    const showcaseSection = document.querySelector(".cs-showcase-grid, .cs-showcase-masonry-gallery")?.closest("section, .cs-section") || document.querySelector('[data-section="creative_showcase"]');
     const showcaseGrid = document.querySelector(".cs-showcase-grid") || document.querySelector(".cs-showcase-masonry-gallery");
     
-    // Unified media items array for showcase (images + videos)
+    // Strictly image assets for the Creative Showcase Collage
     const showcaseMedia = [];
-    if (data.media) {
-      if (Array.isArray(data.media.gallery)) {
-        data.media.gallery.forEach((img, i) => {
-          if (img) showcaseMedia.push({ type: "image", url: resolveAssetUrl(img), title: `${data.companyName || 'Visual'} Asset ${i + 1}` });
-        });
-      }
-      if (Array.isArray(data.media.videos)) {
-        data.media.videos.forEach((vid, i) => {
-          const url = typeof vid === "string" ? vid : (vid ? vid.url : "");
-          if (url) showcaseMedia.push({ type: "video", url: resolveAssetUrl(url), title: `${data.companyName || 'Motion'} Video ${i + 1}` });
-        });
-      }
-    }
-
-    // Fallback if media is empty
-    if (showcaseMedia.length === 0 && data.heroImage) {
-      showcaseMedia.push({ type: "image", url: resolveAssetUrl(data.heroImage), title: `${data.companyName} Campaign Hero` });
-      if (data.cardImage && data.cardImage !== data.heroImage) {
-        showcaseMedia.push({ type: "image", url: resolveAssetUrl(data.cardImage), title: `${data.companyName} Visual Asset` });
-      }
-    }
-
-    if (showcaseGrid && showcaseMedia.length > 0) {
-      showcaseGrid.style.cssText = "";
-      showcaseGrid.className = "cs-showcase-grid cs-editorial-collage-wrapper";
-      
-      const totalCount = showcaseMedia.length;
-      
-      // Rotations and z-indexes array
-      const rotations = [-3.5, 2.5, -1.8, 3.8, -2.4, 4.2, -1.5, 3.0, -2.8, 2.0];
-      const zIndexes = [10, 8, 6, 7, 9, 5, 4, 3, 2, 1];
-      const spanClasses = ["is-hero", "is-tall", "is-square", "is-wide", "is-medium"];
-      
-      // Handwritten Annotations Inspired by Reference Image
-      const annotationsList = [
-        "From Concept to Cravings ↴",
-        "Designing Brands that tell Stories ↗",
-        "Sweet Moments, Stronger Brands ♡",
-        "More Than Dessert, A Story in Every Bite ♡",
-        "Layers of Happiness ↴",
-        "Crafting Iconic Visuals ↗"
-      ];
-      
-      const collageContainer = document.createElement("div");
-      collageContainer.className = "cs-editorial-collage";
-      collageContainer.setAttribute("data-count", totalCount);
-      
-      showcaseMedia.forEach((item, idx) => {
-        const rot = rotations[idx % rotations.length];
-        const z = zIndexes[idx % zIndexes.length];
-        const spanClass = totalCount > 3 ? spanClasses[idx % spanClasses.length] : "";
-        
-        const card = document.createElement("div");
-        card.className = `cs-collage-card cs-collage-item-${idx + 1} ${spanClass} ${item.type === 'video' ? 'is-video-item' : ''}`;
-        card.style.setProperty("--rot", `${rot}deg`);
-        card.style.setProperty("--z", `${z}`);
-        card.setAttribute("data-index", idx);
-        
-        // Optionally attach an artistic handwritten annotation on specific cards
-        let annotationHtml = "";
-        if (idx === 0 && annotationsList[0]) {
-          annotationHtml = `<span class="cs-collage-annotation top-left">${annotationsList[0]}</span>`;
-        } else if (idx === 1 && annotationsList[1]) {
-          annotationHtml = `<span class="cs-collage-annotation top-right">${annotationsList[1]}</span>`;
-        } else if (idx === 2 && annotationsList[2]) {
-          annotationHtml = `<span class="cs-collage-annotation bottom-left">${annotationsList[2]}</span>`;
-        } else if (idx === 3 && annotationsList[3]) {
-          annotationHtml = `<span class="cs-collage-annotation bottom-right">${annotationsList[3]}</span>`;
+    if (data.media && Array.isArray(data.media.gallery)) {
+      data.media.gallery.forEach((item, i) => {
+        if (!item) return;
+        if (typeof item === "object") {
+          if (item.status === "deleted") return;
+          // Never include video items in Section 5
+          if (item.type === "video" || item.target_section === "video_showcase") return;
+          if (item.url && item.url.trim()) {
+            showcaseMedia.push({
+              id: item.id || `asset-${i}`,
+              type: "image",
+              url: resolveAssetUrl(item.url.trim()),
+              title: item.name || `${data.companyName || 'Visual'} Asset ${i + 1}`,
+              display_order: typeof item.display_order === "number" ? item.display_order : i
+            });
+          }
+        } else if (typeof item === "string" && item.trim()) {
+          const lower = item.toLowerCase();
+          const isVideoExt = lower.endsWith(".mp4") || lower.endsWith(".webm") || lower.endsWith(".mov") || lower.includes("youtube.com") || lower.includes("vimeo.com");
+          if (!isVideoExt) {
+            showcaseMedia.push({
+              id: `asset-${i}`,
+              type: "image",
+              url: resolveAssetUrl(item.trim()),
+              title: `${data.companyName || 'Visual'} Asset ${i + 1}`,
+              display_order: i
+            });
+          }
         }
+      });
+      // Sort strictly by display_order ascending
+      showcaseMedia.sort((a, b) => a.display_order - b.display_order);
+    }
+
+    if (showcaseGrid) {
+      if (showcaseMedia.length === 0) {
+        // Zero images: Empty grid cleanly without injecting fallbacks or fake demo media
+        showcaseGrid.innerHTML = "";
+      } else {
+        showcaseGrid.style.cssText = "";
+        showcaseGrid.className = "cs-showcase-grid cs-editorial-collage-wrapper";
         
-        if (item.type === "video") {
-          const isEmbed = item.url.includes("youtube.com") || item.url.includes("vimeo.com") || item.url.includes("embed");
-          card.innerHTML = `
-            ${annotationHtml}
-            <div class="cs-collage-frame">
-              ${isEmbed 
-                ? `<iframe src="${item.url}" style="width:100%; height:100%; border:none; border-radius:12px; pointer-events:none;"></iframe>`
-                : `<video src="${item.url}" preload="metadata" muted style="width:100%; height:100%; object-fit:cover; border-radius:12px;"></video>`
-              }
-              <div class="cs-video-play-badge"><i class="ri-play-fill"></i></div>
-              <span class="cs-media-badge"><i class="ri-film-line"></i> VIDEO</span>
-            </div>
-          `;
-        } else {
+        const totalCount = showcaseMedia.length;
+        
+        // Rotations and z-indexes array
+        const rotations = [-3.5, 2.5, -1.8, 3.8, -2.4, 4.2, -1.5, 3.0, -2.8, 2.0];
+        const zIndexes = [10, 8, 6, 7, 9, 5, 4, 3, 2, 1];
+        const spanClasses = ["is-hero", "is-tall", "is-square", "is-wide", "is-medium"];
+        
+        // Handwritten Annotations Inspired by Reference Image
+        const annotationsList = [
+          "From Concept to Cravings ↴",
+          "Designing Brands that tell Stories ↗",
+          "Sweet Moments, Stronger Brands ♡",
+          "More Than Dessert, A Story in Every Bite ♡",
+          "Layers of Happiness ↴",
+          "Crafting Iconic Visuals ↗"
+        ];
+        
+        const collageContainer = document.createElement("div");
+        collageContainer.className = "cs-editorial-collage";
+        collageContainer.setAttribute("data-count", totalCount);
+        
+        showcaseMedia.forEach((item, idx) => {
+          const rot = rotations[idx % rotations.length];
+          const z = zIndexes[idx % zIndexes.length];
+          const spanClass = totalCount > 3 ? spanClasses[idx % spanClasses.length] : "";
+          
+          const card = document.createElement("div");
+          card.className = `cs-collage-card cs-collage-item-${idx + 1} ${spanClass}`;
+          card.style.setProperty("--rot", `${rot}deg`);
+          card.style.setProperty("--z", `${z}`);
+          card.setAttribute("data-index", idx);
+          
+          // Optionally attach an artistic handwritten annotation on specific cards
+          let annotationHtml = "";
+          if (idx === 0 && annotationsList[0]) {
+            annotationHtml = `<span class="cs-collage-annotation top-left">${annotationsList[0]}</span>`;
+          } else if (idx === 1 && annotationsList[1]) {
+            annotationHtml = `<span class="cs-collage-annotation top-right">${annotationsList[1]}</span>`;
+          } else if (idx === 2 && annotationsList[2]) {
+            annotationHtml = `<span class="cs-collage-annotation bottom-left">${annotationsList[2]}</span>`;
+          } else if (idx === 3 && annotationsList[3]) {
+            annotationHtml = `<span class="cs-collage-annotation bottom-right">${annotationsList[3]}</span>`;
+          }
+          
           card.innerHTML = `
             ${annotationHtml}
             <div class="cs-collage-frame">
@@ -759,35 +791,88 @@
           `;
           const imgElem = card.querySelector("img");
           if (imgElem) attachImgErrorHandler(imgElem);
-        }
+          
+          collageContainer.appendChild(card);
+        });
         
-        collageContainer.appendChild(card);
-      });
-      
-      showcaseGrid.innerHTML = "";
-      showcaseGrid.appendChild(collageContainer);
+        showcaseGrid.innerHTML = "";
+        showcaseGrid.appendChild(collageContainer);
+      }
     }
 
     // --- 6. VIDEO SHOWCASE POPULATION ---
+    const videoSection = document.querySelector(".cs-video-grid")?.closest("section, .cs-section") || document.querySelector('[data-section="video_showcase"]');
     const videoGrid = document.querySelector(".cs-video-grid");
-    if (videoGrid && data.media && Array.isArray(data.media.videos) && data.media.videos.length > 0) {
-      const videoPlaceholders = videoGrid.querySelectorAll(".cs-video-placeholder");
-      data.media.videos.forEach((vidUrl, idx) => {
-        if (videoPlaceholders[idx]) {
-          if (vidUrl.includes("youtube.com") || vidUrl.includes("vimeo.com") || vidUrl.includes("embed")) {
-            videoPlaceholders[idx].innerHTML = `
-              <iframe src="${vidUrl}" style="width: 100%; height: 100%; border: none; border-radius: 18px;" allowfullscreen></iframe>
-            `;
-          } else {
-            const relativeVid = resolveAssetUrl(vidUrl);
-            videoPlaceholders[idx].innerHTML = `
-              <video src="${relativeVid}" controls style="width: 100%; height: 100%; object-fit: cover; border-radius: 18px;"></video>
-            `;
+    
+    // Strictly extract active video assets
+    const activeVideos = [];
+    if (data.media && Array.isArray(data.media.videos)) {
+      data.media.videos.forEach((item, idx) => {
+        if (!item) return;
+        if (typeof item === "object") {
+          if (item.status === "deleted") return;
+          if (item.url && item.url.trim()) {
+            activeVideos.push({
+              url: item.url.trim(),
+              title: item.name || `${data.companyName || 'Motion'} Video ${idx + 1}`,
+              display_order: typeof item.display_order === "number" ? item.display_order : idx
+            });
           }
-          videoPlaceholders[idx].style.padding = "0";
-          videoPlaceholders[idx].style.border = "1px solid rgba(255,255,255,0.1)";
+        } else if (typeof item === "string" && item.trim()) {
+          activeVideos.push({
+            url: item.trim(),
+            title: `${data.companyName || 'Motion'} Video ${idx + 1}`,
+            display_order: idx
+          });
         }
       });
+      activeVideos.sort((a, b) => a.display_order - b.display_order);
+    }
+
+    if (videoGrid) {
+      if (activeVideos.length === 0) {
+        // Zero videos in database: Empty grid and hide Section 6 completely
+        videoGrid.innerHTML = "";
+        if (videoSection) {
+          videoSection.style.display = "none";
+        }
+      } else {
+        // Videos exist: Ensure Section 6 is visible (unless explicitly hidden in config) and render all active videos
+        if (videoSection && (!data.sectionVisibility || data.sectionVisibility.video_showcase !== false)) {
+          videoSection.style.display = "";
+        }
+        videoGrid.innerHTML = "";
+        
+        const count = activeVideos.length;
+        activeVideos.forEach((vid) => {
+          const card = document.createElement("div");
+          let gridColStyle = "grid-column: span 6;";
+          if (count === 1) {
+            gridColStyle = "grid-column: span 12;";
+          } else if (count === 2) {
+            gridColStyle = "grid-column: span 6;";
+          } else if (count >= 3) {
+            gridColStyle = "grid-column: span 4;";
+          }
+
+          card.className = "cs-video-card-item";
+          card.style.cssText = `${gridColStyle} border-radius: 20px; overflow: hidden; background: rgba(12, 15, 23, 0.8); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 16px 36px rgba(0,0,0,0.5); aspect-ratio: 16/9; position: relative;`;
+          
+          const isEmbed = vid.url.includes("youtube.com") || vid.url.includes("vimeo.com") || vid.url.includes("embed");
+          const finalUrl = resolveAssetUrl(vid.url);
+          
+          if (isEmbed) {
+            card.innerHTML = `
+              <iframe src="${finalUrl}" title="${vid.title}" style="width: 100%; height: 100%; border: none; border-radius: 20px; display: block;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            `;
+          } else {
+            card.innerHTML = `
+              <video src="${finalUrl}" controls preload="metadata" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px; display: block;"></video>
+            `;
+          }
+          videoGrid.appendChild(card);
+        });
+      }
     }
 
     // --- 7. WEBSITE SHOWCASE POPULATION ---
@@ -984,38 +1069,24 @@
     const prevBtn = document.getElementById("cs-lightbox-prev-btn");
     const nextBtn = document.getElementById("cs-lightbox-next-btn");
 
-    const collageCards = Array.from(document.querySelectorAll(".cs-collage-card, .cs-showcase-masonry-item, .cs-showcase-placeholder, .cs-video-placeholder, .cs-mockup-screen"));
+    const collageCards = Array.from(document.querySelectorAll(".cs-collage-card, .cs-showcase-masonry-item"));
     let currentGalleryIndex = 0;
 
     const openLightbox = (index) => {
+      if (index < 0 || index >= showcaseMedia.length) return;
       currentGalleryIndex = index;
       const targetMedia = showcaseMedia[index];
 
       lightboxContainer.innerHTML = "";
 
       if (targetMedia) {
-        if (targetMedia.type === "video") {
-          const isEmbed = targetMedia.url.includes("youtube.com") || targetMedia.url.includes("vimeo.com") || targetMedia.url.includes("embed");
-          if (isEmbed) {
-            lightboxContainer.innerHTML = `<iframe src="${targetMedia.url}?autoplay=1" class="cs-lightbox-video" style="border:none;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-          } else {
-            lightboxContainer.innerHTML = `<video src="${targetMedia.url}" controls autoplay class="cs-lightbox-video"></video>`;
-          }
-        } else {
-          lightboxContainer.innerHTML = `<img id="cs-lightbox-img" class="cs-lightbox-img" src="${targetMedia.url}" alt="${targetMedia.title || 'Showcase Image'}">`;
-          const imgElem = lightboxContainer.querySelector("img");
-          if (imgElem) attachImgErrorHandler(imgElem);
-        }
+        lightboxContainer.innerHTML = `<img id="cs-lightbox-img" class="cs-lightbox-img" src="${targetMedia.url}" alt="${targetMedia.title || 'Showcase Image'}">`;
+        const imgElem = lightboxContainer.querySelector("img");
+        if (imgElem) attachImgErrorHandler(imgElem);
 
         if (lightboxCaption) {
           lightboxCaption.textContent = `${data.companyName || 'Case Study'} Showcase — ${targetMedia.title || 'Visual Asset'} (${index + 1} of ${showcaseMedia.length})`;
         }
-      } else {
-        const item = collageCards[index];
-        const title = item?.querySelector(".cs-placeholder-title")?.textContent || "Creative Showcase Item";
-        const img = item?.querySelector("img")?.src || data.heroImage || "../images/p1.jpg";
-        lightboxContainer.innerHTML = `<img id="cs-lightbox-img" class="cs-lightbox-img" src="${resolveAssetUrl(img)}" alt="Preview">`;
-        if (lightboxCaption) lightboxCaption.textContent = title;
       }
 
       lightboxOverlay.classList.add("active");
@@ -1030,15 +1101,17 @@
       if (lightboxContainer) lightboxContainer.innerHTML = "";
     };
 
-    collageCards.forEach((item, index) => {
+    collageCards.forEach((item) => {
       item.style.cursor = "pointer";
       item.setAttribute("role", "button");
       item.setAttribute("tabindex", "0");
-      item.addEventListener("click", () => openLightbox(index));
+      const idx = parseInt(item.getAttribute("data-index"), 10);
+      const targetIdx = isNaN(idx) ? 0 : idx;
+      item.addEventListener("click", () => openLightbox(targetIdx));
       item.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          openLightbox(index);
+          openLightbox(targetIdx);
         }
       });
     });
@@ -1290,16 +1363,47 @@
     }
   };
 
-  const refreshAndRender = async () => {
-    const csList = await BetroStorage.getCaseStudies();
-    if (csList && Array.isArray(csList)) BetroStorage.cache = csList;
-    renderCaseStudyPage();
+  const refreshAndRender = async (force = false) => {
+    if (force) {
+      BetroStorage.invalidateCache();
+    }
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentSlug = urlParams.get("id") || urlParams.get("project");
+    if (!currentSlug) {
+      const pathParts = window.location.pathname.split("/");
+      const lastPart = pathParts[pathParts.length - 1];
+      if (lastPart && lastPart.endsWith(".html")) {
+        currentSlug = lastPart.replace(".html", "");
+      } else if (lastPart && !lastPart.includes(".")) {
+        currentSlug = lastPart;
+      }
+    }
+    if (!currentSlug || currentSlug === "case-study") currentSlug = "mylaban";
+
+    let singleCS = null;
+    let allCS = null;
+
+    if (window.BetroDB) {
+      try {
+        singleCS = await BetroDB.getCaseStudyBySlug(currentSlug);
+        allCS = await BetroDB.getCaseStudies({ forceRefresh: force, includeDrafts: false });
+      } catch (e) {
+        console.warn("[CaseStudy] Cloud load failed, using local:", e);
+      }
+    }
+
+    if (!allCS || allCS.length === 0) {
+      allCS = await BetroStorage.getCaseStudies(force);
+    }
+    if (allCS && Array.isArray(allCS)) BetroStorage.cache = allCS;
+
+    await renderCaseStudyPage(singleCS, allCS);
   };
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", refreshAndRender);
+    document.addEventListener("DOMContentLoaded", () => refreshAndRender(false));
   } else {
-    refreshAndRender();
+    refreshAndRender(false);
   }
 
   // Real-time synchronization listeners across windows/tabs
@@ -1307,19 +1411,22 @@
     try {
       const channel = new BroadcastChannel("betro_portfolio_sync");
       channel.onmessage = (e) => {
-        if (e.data && e.data.type === "CASE_STUDY_UPDATED") {
-          refreshAndRender();
+        if (e.data && (e.data.type === "CASE_STUDY_UPDATED" || e.data.type === "MEDIA_SYNC" || e.data.type === "CASE_STUDY_DELETED")) {
+          refreshAndRender(true);
         }
       };
     } catch (e) {}
   }
   window.addEventListener("storage", (e) => {
-    if (e.key === "betro_casestudies") {
-      refreshAndRender();
+    if (e.key === "betro_casestudies" || e.key === "betro_casestudies_cache") {
+      refreshAndRender(true);
     }
   });
   window.addEventListener("betro_storage_updated", () => {
-    refreshAndRender();
+    refreshAndRender(true);
+  });
+  window.addEventListener("betro_db_updated", () => {
+    refreshAndRender(true);
   });
 })();
 
