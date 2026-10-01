@@ -4,10 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Betroverse | Admin Dashboard</title>
+  <title>Betroverse | Agency CMS Admin</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="css/style.css" type="text/css">
-  <link rel="stylesheet" href="css/admin.css" type="text/css">
+  <link rel="stylesheet" href="css/admin.css?v=8" type="text/css">
   <!-- Fonts and Icons -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
@@ -37,8 +40,8 @@
       <div class="glass-card auth-card">
         <div class="auth-header">
           <img src="images/logo.png" alt="Betroverse Logo" class="auth-logo">
-          <h2>Admin Portal</h2>
-          <p>Login to manage leads, view metrics, and customize campaigns.</p>
+          <h2>Admin CMS Portal</h2>
+          <p>Sign in to manage agency case studies, client media assets, and live website branding.</p>
         </div>
 
         <div id="login-error-alert" class="alert-box error hidden">
@@ -51,67 +54,105 @@
             <label for="login-email">Email Address</label>
             <div class="input-wrapper">
               <i class="ri-mail-line input-icon"></i>
-              <input type="email" id="login-email" placeholder="Enter your email" required autocomplete="username">
+              <input type="email" id="login-email" placeholder="admin@betroverse.in" required autocomplete="username">
             </div>
           </div>
           <div class="form-group">
             <label for="login-password">Password</label>
             <div class="input-wrapper">
               <i class="ri-lock-line input-icon"></i>
-              <input type="password" id="login-password" placeholder="••••••••" required
-                autocomplete="current-password">
+              <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
             </div>
           </div>
-          <button type="submit" class="admin-btn primary-btn">Sign In</button>
+          <button type="submit" class="admin-btn primary-btn" style="width: 100%; margin-top: 0.5rem;">
+            <span>Sign In to Dashboard</span>
+            <i class="ri-arrow-right-line"></i>
+          </button>
         </form>
       </div>
     </div>
 
     <!-- ==========================================
-         3. DASHBOARD LAYOUT (Main Panel)
+         3. DASHBOARD LAYOUT (Main Panel Shell)
          ========================================== -->
     <div id="dashboard-view" class="dashboard-layout hidden">
 
+      <!-- Mobile Backdrop Overlay -->
+      <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
       <!-- Side Navigation Panel -->
-      <aside class="sidebar">
+      <aside class="sidebar" id="admin-sidebar">
         <div class="sidebar-header">
-          <img src="images/logo.png" alt="Betroverse Logo" class="sidebar-logo">
-          <span class="sidebar-title">Betroverse</span>
-          <span class="badge admin-badge">Admin</span>
+          <a href="#" class="sidebar-brand-wrap">
+            <img src="images/logo.png" alt="Betroverse Logo" class="sidebar-logo">
+            <span class="sidebar-title">Betroverse</span>
+          </a>
+          <span class="badge admin-badge">CMS ADMIN</span>
         </div>
 
-        <nav class="sidebar-nav">
-          <a href="#" class="sidebar-link active" data-tab="casestudies">
-            <i class="ri-folder-shield-2-line"></i>
-            <span>Case Studies CMS</span>
-          </a>
-          <a href="#" class="sidebar-link" data-tab="medialibrary">
-            <i class="ri-folder-image-line"></i>
-            <span>Media Library</span>
-          </a>
-          <a href="#" class="sidebar-link" data-tab="content">
-            <i class="ri-image-edit-line"></i>
-            <span>Gallery & Brands</span>
-          </a>
-          <a href="#" class="sidebar-link" data-tab="settings">
-            <i class="ri-settings-4-line"></i>
-            <span>Settings</span>
-          </a>
-        </nav>
+        <div class="sidebar-nav-container">
+          <div class="sidebar-group-title">OVERVIEW</div>
+          <nav class="sidebar-nav">
+            <a href="#" class="sidebar-link active" data-tab="dashboard">
+              <i class="ri-dashboard-3-line"></i>
+              <span>Dashboard</span>
+            </a>
+          </nav>
+
+          <div class="sidebar-group-title">PORTFOLIO & CMS</div>
+          <nav class="sidebar-nav">
+            <a href="#" class="sidebar-link" data-tab="casestudies">
+              <i class="ri-folder-shield-2-line"></i>
+              <span>Case Studies CMS</span>
+              <span class="nav-counter" id="nav-cs-counter">16</span>
+            </a>
+            <button type="button" class="sidebar-action-btn" id="sidebar-quick-add-btn">
+              <i class="ri-add-line"></i>
+              <span>+ New Case Study</span>
+            </button>
+          </nav>
+
+          <div class="sidebar-group-title">CONTENT & ASSETS</div>
+          <nav class="sidebar-nav">
+            <a href="#" class="sidebar-link" data-tab="medialibrary">
+              <i class="ri-folder-image-line"></i>
+              <span>Media Library</span>
+            </a>
+            <a href="#" class="sidebar-link" data-tab="content">
+              <i class="ri-gallery-line"></i>
+              <span>Gallery & Brands</span>
+            </a>
+          </nav>
+
+          <div class="sidebar-group-title">SYSTEM</div>
+          <nav class="sidebar-nav">
+            <a href="#" class="sidebar-link" data-tab="settings">
+              <i class="ri-settings-4-line"></i>
+              <span>Settings & Cloud DB</span>
+              <span class="status-dot online" title="Supabase Active"></span>
+            </a>
+          </nav>
+        </div>
 
         <div class="sidebar-footer">
           <!-- Theme Toggle -->
           <button class="theme-toggle-btn sidebar-theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode">
-            <i class="ri-sun-line light-icon"></i>
-            <i class="ri-moon-line dark-icon"></i>
+            <span>Interface Mode</span>
+            <div class="theme-icons-wrap">
+              <i class="ri-sun-line light-icon" title="Light Mode"></i>
+              <i class="ri-moon-line dark-icon" title="Dark Mode"></i>
+            </div>
           </button>
 
           <div class="profile-card">
-            <div class="profile-avatar">
-              <i class="ri-user-settings-line"></i>
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar">
+                <i class="ri-user-settings-line"></i>
+              </div>
+              <span class="profile-online-badge"></span>
             </div>
             <div class="profile-info">
-              <span id="user-display-email" class="profile-email">admin@betroverse</span>
+              <span id="user-display-email" class="profile-email">admin@betroverse.in</span>
               <button id="logout-btn" class="logout-link"><i class="ri-logout-box-r-line"></i> Sign Out</button>
             </div>
           </div>
@@ -121,13 +162,22 @@
       <!-- Main Contents -->
       <main class="main-content">
 
-        <!-- Header bar -->
+        <!-- Top Header Bar -->
         <header class="dashboard-header">
-          <div>
-            <h1 id="page-title">Case Studies CMS</h1>
-            <p id="page-subtitle">Create, edit, publish/unpublish, and manage dynamic agency case studies.</p>
+          <div class="header-left">
+            <button id="mobile-sidebar-toggle" class="mobile-toggle-btn" aria-label="Toggle Navigation">
+              <i class="ri-menu-line"></i>
+            </button>
+            <div class="header-title-box">
+              <h1 id="page-title">Dashboard Overview</h1>
+              <p id="page-subtitle">Live portfolio metrics, cloud storage status, and recent project activity.</p>
+            </div>
           </div>
           <div class="header-widgets">
+            <a href="portfolio.html" target="_blank" class="header-action-btn view-site-btn" title="View live portfolio">
+              <i class="ri-external-link-line"></i>
+              <span>View Public Site</span>
+            </a>
             <span id="cs-autosave-global-badge" class="autosave-badge saved hidden">
               <i class="ri-checkbox-circle-line"></i> Saved
             </span>
@@ -140,37 +190,194 @@
         <!-- Dynamic Tabs -->
         <div class="tab-container">
 
-          <!-- TAB A: CASE STUDIES CMS -->
-          <div id="tab-casestudies" class="tab-panel active">
-            <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <!-- TAB 1: DASHBOARD OVERVIEW -->
+          <div id="tab-dashboard" class="tab-panel active">
+            
+            <!-- Welcome Hero Banner -->
+            <div class="dashboard-welcome-card">
+              <div class="welcome-top">
+                <div class="welcome-left">
+                  <h2>Betroverse Agency Command Center</h2>
+                  <p>Production creative management hub for high-impact case studies, client branding, media assets, and Supabase cloud synchronization.</p>
+                </div>
+                <div class="welcome-right">
+                  <div id="dashboard-db-badge" class="sync-indicator" style="background: rgba(0, 229, 117, 0.15); border-color: rgba(0, 229, 117, 0.35);">
+                    <i class="ri-pulse-line ri-spin" style="color: #00e575;"></i>
+                    <span>Supabase Cloud Ready</span>
+                  </div>
+                </div>
+              </div>
+              <div class="welcome-actions-row">
+                <button type="button" class="admin-btn primary-btn" id="dash-quick-create-btn">
+                  <i class="ri-add-line"></i> Create New Case Study
+                </button>
+                <button type="button" class="admin-btn secondary-btn" id="dash-nav-media-btn">
+                  <i class="ri-folder-image-line"></i> Open Media Library
+                </button>
+                <button type="button" class="admin-btn secondary-btn" id="dash-nav-brands-btn">
+                  <i class="ri-gallery-line"></i> Homepage Brands
+                </button>
+                <button type="button" class="admin-btn secondary-btn" id="dash-nav-settings-btn">
+                  <i class="ri-cloud-line"></i> Cloud Database Sync
+                </button>
+              </div>
+            </div>
+
+            <!-- 6 High-Performance Metric Cards -->
+            <div class="metrics-summary-grid">
+              <div class="summary-stat-card">
+                <div class="stat-icon-wrap green">
+                  <i class="ri-folder-shield-2-line"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-number" id="stat-total-projects">16</span>
+                  <span class="stat-label">Total Case Studies</span>
+                  <span class="stat-subtitle">Agency Portfolio Records</span>
+                </div>
+              </div>
+              <div class="summary-stat-card">
+                <div class="stat-icon-wrap green">
+                  <i class="ri-checkbox-circle-line"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-number" id="stat-published-projects">16</span>
+                  <span class="stat-label">Published Live</span>
+                  <span class="stat-subtitle" style="color: var(--accent-color);">● Visible on Website</span>
+                </div>
+              </div>
+              <div class="summary-stat-card">
+                <div class="stat-icon-wrap amber">
+                  <i class="ri-draft-line"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-number" id="stat-draft-projects">0</span>
+                  <span class="stat-label">Draft Projects</span>
+                  <span class="stat-subtitle">Pending Review / Hidden</span>
+                </div>
+              </div>
+              <div class="summary-stat-card">
+                <div class="stat-icon-wrap blue">
+                  <i class="ri-image-2-line"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-number" id="stat-gallery-images">0</span>
+                  <span class="stat-label">Gallery Assets</span>
+                  <span class="stat-subtitle">Showcase & Brand Media</span>
+                </div>
+              </div>
+              <div class="summary-stat-card">
+                <div class="stat-icon-wrap purple">
+                  <i class="ri-video-line"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-number" id="stat-video-count">0</span>
+                  <span class="stat-label">Video Showcases</span>
+                  <span class="stat-subtitle">MP4, YouTube & Vimeo</span>
+                </div>
+              </div>
+              <div class="summary-stat-card">
+                <div class="stat-icon-wrap cyan">
+                  <i class="ri-cloud-line"></i>
+                </div>
+                <div class="stat-content">
+                  <span class="stat-number" id="stat-db-status" style="font-size: 1.25rem;">Live</span>
+                  <span class="stat-label">Cloud Database</span>
+                  <span class="stat-subtitle" id="stat-bucket-info">Bucket: betodata</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Management Split Row -->
+            <div class="dashboard-twocol">
+              <div class="glass-card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+                  <div>
+                    <h3>Recent Case Studies Activity</h3>
+                    <p class="subtitle" style="color: var(--text-secondary); font-size: 0.825rem; margin-top: 2px;">Direct access to top agency projects, live statuses, and editor controls.</p>
+                  </div>
+                  <button type="button" class="admin-btn secondary-btn" id="dash-view-all-cs-btn" style="padding: 6px 14px; font-size: 0.8rem;">
+                    <span>View All Projects</span> <i class="ri-arrow-right-line"></i>
+                  </button>
+                </div>
+                <div id="dash-recent-projects-list">
+                  <!-- JS populated recent projects -->
+                </div>
+              </div>
+
+              <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div class="card-header" style="border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+                    <h3>System & Cloud Engine</h3>
+                    <p class="subtitle" style="color: var(--text-secondary); font-size: 0.825rem; margin-top: 2px;">Real-time status of backend storage & local caching engines.</p>
+                  </div>
+                  <div style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="padding: 12px 14px; border-radius: var(--radius-md); background: rgba(0, 229, 117, 0.06); border: 1px solid rgba(0, 229, 117, 0.2); display: flex; align-items: center; gap: 12px;">
+                      <i class="ri-shield-check-line" style="font-size: 1.5rem; color: var(--accent-color);"></i>
+                      <div>
+                        <strong style="display: block; font-size: 0.85rem; color: #ffffff;">Authoritative Cloud Source</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">Supabase PostgreSQL & Storage API connected</span>
+                      </div>
+                    </div>
+
+                    <div style="padding: 12px 14px; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--panel-border); display: flex; align-items: center; gap: 12px;">
+                      <i class="ri-database-2-line" style="font-size: 1.5rem; color: #60a5fa;"></i>
+                      <div>
+                        <strong style="display: block; font-size: 0.85rem; color: #ffffff;">Local IndexedDB Engine</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">High-capacity fallback storage active</span>
+                      </div>
+                    </div>
+
+                    <div style="padding: 12px 14px; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--panel-border); display: flex; align-items: center; gap: 12px;">
+                      <i class="ri-broadcast-line" style="font-size: 1.5rem; color: #c084fc;"></i>
+                      <div>
+                        <strong style="display: block; font-size: 0.85rem; color: #ffffff;">Multi-Tab Broadcast Sync</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">Real-time BroadcastChannel active</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; border-top: 1px solid var(--panel-border); padding-top: 1rem;">
+                  <button type="button" class="admin-btn secondary-btn" id="dash-quick-sync-btn" style="width: 100%; border-color: rgba(0, 229, 117, 0.3); color: var(--accent-color);">
+                    <i class="ri-refresh-line"></i> Verify Cloud Connection
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TAB 2: CASE STUDIES CMS -->
+          <div id="tab-casestudies" class="tab-panel">
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
               <div class="glass-card content-card">
                 <div class="card-header"
-                  style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
+                  style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1.25rem;">
                   <div>
-                    <h3>Case Studies CMS Management</h3>
-                    <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem;">Create, edit,
-                      publish/unpublish, and manage dynamic agency case studies.</p>
+                    <h3 style="font-size: 1.3rem; font-weight: 800;">Case Studies CMS Management</h3>
+                    <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">Create, edit, publish/unpublish, and manage dynamic agency case studies.</p>
                   </div>
                   <button type="button" class="admin-btn primary-btn" id="add-casestudy-btn"><i class="ri-add-line"></i>
                     Create New Case Study</button>
                 </div>
 
-                <!-- Filters -->
-                <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
-                  <input type="text" id="cs-search-input" placeholder="Search by company or category..."
-                    class="form-input"
-                    style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary);">
-                  <select id="cs-status-filter" class="form-input"
-                    style="width: 180px; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary);">
-                    <option value="all">All Statuses</option>
-                    <option value="published">Published</option>
-                    <option value="draft">Draft</option>
-                  </select>
+                <!-- Filters & Search Toolbar -->
+                <div class="cs-header-toolbar" style="margin-top: 1.5rem;">
+                  <div class="cs-search-row">
+                    <div class="cs-search-wrapper">
+                      <i class="ri-search-line"></i>
+                      <input type="text" id="cs-search-input" placeholder="Search by company, slug, or category..." class="form-input">
+                    </div>
+                    <select id="cs-status-filter" class="form-input" style="width: 180px;">
+                      <option value="all">All Statuses</option>
+                      <option value="published">Published Only</option>
+                      <option value="draft">Drafts Only</option>
+                    </select>
+                  </div>
                 </div>
 
-                <!-- Case Study List -->
-                <div id="admin-casestudies-list"
-                  style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                <!-- Case Study List Grid -->
+                <div id="admin-casestudies-list" class="casestudies-grid">
                   <!-- JS Inject -->
                 </div>
               </div>
@@ -286,7 +493,8 @@
             </div>
           </div>
 
-          <!-- TAB           <div id="tab-settings" class="tab-panel">
+          <!-- TAB SETTINGS & CLOUD DB -->
+          <div id="tab-settings" class="tab-panel">
             <div class="settings-grid" style="grid-template-columns: 1fr; gap: 2rem; max-width: 760px; margin: 0 auto; width: 100%;">
               
               <!-- Cloud Database Connection Status Card -->
@@ -382,7 +590,7 @@
               </div>
 
             </div>
-          </div>          </div>
+          </div>
 
         </div>
       </main>
@@ -1151,7 +1359,7 @@
   <!-- Cloud Backend & JS Logic Modules -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=8"></script>
 </body>
 
 </html>

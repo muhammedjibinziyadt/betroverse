@@ -75,6 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const displayElem = document.getElementById("user-display-email");
       if (displayElem) displayElem.textContent = email;
       showView("dashboard-view");
+      if (typeof renderDashboardOverview === "function") {
+        renderDashboardOverview();
+      }
       if (typeof renderCaseStudiesTab === "function") {
         renderCaseStudiesTab();
       } else {
@@ -104,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("betro_admin_email", email);
         document.getElementById("user-display-email").textContent = email;
         showView("dashboard-view");
+        renderDashboardOverview();
         renderCaseStudiesTab();
       } else {
         errorAlert.classList.remove("hidden");
@@ -1355,7 +1359,72 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeSectionVisibility = {};
   let activeSectionOrder = [];
   let isEditorDirty = false;
+  let isEditorSaving = false;
+  let pendingSaveQueued = false;
+  let autoSaveDebounceTimer = null;
+  let autoSaveIntervalTimer = null;
   let autoSaveTimer = null;
+
+  // Auto-Save Status Badge & Indicator Handlers
+  const markEditorDirty = () => {
+    isEditorDirty = true;
+    const badge = document.getElementById("cs-autosave-indicator");
+    const globalBadge = document.getElementById("cs-autosave-global-badge");
+
+    if (badge) {
+      badge.className = "cs-autosave-pill status-unsaved";
+      const lbl = badge.querySelector(".autosave-label");
+      if (lbl) lbl.textContent = "Unsaved Changes";
+      badge.title = "Unsaved changes. Auto-saving shortly or click to save now.";
+    }
+    if (globalBadge) {
+      globalBadge.className = "autosave-badge unsaved";
+      globalBadge.classList.remove("hidden");
+    }
+  };
+
+  const setEditorSaving = () => {
+    const badge = document.getElementById("cs-autosave-indicator");
+    const globalBadge = document.getElementById("cs-autosave-global-badge");
+
+    if (badge) {
+      badge.className = "cs-autosave-pill status-saving";
+      const lbl = badge.querySelector(".autosave-label");
+      if (lbl) lbl.textContent = "Saving to Cloud...";
+      badge.title = "Saving changes to database...";
+    }
+    if (globalBadge) {
+      globalBadge.className = "autosave-badge unsaved";
+      globalBadge.classList.remove("hidden");
+    }
+  };
+
+  const setEditorSaved = () => {
+    isEditorDirty = false;
+    const badge = document.getElementById("cs-autosave-indicator");
+    const globalBadge = document.getElementById("cs-autosave-global-badge");
+
+    if (badge) {
+      badge.className = "cs-autosave-pill status-saved";
+      const lbl = badge.querySelector(".autosave-label");
+      if (lbl) lbl.textContent = "Saved";
+      badge.title = "All changes saved to cloud database & live on site.";
+    }
+    if (globalBadge) {
+      globalBadge.className = "autosave-badge saved";
+      globalBadge.classList.remove("hidden");
+    }
+  };
+
+  const setEditorError = (errMessage) => {
+    const badge = document.getElementById("cs-autosave-indicator");
+    if (badge) {
+      badge.className = "cs-autosave-pill status-error";
+      const lbl = badge.querySelector(".autosave-label");
+      if (lbl) lbl.textContent = "Save Failed (Click to Retry)";
+      badge.title = errMessage || "Error saving state. Click to retry.";
+    }
+  };
 
   // Dedicated Upload Status Indicator
   const updateUploadStatus = (type, state, message) => {
@@ -1386,44 +1455,390 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Immediate Persistent Case Study Media Sync
-  const persistCurrentCaseStudyMedia = async () => {
+  // Authoritative Case Study State Saver
+  async function saveActiveEditorState() {
     const editId = document.getElementById("cs-edit-id")?.value;
-    if (!editId) return;
+    const companyName = document.getElementById("cs-company-name")?.value?.trim() || "New Case Study";
+    const rawSlug = document.getElementById("cs-slug")?.value?.trim() || companyName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+    const slug = (rawSlug || "project").toLowerCase().replace(/[^a-z0-9-]/g, "-");
 
-    let list = await getFreshBetroCaseStudies();
-    const targetIdx = list.findIndex(item => item.id === editId);
-    if (targetIdx === -1) return;
+    const category = document.getElementById("cs-category")?.value?.trim() || "Creative Campaign";
+    const industry = document.getElementById("cs-industry")?.value?.trim() || "General Business";
+    const clientName = document.getElementById("cs-client-name")?.value?.trim() || companyName;
+    const status = document.getElementById("cs-status")?.value || "published";
 
-    // Ensure strictly indexed display_order
-    activeGallery.forEach((item, idx) => {
-      if (typeof item === "object" && item) item.display_order = idx;
-    });
-    activeVideos.forEach((item, idx) => {
-      if (typeof item === "object" && item) item.display_order = idx;
-    });
+    const logoUrl = document.getElementById("cs-logo-url")?.value?.trim() || "images/logo.png";
+    const cardImageUrl = document.getElementById("cs-cardimg-url")?.value?.trim() || "";
+    const heroUrl = document.getElementById("cs-hero-url")?.value?.trim() || "images/p1.jpg";
 
-    const slug = list[targetIdx].slug || editId.replace("cs-", "");
-    const structuredAssets = [
-      ...activeGallery.map((item, idx) => normalizeMediaAsset(item, editId, slug, "image", "creative_showcase", idx)),
-      ...activeVideos.map((item, idx) => normalizeMediaAsset(item, editId, slug, "video", "video_showcase", idx))
-    ];
+    const shortIntro = document.getElementById("cs-short-intro")?.value?.trim() || "";
+    const brandStory = document.getElementById("cs-brand-story")?.value?.trim() || "";
+    const brandGoals = document.getElementById("cs-brand-goals")?.value?.trim() || "";
 
-    list[targetIdx].media = {
-      ...(list[targetIdx].media || {}),
-      gallery: activeGallery.map(g => typeof g === "string" ? g : (g ? g.url : "")),
-      videos: activeVideos.map(v => typeof v === "string" ? v : (v ? v.url : "")),
-      assets: structuredAssets
+    const overview = {
+      challenge: document.getElementById("cs-overview-challenge")?.value?.trim() || "",
+      strategy: document.getElementById("cs-overview-strategy")?.value?.trim() || "",
+      solution: document.getElementById("cs-overview-solution")?.value?.trim() || "",
+      execution: document.getElementById("cs-overview-execution")?.value?.trim() || "",
+      results: document.getElementById("cs-overview-results")?.value?.trim() || ""
     };
 
-    activeGallery = structuredAssets.filter(a => a.type === "image" || a.target_section === "creative_showcase");
-    activeVideos = structuredAssets.filter(a => a.type === "video" || a.target_section === "video_showcase");
+    const results = {
+      stat1Num: document.getElementById("cs-stat1-num")?.value?.trim() || "+500K",
+      stat1Label: document.getElementById("cs-stat1-label")?.value?.trim() || "Social Views",
+      stat2Num: document.getElementById("cs-stat2-num")?.value?.trim() || "+60%",
+      stat2Label: document.getElementById("cs-stat2-label")?.value?.trim() || "Growth",
+      stat3Num: document.getElementById("cs-stat3-num")?.value?.trim() || "4.2x",
+      stat3Label: document.getElementById("cs-stat3-label")?.value?.trim() || "ROI",
+      stat4Num: document.getElementById("cs-stat4-num")?.value?.trim() || "100%",
+      stat4Label: document.getElementById("cs-stat4-label")?.value?.trim() || "Satisfaction",
+
+      feedbackQuote: document.getElementById("cs-feedback-quote")?.value?.trim() || "",
+      feedbackAuthor: document.getElementById("cs-feedback-author")?.value?.trim() || "",
+      feedbackRole: document.getElementById("cs-feedback-role")?.value?.trim() || ""
+    };
+
+    // Re-index display_order before saving
+    activeGallery.forEach((item, idx) => { if (typeof item === 'object' && item) item.display_order = idx; });
+    activeVideos.forEach((item, idx) => { if (typeof item === 'object' && item) item.display_order = idx; });
+
+    const firstGalUrl = activeGallery[0] ? (typeof activeGallery[0] === 'string' ? activeGallery[0] : activeGallery[0].url) : "";
+    const secondGalUrl = activeGallery[1] ? (typeof activeGallery[1] === 'string' ? activeGallery[1] : activeGallery[1].url) : "";
+
+    const deskMockUrl = document.getElementById("cs-desktop-mockup-url")?.value?.trim() || firstGalUrl || heroUrl;
+    const mobMockUrl = document.getElementById("cs-mobile-mockup-url")?.value?.trim() || secondGalUrl || logoUrl;
+
+    const allStructuredAssets = [
+      ...activeGallery.map((g, idx) => normalizeMediaAsset(g, editId || "cs-" + Date.now(), slug, "image", "creative_showcase", idx)),
+      ...activeVideos.map((v, idx) => normalizeMediaAsset(v, editId || "cs-" + Date.now(), slug, "video", "video_showcase", idx))
+    ];
+
+    const media = {
+      gallery: activeGallery.map(g => typeof g === "string" ? g : (g ? g.url : "")),
+      videos: activeVideos.map(v => typeof v === "string" ? v : (v ? v.url : "")),
+      assets: allStructuredAssets,
+      mockups: {
+        desktop: deskMockUrl,
+        mobile: mobMockUrl
+      }
+    };
+
+    const seo = {
+      title: document.getElementById("cs-seo-title")?.value?.trim() || `${companyName} Case Study | Betroverse`,
+      description: document.getElementById("cs-seo-desc")?.value?.trim() || shortIntro,
+      keywords: document.getElementById("cs-seo-keywords")?.value?.trim() || "",
+      ogImage: document.getElementById("cs-seo-ogimage")?.value?.trim() || heroUrl,
+      canonicalUrl: document.getElementById("cs-seo-canonical")?.value?.trim() || `https://betroverse.in/portfolio/${slug}`
+    };
+
+    let list = await getFreshBetroCaseStudies();
+    let targetItem = null;
+
+    if (editId) {
+      list = list.map(cs => {
+        if (cs.id === editId) {
+          targetItem = {
+            ...cs,
+            companyName,
+            slug,
+            category,
+            industry,
+            clientName,
+            status,
+            companyLogo: logoUrl,
+            cardImage: cardImageUrl || cs.cardImage || heroUrl,
+            heroImage: heroUrl,
+            shortIntro,
+            brandStory,
+            brandGoals,
+            services: [...activeTags],
+            overview,
+            results,
+            media,
+            gallerySections: [...activeGallerySections],
+            blocks: [...activeBlocks],
+            sectionVisibility: { ...activeSectionVisibility },
+            sectionOrder: [...activeSectionOrder],
+            seo
+          };
+          return targetItem;
+        }
+        return cs;
+      });
+
+      if (!targetItem) {
+        targetItem = {
+          id: editId,
+          companyName,
+          slug,
+          category,
+          industry,
+          clientName,
+          status,
+          year: "2024 - 2025",
+          companyLogo: logoUrl,
+          cardImage: cardImageUrl || heroUrl,
+          heroImage: heroUrl,
+          shortIntro,
+          brandStory,
+          brandGoals,
+          services: [...activeTags],
+          overview,
+          results,
+          media,
+          gallerySections: [...activeGallerySections],
+          blocks: [...activeBlocks],
+          sectionVisibility: { ...activeSectionVisibility },
+          sectionOrder: [...activeSectionOrder],
+          seo
+        };
+        list.push(targetItem);
+      }
+    } else {
+      const generatedId = "cs-" + Date.now();
+      targetItem = {
+        id: generatedId,
+        companyName,
+        slug,
+        category,
+        industry,
+        clientName,
+        status,
+        year: "2024 - 2025",
+        companyLogo: logoUrl,
+        cardImage: cardImageUrl || heroUrl,
+        heroImage: heroUrl,
+        shortIntro,
+        brandStory,
+        brandGoals,
+        services: [...activeTags],
+        overview,
+        results,
+        media,
+        gallerySections: [...activeGallerySections],
+        blocks: [...activeBlocks],
+        sectionVisibility: { ...activeSectionVisibility },
+        sectionOrder: [...activeSectionOrder],
+        seo
+      };
+      const idInput = document.getElementById("cs-edit-id");
+      if (idInput) idInput.value = generatedId;
+      list.push(targetItem);
+    }
+
+    // Authoritative Cloud Database Save
+    if (window.BetroDB && targetItem) {
+      try {
+        const cloudResult = await BetroDB.saveCaseStudy(targetItem);
+        if (cloudResult && cloudResult.warning) {
+          console.warn("[Admin]", cloudResult.warning);
+        }
+      } catch (cloudErr) {
+        console.error("Cloud database save failed:", cloudErr);
+        throw new Error("Case study could not be saved to cloud database: " + (cloudErr.message || cloudErr));
+      }
+    }
 
     await saveBetroCaseStudies(list);
+
+    // Sync to legacy betro_projects for full backward compatibility
+    const legacyProjects = list.map(cs => ({
+      id: cs.id,
+      src: cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || "images/p1.jpg",
+      companyName: cs.companyName,
+      category: cs.category,
+      shortDesc: cs.shortIntro,
+      companyDesc: cs.brandStory || cs.fullDescription,
+      services: cs.services,
+      companyId: cs.slug,
+      logo: cs.companyLogo
+    }));
+    try {
+      localStorage.setItem("betro_projects", JSON.stringify(legacyProjects));
+    } catch (e) { }
+
+    renderCaseStudiesTab();
+    return targetItem;
+  }
+
+  // Core Auto-Save Execution Engine (Protected against concurrency)
+  async function executeAutoSave() {
+    if (isEditorSaving) {
+      pendingSaveQueued = true;
+      return;
+    }
+    if (!isEditorDirty) return;
+
+    isEditorSaving = true;
+    setEditorSaving();
+
+    try {
+      await saveActiveEditorState();
+      setEditorSaved();
+    } catch (err) {
+      console.error("[AutoSave] Save error:", err);
+      setEditorError(err.message || "Cloud save error");
+    } finally {
+      isEditorSaving = false;
+      if (pendingSaveQueued) {
+        pendingSaveQueued = false;
+        setTimeout(executeAutoSave, 150);
+      }
+    }
+  }
+
+  function scheduleAutoSave(delayMs = 1200) {
+    markEditorDirty();
+    if (typeof updateLivePreview === "function") updateLivePreview();
+    if (autoSaveDebounceTimer) clearTimeout(autoSaveDebounceTimer);
+    autoSaveDebounceTimer = setTimeout(() => {
+      executeAutoSave();
+    }, delayMs);
+  }
+
+  async function triggerInstantSave() {
+    if (autoSaveDebounceTimer) clearTimeout(autoSaveDebounceTimer);
+    markEditorDirty();
+    if (typeof updateLivePreview === "function") updateLivePreview();
+    await executeAutoSave();
+  }
+
+  // Immediate Persistent Case Study Media Sync
+  const persistCurrentCaseStudyMedia = async () => {
+    await triggerInstantSave();
   };
 
-  // Render Case Studies List Grid
-  const renderCaseStudiesTab = () => {
+  // ==========================================
+  // DASHBOARD OVERVIEW ENGINE (REAL DATA FROM SUPABASE / LOCAL DB)
+  // ==========================================
+  const renderDashboardOverview = async () => {
+    let list = getBetroCaseStudies();
+    if (window.BetroDB) {
+      try {
+        const fresh = await BetroDB.getCaseStudies({ forceRefresh: false, includeDrafts: true });
+        if (fresh && Array.isArray(fresh) && fresh.length > 0) list = fresh;
+      } catch (e) { }
+    }
+
+    const totalCount = list.length;
+    const publishedCount = list.filter(c => (c.status || "published") === "published").length;
+    const draftCount = list.filter(c => (c.status || "published") === "draft").length;
+
+    // Calculate real gallery assets across case studies and media library
+    let totalGallery = 0;
+    let totalVideos = 0;
+    list.forEach(c => {
+      if (c.media && Array.isArray(c.media.gallery)) totalGallery += c.media.gallery.length;
+      if (c.media && Array.isArray(c.media.videos)) totalVideos += c.media.videos.length;
+    });
+
+    const storedAssets = BetroStorage.cache["betro_media_assets"] || defaultMediaAssets || [];
+    totalGallery += storedAssets.filter(a => a.type === "image").length;
+    totalVideos += storedAssets.filter(a => a.type === "video").length;
+
+    // Update real metric spans
+    const elTotal = document.getElementById("stat-total-projects");
+    if (elTotal) elTotal.textContent = totalCount;
+
+    const elPub = document.getElementById("stat-published-projects");
+    if (elPub) elPub.textContent = publishedCount;
+
+    const elDraft = document.getElementById("stat-draft-projects");
+    if (elDraft) elDraft.textContent = draftCount;
+
+    const elGal = document.getElementById("stat-gallery-images");
+    if (elGal) elGal.textContent = totalGallery;
+
+    const elVid = document.getElementById("stat-video-count");
+    if (elVid) elVid.textContent = totalVideos;
+
+    const navCounter = document.getElementById("nav-cs-counter");
+    if (navCounter) navCounter.textContent = totalCount;
+
+    // Cloud Database real-time status check
+    if (window.BetroDB) {
+      const cfg = BetroDB.getConfig();
+      const dbStatusEl = document.getElementById("stat-db-status");
+      const bucketEl = document.getElementById("stat-bucket-info");
+      const dbBadge = document.getElementById("dashboard-db-badge");
+      if (dbStatusEl) dbStatusEl.textContent = cfg.isConfigured ? "Connected" : "Local Mode";
+      if (bucketEl) bucketEl.textContent = `Bucket: ${cfg.storageBucket || "betodata"}`;
+      if (dbBadge) {
+        dbBadge.innerHTML = cfg.isConfigured
+          ? `<i class="ri-checkbox-circle-fill" style="color:#00e575;"></i><span>Supabase Cloud Ready</span>`
+          : `<i class="ri-alert-line" style="color:#fbbf24;"></i><span>Local Fallback Mode</span>`;
+      }
+    }
+
+    // Render Recent Projects Quick Table
+    const recentListContainer = document.getElementById("dash-recent-projects-list");
+    if (recentListContainer) {
+      const recentItems = list.slice(0, 5);
+      if (recentItems.length === 0) {
+        recentListContainer.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">No projects found. Click "Create New Case Study" to get started.</div>`;
+      } else {
+        recentListContainer.innerHTML = `
+          <table class="recent-cs-table">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th style="text-align: right;">Quick Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recentItems.map(item => {
+                const isPub = (item.status || "published") === "published";
+                const thumb = item.cardImage || item.heroImage || (item.media && item.media.gallery && item.media.gallery[0]) || item.companyLogo || 'images/logo.png';
+                return `
+                  <tr>
+                    <td>
+                      <div class="recent-cs-item-cell">
+                        <img src="${thumb}" alt="${item.companyName}" class="recent-cs-thumb" loading="lazy">
+                        <div class="recent-cs-details">
+                          <span class="recent-cs-name">${item.companyName}</span>
+                          <span class="recent-cs-slug">/portfolio/${item.slug}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="cs-category-badge">${item.category || "Creative"}</span>
+                    </td>
+                    <td>
+                      <span class="cs-floating-status ${isPub ? 'published' : 'draft'}" style="position: static; font-size: 0.72rem; padding: 2px 8px;">
+                        ${isPub ? 'Published' : 'Draft'}
+                      </span>
+                    </td>
+                    <td style="text-align: right;">
+                      <div style="display: inline-flex; gap: 6px;">
+                        <a href="portfolio/${item.slug}.html" target="_blank" class="admin-btn secondary-btn" style="padding: 4px 8px; font-size: 0.75rem;" title="View Live">
+                          <i class="ri-external-link-line"></i>
+                        </a>
+                        <button type="button" class="admin-btn primary-btn dash-edit-btn" data-id="${item.id}" style="padding: 4px 10px; font-size: 0.75rem;">
+                          <i class="ri-edit-line"></i> Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        `;
+
+        recentListContainer.querySelectorAll(".dash-edit-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-id");
+            if (id) openCSModal(id);
+          });
+        });
+      }
+    }
+  };
+
+  // Render Case Studies List Grid with Modern Project Cards
+  function renderCaseStudiesTab() {
     const grid = document.getElementById("admin-casestudies-list");
     if (!grid) return;
 
@@ -1446,54 +1861,65 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.innerHTML = "";
 
     if (caseStudies.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: var(--text-secondary);">No Case Studies found. Click "Create New Case Study" to add one!</div>`;
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; padding: 3rem 1.5rem; text-align: center; color: var(--text-secondary); background: rgba(255,255,255,0.02); border-radius: var(--radius-lg); border: 1px dashed var(--panel-border);">
+          <i class="ri-folder-open-line" style="font-size: 2.5rem; opacity: 0.4; display: block; margin-bottom: 8px;"></i>
+          <h4 style="color: var(--text-primary); font-size: 1.1rem; margin-bottom: 4px;">No Case Studies Found</h4>
+          <p style="font-size: 0.85rem; max-width: 360px; margin: 0 auto 1.25rem auto;">No matching projects found. Adjust your filters or create a new case study.</p>
+          <button type="button" class="admin-btn primary-btn" onclick="document.getElementById('add-casestudy-btn').click();" style="margin: 0 auto;">
+            <i class="ri-add-line"></i> Create New Case Study
+          </button>
+        </div>
+      `;
       return;
     }
 
     caseStudies.forEach(cs => {
       const card = document.createElement("div");
-      card.className = "glass-card";
-      card.style.padding = "1.5rem";
-      card.style.display = "flex";
-      card.style.flexDirection = "column";
-      card.style.justifySpaceBetween = "space-between";
-      card.style.position = "relative";
+      card.className = "cs-project-card";
 
       const isPublished = (cs.status || "published") === "published";
       const isFeatured = !!cs.featured;
-
-      const statusBadge = isPublished
-        ? `<span style="background: rgba(74, 185, 108, 0.15); color: #4ab96c; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">${isFeatured ? '★ FEATURED' : 'PUBLISHED'}</span>`
-        : `<span style="background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">DRAFT</span>`;
+      const coverImg = cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || cs.companyLogo || 'images/p1.jpg';
+      const logoImg = cs.companyLogo || 'images/logo.png';
 
       card.innerHTML = `
-        <div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <div style="width: 48px; height: 48px; background: rgba(0,0,0,0.3); border-radius: 10px; padding: 6px; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center;">
-              <img src="${cs.companyLogo || 'images/logo.png'}" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
-            ${statusBadge}
+        <div class="cs-card-banner">
+          <img src="${coverImg}" alt="${cs.companyName}" class="cs-card-cover-img" loading="lazy">
+          <div class="cs-card-scrim"></div>
+          <div class="cs-floating-logo">
+            <img src="${logoImg}" alt="Logo">
           </div>
-          <h4 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${cs.companyName}</h4>
-          <p style="font-size: 0.8rem; color: #4ab96c; font-family: monospace; margin-bottom: 8px;">/portfolio/${cs.slug}</p>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.25rem;">${cs.shortIntro || cs.category || 'Case study overview'}</p>
+          <span class="cs-floating-status ${isPublished ? 'published' : 'draft'}">
+            ${isPublished ? (isFeatured ? '★ FEATURED' : 'PUBLISHED') : 'DRAFT'}
+          </span>
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; border-top: 1px solid var(--panel-border); padding-top: 1rem;">
-          <a href="portfolio/${cs.slug}.html" target="_blank" class="admin-btn secondary-btn" style="padding: 6px 12px; font-size: 0.8rem; text-decoration: none;">
-            <i class="ri-external-link-line"></i> View
-          </a>
-          <button type="button" class="admin-btn secondary-btn edit-cs-btn" data-id="${cs.id}" style="padding: 6px 12px; font-size: 0.8rem;">
-            <i class="ri-edit-line"></i> Edit
-          </button>
-          <button type="button" class="admin-btn secondary-btn duplicate-cs-btn" data-id="${cs.id}" style="padding: 6px 12px; font-size: 0.8rem;" title="Duplicate Project">
-            <i class="ri-file-copy-line"></i> Copy
-          </button>
-          <button type="button" class="admin-btn secondary-btn toggle-cs-status" data-id="${cs.id}" style="padding: 6px 12px; font-size: 0.8rem;">
-            <i class="ri-repeat-line"></i> ${isPublished ? 'Unpublish' : 'Publish'}
-          </button>
-          <button type="button" class="admin-btn danger-btn delete-cs-btn" data-id="${cs.id}" style="padding: 6px 12px; font-size: 0.8rem;">
-            <i class="ri-delete-bin-line"></i>
-          </button>
+        <div class="cs-card-body">
+          <div class="cs-card-category-row">
+            <span class="cs-category-badge">${cs.category || 'Creative'}</span>
+            <span class="cs-industry-badge">${cs.industry || 'Agency'}</span>
+          </div>
+          <h4 class="cs-card-title">${cs.companyName}</h4>
+          <p class="cs-card-slug">/portfolio/${cs.slug}</p>
+          <p class="cs-card-desc">${cs.shortIntro || cs.brandStory || 'Dynamic agency case study'}</p>
+
+          <div class="cs-card-actions">
+            <a href="portfolio/${cs.slug}.html" target="_blank" class="admin-btn secondary-btn cs-btn-view" title="View live page">
+              <i class="ri-external-link-line"></i> View
+            </a>
+            <button type="button" class="admin-btn primary-btn cs-btn-edit edit-cs-btn" data-id="${cs.id}">
+              <i class="ri-edit-line"></i> Edit
+            </button>
+            <button type="button" class="admin-btn secondary-btn cs-btn-copy duplicate-cs-btn" data-id="${cs.id}" title="Duplicate Project">
+              <i class="ri-file-copy-line"></i>
+            </button>
+            <button type="button" class="admin-btn secondary-btn cs-btn-toggle toggle-cs-status" data-id="${cs.id}" title="${isPublished ? 'Unpublish project' : 'Publish project'}">
+              <i class="ri-repeat-line"></i>
+            </button>
+            <button type="button" class="admin-btn danger-btn cs-btn-delete delete-cs-btn" data-id="${cs.id}" title="Delete project">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+          </div>
         </div>
       `;
 
@@ -1504,7 +1930,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       grid.appendChild(card);
     });
-  };
+  }
 
   const duplicateCS = async (csId) => {
     let list = await getFreshBetroCaseStudies();
@@ -2362,25 +2788,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const triggerInstantSave = () => {
-    const badge = document.getElementById("cs-autosave-indicator");
-    if (badge) {
-      badge.className = "cs-autosave-pill status-saving";
-      badge.querySelector(".autosave-label").textContent = "Saving...";
-    }
-    setTimeout(() => {
-      try {
-        saveActiveEditorState();
-        setEditorSaved();
-      } catch (err) {
-        if (badge) {
-          badge.className = "cs-autosave-pill status-unsaved";
-          badge.querySelector(".autosave-label").textContent = "Save Failed (Retry)";
-        }
-        showAdminToast("Save Failed: " + (err.message || "Error saving state"), "error", 5000);
-      }
-    }, 200);
-  };
 
   document.getElementById("cs-vis-enable-all-btn")?.addEventListener("click", () => {
     STANDARD_CASE_STUDY_SECTIONS.forEach(s => activeSectionVisibility[s.key] = true);
@@ -2582,36 +2989,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Auto Save Indicator & Timer
-  const markEditorDirty = () => {
-    isEditorDirty = true;
-    const badge = document.getElementById("cs-autosave-indicator");
-    const globalBadge = document.getElementById("cs-autosave-global-badge");
-
-    if (badge) {
-      badge.className = "cs-autosave-pill status-unsaved";
-      badge.querySelector(".autosave-label").textContent = "Unsaved Changes";
-    }
-    if (globalBadge) {
-      globalBadge.className = "autosave-badge unsaved";
-      globalBadge.classList.remove("hidden");
-    }
-  };
-
-  const setEditorSaved = () => {
-    isEditorDirty = false;
-    const badge = document.getElementById("cs-autosave-indicator");
-    const globalBadge = document.getElementById("cs-autosave-global-badge");
-
-    if (badge) {
-      badge.className = "cs-autosave-pill status-saved";
-      badge.querySelector(".autosave-label").textContent = "Saved";
-    }
-    if (globalBadge) {
-      globalBadge.className = "autosave-badge saved";
-      globalBadge.classList.remove("hidden");
-    }
-  };
 
   const autoSaveCheck = () => {
     if (!isEditorDirty) return;
@@ -2633,7 +3010,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // --- OPEN / CLOSE EDITOR MODAL & SAVE DATA ENGINE ---
-  const openCSModal = async (csId = null) => {
+  async function openCSModal(csId = null) {
     if (!csModal) return;
     csForm.reset();
     document.getElementById("cs-edit-id").value = "";
@@ -2808,11 +3185,15 @@ document.addEventListener("DOMContentLoaded", () => {
     setEditorSaved();
 
     csModal.classList.remove("hidden");
-  };
+  }
 
-  const closeCSModal = () => {
+  function closeCSModal() {
+    if (isEditorDirty) {
+      const confirmLeave = confirm("You have unsaved changes. Are you sure you want to close without saving?");
+      if (!confirmLeave) return;
+    }
     if (csModal) csModal.classList.add("hidden");
-  };
+  }
 
   if (addCSBtn) addCSBtn.addEventListener("click", () => openCSModal());
   if (closeCSModalBtn) closeCSModalBtn.addEventListener("click", closeCSModal);
@@ -2827,176 +3208,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const saveActiveEditorState = async () => {
-    const editId = document.getElementById("cs-edit-id").value;
-    const companyName = document.getElementById("cs-company-name").value.trim() || "New Case Study";
-    const rawSlug = document.getElementById("cs-slug").value.trim() || companyName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-    const slug = rawSlug.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-
-    const category = document.getElementById("cs-category").value.trim() || "Creative Campaign";
-    const industry = document.getElementById("cs-industry").value.trim() || "General Business";
-    const clientName = document.getElementById("cs-client-name").value.trim() || companyName;
-    const status = document.getElementById("cs-status").value;
-
-    const logoUrl = document.getElementById("cs-logo-url").value.trim() || "images/logo.png";
-    const cardImageUrl = document.getElementById("cs-cardimg-url")?.value.trim() || "";
-    const heroUrl = document.getElementById("cs-hero-url").value.trim() || "images/p1.jpg";
-
-    const shortIntro = document.getElementById("cs-short-intro").value.trim();
-    const brandStory = document.getElementById("cs-brand-story").value.trim();
-    const brandGoals = document.getElementById("cs-brand-goals").value.trim();
-
-    const overview = {
-      challenge: document.getElementById("cs-overview-challenge")?.value.trim() || "",
-      strategy: document.getElementById("cs-overview-strategy")?.value.trim() || "",
-      solution: document.getElementById("cs-overview-solution")?.value.trim() || "",
-      execution: document.getElementById("cs-overview-execution")?.value.trim() || "",
-      results: document.getElementById("cs-overview-results")?.value.trim() || ""
-    };
-
-    const results = {
-      stat1Num: document.getElementById("cs-stat1-num")?.value.trim() || "+500K",
-      stat1Label: document.getElementById("cs-stat1-label")?.value.trim() || "Social Views",
-      stat2Num: document.getElementById("cs-stat2-num")?.value.trim() || "+60%",
-      stat2Label: document.getElementById("cs-stat2-label")?.value.trim() || "Growth",
-      stat3Num: document.getElementById("cs-stat3-num")?.value.trim() || "4.2x",
-      stat3Label: document.getElementById("cs-stat3-label")?.value.trim() || "ROI",
-      stat4Num: document.getElementById("cs-stat4-num")?.value.trim() || "100%",
-      stat4Label: document.getElementById("cs-stat4-label")?.value.trim() || "Satisfaction",
-
-      feedbackQuote: document.getElementById("cs-feedback-quote")?.value.trim() || "",
-      feedbackAuthor: document.getElementById("cs-feedback-author")?.value.trim() || "",
-      feedbackRole: document.getElementById("cs-feedback-role")?.value.trim() || ""
-    };
-
-    // Re-index display_order before saving
-    activeGallery.forEach((item, idx) => { if (typeof item === 'object' && item) item.display_order = idx; });
-    activeVideos.forEach((item, idx) => { if (typeof item === 'object' && item) item.display_order = idx; });
-
-    const firstGalUrl = activeGallery[0] ? (typeof activeGallery[0] === 'string' ? activeGallery[0] : activeGallery[0].url) : "";
-    const secondGalUrl = activeGallery[1] ? (typeof activeGallery[1] === 'string' ? activeGallery[1] : activeGallery[1].url) : "";
-
-    const deskMockUrl = document.getElementById("cs-desktop-mockup-url")?.value.trim() || firstGalUrl || heroUrl;
-    const mobMockUrl = document.getElementById("cs-mobile-mockup-url")?.value.trim() || secondGalUrl || logoUrl;
-
-    const allStructuredAssets = [
-      ...activeGallery.map((g, idx) => normalizeMediaAsset(g, editId || "cs-" + Date.now(), slug, "image", "creative_showcase", idx)),
-      ...activeVideos.map((v, idx) => normalizeMediaAsset(v, editId || "cs-" + Date.now(), slug, "video", "video_showcase", idx))
-    ];
-
-    const media = {
-      gallery: activeGallery.map(g => typeof g === "string" ? g : (g ? g.url : "")),
-      videos: activeVideos.map(v => typeof v === "string" ? v : (v ? v.url : "")),
-      assets: allStructuredAssets,
-      mockups: {
-        desktop: deskMockUrl,
-        mobile: mobMockUrl
-      }
-    };
-
-    const seo = {
-      title: document.getElementById("cs-seo-title")?.value.trim() || `${companyName} Case Study | Betroverse`,
-      description: document.getElementById("cs-seo-desc")?.value.trim() || shortIntro,
-      keywords: document.getElementById("cs-seo-keywords")?.value.trim() || "",
-      ogImage: document.getElementById("cs-seo-ogimage")?.value.trim() || heroUrl,
-      canonicalUrl: document.getElementById("cs-seo-canonical")?.value.trim() || `https://betroverse.in/portfolio/${slug}`
-    };
-
-    let list = await getFreshBetroCaseStudies();
-
-    if (editId) {
-      list = list.map(cs => {
-        if (cs.id === editId) {
-          return {
-            ...cs,
-            companyName,
-            slug,
-            category,
-            industry,
-            clientName,
-            status,
-            companyLogo: logoUrl,
-            cardImage: cardImageUrl || cs.cardImage || heroUrl,
-            heroImage: heroUrl,
-            shortIntro,
-            brandStory,
-            brandGoals,
-            services: [...activeTags],
-            overview,
-            results,
-            media,
-            gallerySections: [...activeGallerySections],
-            blocks: [...activeBlocks],
-            sectionVisibility: { ...activeSectionVisibility },
-            sectionOrder: [...activeSectionOrder],
-            seo
-          };
-        }
-        return cs;
-      });
-    } else {
-      const newCS = {
-        id: "cs-" + Date.now(),
-        companyName,
-        slug,
-        category,
-        industry,
-        clientName,
-        status,
-        year: "2024 - 2025",
-        companyLogo: logoUrl,
-        cardImage: cardImageUrl || heroUrl,
-        heroImage: heroUrl,
-        shortIntro,
-        brandStory,
-        brandGoals,
-        services: [...activeTags],
-        overview,
-        results,
-        media,
-        gallerySections: [...activeGallerySections],
-        blocks: [...activeBlocks],
-        sectionVisibility: { ...activeSectionVisibility },
-        sectionOrder: [...activeSectionOrder],
-        seo
-      };
-      list.push(newCS);
-    }
-
-    // Authoritative Cloud Database Save
-    const targetItem = editId ? list.find(cs => cs.id === editId) : newCS;
-    if (window.BetroDB && targetItem) {
-      try {
-        const cloudResult = await BetroDB.saveCaseStudy(targetItem);
-        if (cloudResult.warning) {
-          console.warn("[Admin]", cloudResult.warning);
-        }
-      } catch (cloudErr) {
-        console.error("Cloud database save failed:", cloudErr);
-        throw new Error("File uploaded, but project record could not be saved to cloud database: " + (cloudErr.message || cloudErr));
-      }
-    }
-
-    await saveBetroCaseStudies(list);
-
-    // Sync to legacy betro_projects for full backward compatibility
-    const legacyProjects = list.map(cs => ({
-      id: cs.id,
-      src: cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || "images/p1.jpg",
-      companyName: cs.companyName,
-      category: cs.category,
-      shortDesc: cs.shortIntro,
-      companyDesc: cs.brandStory || cs.fullDescription,
-      services: cs.services,
-      companyId: cs.slug,
-      logo: cs.companyLogo
-    }));
-    try {
-      localStorage.setItem("betro_projects", JSON.stringify(legacyProjects));
-    } catch (e) { }
-
-    renderCaseStudiesTab();
-  };
 
   if (csForm) {
     csForm.addEventListener("submit", async (e) => {
@@ -3204,44 +3415,95 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("cs-search-input")?.addEventListener("input", renderCaseStudiesTab);
   document.getElementById("cs-status-filter")?.addEventListener("change", renderCaseStudiesTab);
 
-  // Sidebar Links Tab Switcher
+  // Centralized Tab Switcher Function
   const sidebarLinks = document.querySelectorAll(".sidebar-link");
   const tabPanels = document.querySelectorAll(".tab-panel");
+
+  const switchTab = (tabId) => {
+    sidebarLinks.forEach(l => {
+      if (l.getAttribute("data-tab") === tabId) l.classList.add("active");
+      else l.classList.remove("active");
+    });
+
+    tabPanels.forEach(panel => panel.classList.remove("active"));
+    const targetPanel = document.getElementById(`tab-${tabId}`);
+    if (targetPanel) {
+      targetPanel.classList.add("active");
+    }
+
+    const pageTitle = document.getElementById("page-title");
+    const pageSubtitle = document.getElementById("page-subtitle");
+
+    if (tabId === "dashboard") {
+      if (pageTitle) pageTitle.textContent = "Dashboard Overview";
+      if (pageSubtitle) pageSubtitle.textContent = "Live portfolio metrics, cloud storage status, and recent project activity.";
+      renderDashboardOverview();
+    } else if (tabId === "casestudies") {
+      if (pageTitle) pageTitle.textContent = "Case Studies CMS";
+      if (pageSubtitle) pageSubtitle.textContent = "Create, edit, publish/unpublish, and manage dynamic case studies.";
+      renderCaseStudiesTab();
+    } else if (tabId === "medialibrary") {
+      if (pageTitle) pageTitle.textContent = "Central Media Library";
+      if (pageSubtitle) pageSubtitle.textContent = "Upload, organize, search, and reuse images, videos, and PDFs.";
+      renderMediaLibraryTab();
+    } else if (tabId === "content") {
+      if (pageTitle) pageTitle.textContent = "Gallery & Brands Management";
+      if (pageSubtitle) pageSubtitle.textContent = "Add or remove homepage portfolio projects and brand logos.";
+      renderContentTab();
+    } else if (tabId === "settings") {
+      if (pageTitle) pageTitle.textContent = "Cloud DB & Portal Settings";
+      if (pageSubtitle) pageSubtitle.textContent = "Manage Supabase cloud database, credentials, and offline storage.";
+      if (typeof updateSupabaseStatusUI === "function") {
+        updateSupabaseStatusUI();
+      }
+    }
+
+    // Auto-close mobile drawer
+    const sidebar = document.getElementById("admin-sidebar");
+    const backdrop = document.getElementById("sidebar-backdrop");
+    if (sidebar) sidebar.classList.remove("open");
+    if (backdrop) backdrop.classList.remove("active");
+  };
 
   sidebarLinks.forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       const tabId = link.getAttribute("data-tab");
-
-      sidebarLinks.forEach(l => l.classList.remove("active"));
-      link.classList.add("active");
-
-      tabPanels.forEach(panel => panel.classList.remove("active"));
-      const targetPanel = document.getElementById(`tab-${tabId}`);
-      if (targetPanel) {
-        targetPanel.classList.add("active");
-      }
-
-      const pageTitle = document.getElementById("page-title");
-      const pageSubtitle = document.getElementById("page-subtitle");
-
-      if (tabId === "casestudies") {
-        if (pageTitle) pageTitle.textContent = "Case Studies CMS";
-        if (pageSubtitle) pageSubtitle.textContent = "Create, edit, publish/unpublish, and manage dynamic case studies.";
-        renderCaseStudiesTab();
-      } else if (tabId === "medialibrary") {
-        if (pageTitle) pageTitle.textContent = "Central Media Library";
-        if (pageSubtitle) pageSubtitle.textContent = "Upload, organize, search, and reuse images, videos, and PDFs.";
-        renderMediaLibraryTab();
-      } else if (tabId === "content") {
-        if (pageTitle) pageTitle.textContent = "Gallery & Brands Management";
-        if (pageSubtitle) pageSubtitle.textContent = "Add or remove homepage portfolio projects and brand logos.";
-        renderContentTab();
-      } else if (tabId === "settings") {
-        if (pageTitle) pageTitle.textContent = "Portal Settings";
-        if (pageSubtitle) pageSubtitle.textContent = "Manage offline storage settings and session logs.";
-      }
+      switchTab(tabId);
     });
+  });
+
+  // Mobile Drawer Toggle Listeners
+  const mobileToggleBtn = document.getElementById("mobile-sidebar-toggle");
+  const sidebarElem = document.getElementById("admin-sidebar");
+  const backdropElem = document.getElementById("sidebar-backdrop");
+
+  if (mobileToggleBtn && sidebarElem) {
+    mobileToggleBtn.addEventListener("click", () => {
+      sidebarElem.classList.toggle("open");
+      if (backdropElem) backdropElem.classList.toggle("active");
+    });
+  }
+
+  if (backdropElem && sidebarElem) {
+    backdropElem.addEventListener("click", () => {
+      sidebarElem.classList.remove("open");
+      backdropElem.classList.remove("active");
+    });
+  }
+
+  // Dashboard Overview Quick Actions Handlers
+  document.getElementById("dash-quick-create-btn")?.addEventListener("click", () => openCSModal());
+  document.getElementById("sidebar-quick-add-btn")?.addEventListener("click", () => openCSModal());
+  document.getElementById("dash-nav-media-btn")?.addEventListener("click", () => switchTab("medialibrary"));
+  document.getElementById("dash-nav-brands-btn")?.addEventListener("click", () => switchTab("content"));
+  document.getElementById("dash-nav-settings-btn")?.addEventListener("click", () => switchTab("settings"));
+  document.getElementById("dash-view-all-cs-btn")?.addEventListener("click", () => switchTab("casestudies"));
+  document.getElementById("dash-quick-sync-btn")?.addEventListener("click", async () => {
+    showAdminToast("Verifying Supabase Cloud connection...", "info", 2500);
+    await updateSupabaseStatusUI();
+    await renderDashboardOverview();
+    showAdminToast("Supabase Database & Cloud Storage verified!", "success", 4000);
   });
 
   // Check initial Auth state
