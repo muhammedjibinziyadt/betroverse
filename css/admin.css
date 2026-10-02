@@ -2432,6 +2432,14 @@ body.light-mode .dark-icon { display: none; }
    ========================================================================== */
 
 /* Safe Delete Card */
+#safe-delete-modal {
+  z-index: 10050;
+}
+
+#media-details-modal {
+  z-index: 10020;
+}
+
 .safe-delete-card {
   max-width: 480px;
   width: 92%;
