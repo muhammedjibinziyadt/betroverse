@@ -1171,6 +1171,14 @@ body.light-mode .portfolio-card:hover {
   width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
+  background: linear-gradient(110deg, #121622 8%, #1e2436 18%, #121622 33%);
+  background-size: 200% 100%;
+  animation: cardSkeletonShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes cardSkeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .portfolio-card-image {

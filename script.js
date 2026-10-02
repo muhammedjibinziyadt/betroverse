@@ -1,16 +1,20 @@
- window.addEventListener("load", function() {
-      // Delay so text is visible long enough
-      setTimeout(() => {
-        const preloader = document.getElementById("preloader");
-        if (preloader) {
-          preloader.classList.add("hide"); // fade out
-        }
-        const content = document.getElementById("content");
-        if (content) {
-          content.style.display = "block";
-        }
-      }, 900); // show loader for 2.5s (adjust as you like)
-    });
+const dismissPreloader = () => {
+  const preloader = document.getElementById("preloader");
+  if (preloader && !preloader.classList.contains("hide")) {
+    preloader.classList.add("hide");
+  }
+  const content = document.getElementById("content");
+  if (content) {
+    content.style.display = "block";
+  }
+};
+
+if (document.readyState === "interactive" || document.readyState === "complete") {
+  setTimeout(dismissPreloader, 80);
+} else {
+  document.addEventListener("DOMContentLoaded", () => setTimeout(dismissPreloader, 100));
+}
+window.addEventListener("load", dismissPreloader);
 
 const scrollRevealOption = {
   distance: "100px",
@@ -464,8 +468,16 @@ document.addEventListener("DOMContentLoaded", () => {
       brands.forEach(b => {
         const li = document.createElement("li");
         const img = document.createElement("img");
-        img.src = b.src;
+        const base = b.src.replace(/\.(png|jpe?g)$/i, "");
+        img.src = `${base}.webp`;
         img.alt = "Brand Logo";
+        img.loading = "lazy";
+        img.decoding = "async";
+        img.setAttribute("data-fallback", b.src);
+        img.onerror = function() {
+          const fb = this.getAttribute("data-fallback");
+          if (fb && this.src !== fb) this.src = fb;
+        };
         if (b.style) {
           img.setAttribute("style", b.style);
         }

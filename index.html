@@ -4,22 +4,24 @@
 
 <head>
   <meta charset="UTF-8" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Betroverse | The Solution for Professional Teams</title>
 
-  <!-- Main CSS -->
+  <!-- Preconnect CDN & Fonts for Fast Asset Retrieval -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://fvbauhcwshgqboakeiux.supabase.co" />
 
+  <!-- Main CSS -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/portfolio-redesign.css">
 
   <!-- Remix Icons -->
-
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
 
   <!-- Font Awesome -->
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
   <!-- Swiper -->
@@ -57,14 +59,12 @@
   ========================================================== -->
 
   <header class="site-header">
-
-    ```
     <div class="header-container">
 
       <!-- Logo -->
       <div class="logo-container">
         <a href="#home" class="logo-link">
-          <img src="images/logo.png" alt="Betroverse Logo" class="logo-img">
+          <img src="images/logo.png" alt="Betroverse Logo" class="logo-img" width="160" height="40" fetchpriority="high">
         </a>
       </div>
 
@@ -144,7 +144,6 @@
     </div>
 
     <div class="drawer-overlay" id="drawer-overlay"></div>
-    ```
 
   </header>
 
@@ -154,7 +153,6 @@
 
   <header class="section__container header__container" id="home">
 
-    ```
     <h2>
       <img class="bg0" src="images/bag.png" alt="Bag">
       Growing Brands Beyond Boundaries
@@ -181,7 +179,6 @@
         <i class="ri-arrow-right-line"></i>
       </a>
     </div>
-    ```
 
   </header>
 
@@ -193,7 +190,6 @@
 
   <section id="about">
 
-    ```
     <div class="about_container">
 
       <h4>Something About Us</h4>
@@ -205,7 +201,7 @@
 
           <div class="icons"></div>
 
-          <img src="images/abg.png" alt="About Betroverse">
+          <img src="images/abg.png" alt="About Betroverse" loading="lazy" decoding="async">
 
         </div>
 
@@ -300,7 +296,6 @@
       </a>
 
     </div>
-    ```
 
   </section>
 
@@ -310,7 +305,6 @@
 
   <section class="count">
 
-    ```
     <div class="wrapper">
 
       <div class="container2">
@@ -334,7 +328,6 @@
       </div>
 
     </div>
-    ```
 
   </section>
 
@@ -344,7 +337,6 @@
 
   <section id="services">
 
-    ```
     <section class="section__container3 room__container">
 
       <h6>What We Do</h6>
@@ -508,7 +500,6 @@
       </a>
 
     </section>
-    ```
 
   </section>
 
@@ -518,7 +509,6 @@
 
   <section id="process">
 
-    ```
     <h6 class="section__header"
       style="font-size:1rem;color:var(--primary-color);text-transform:uppercase;letter-spacing:2px;margin-bottom:0.5rem;">
       Our Process
@@ -584,7 +574,6 @@
       </div>
 
     </div>
-    ```
 
   </section>
 
@@ -596,7 +585,6 @@
 
   <section id="testimonials">
 
-    ```
     <h6 class="section__header"
       style="font-size:1rem;color:var(--primary-color);text-transform:uppercase;letter-spacing:2px;margin-bottom:0.5rem;">
       Testimonials
@@ -793,7 +781,6 @@
       </div>
 
     </div>
-    ```
 
   </section>
 
@@ -805,7 +792,6 @@
 
   <section class="section__container6 subscribe__container" id="subscribe">
 
-    ```
     <div class="subscribe__content">
 
       <h2 class="section__header">
@@ -827,7 +813,6 @@
       </form>
 
     </div>
-    ```
 
   </section>
 
@@ -837,7 +822,6 @@
 
   <section id="contact">
 
-    ```
     <div class="container">
 
       <div class="content3">
@@ -905,7 +889,6 @@
       </div>
 
     </div>
-    ```
 
   </section>
 
@@ -915,7 +898,6 @@
 
   <footer>
 
-    ```
     <div class="section__container7 footer__container">
 
 
@@ -1000,8 +982,6 @@
     <div class="footer__bar">
       Copyright © 2025 Betroverse. All rights reserved.
     </div>
-    ```
-
   </footer>
 
   <!-- =========================================================

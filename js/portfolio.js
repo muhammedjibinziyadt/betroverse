@@ -1,42 +1,38 @@
-window.addEventListener("load", function() {
-  // Delay so preloader fade out is visible
-  setTimeout(() => {
-    const preloader = document.getElementById("preloader");
-    if (preloader) {
-      preloader.classList.add("hide");
-    }
-  }, 900);
-});
-
-// Initialize ScrollReveal for portfolio page
-const scrollRevealOption = {
-  distance: "100px",
-  origin: "bottom",
-  duration: 2000,
+// Fast Preloader Dismissal (dismiss immediately once DOM and initial cards are ready)
+const dismissPreloader = () => {
+  const preloader = document.getElementById("preloader");
+  if (preloader && !preloader.classList.contains("hide")) {
+    preloader.classList.add("hide");
+  }
 };
 
-ScrollReveal().reveal("header.site-header", {
-  ...scrollRevealOption,
-  delay: 300,
-  origin: "top",
-});
+if (document.readyState === "interactive" || document.readyState === "complete") {
+  setTimeout(dismissPreloader, 80);
+} else {
+  document.addEventListener("DOMContentLoaded", () => setTimeout(dismissPreloader, 100));
+}
+window.addEventListener("load", dismissPreloader);
 
-ScrollReveal().reveal(".header__container h1", {
-  ...scrollRevealOption,
-  delay: 500,
-  origin: "bottom",
-});
+// Initialize ScrollReveal with snappy performance timings
+if (typeof ScrollReveal !== "undefined") {
+  const scrollRevealOption = {
+    distance: "30px",
+    origin: "bottom",
+    duration: 700,
+  };
 
-ScrollReveal().reveal(".header__container p", {
-  ...scrollRevealOption,
-  delay: 700,
-  origin: "bottom",
-});
+  ScrollReveal().reveal("header.site-header", {
+    ...scrollRevealOption,
+    delay: 100,
+    origin: "top",
+  });
 
-ScrollReveal().reveal("#gallery ul li.project-card", {
-  ...scrollRevealOption,
-  interval: 150,
-});
+  ScrollReveal().reveal(".portfolio-header-container", {
+    ...scrollRevealOption,
+    delay: 150,
+    origin: "bottom",
+  });
+}
 
 const initPortfolio = () => {
   // --- 1. Sticky Header Background Transition ---
@@ -161,41 +157,18 @@ const initPortfolio = () => {
     }
   };
 
-  const loadDynamicProjects = async () => {
-    let caseStudies = [];
-
-    // 1. Authoritative Cloud Database fetch from Supabase
-    if (window.BetroDB) {
-      try {
-        const fromCloud = await BetroDB.getCaseStudies({ includeDrafts: false });
-        if (Array.isArray(fromCloud) && fromCloud.length > 0) {
-          caseStudies = fromCloud;
-        }
-      } catch (err) {
-        console.warn("[Portfolio] Cloud database fetch failed, using fallback:", err);
-      }
-    }
-
-    // 2. Local fallback if offline or Supabase not yet configured
-    if (!Array.isArray(caseStudies) || caseStudies.length === 0) {
-      caseStudies = await fetchCaseStudiesFromStore();
-    }
-
-    if (!Array.isArray(caseStudies) || caseStudies.length === 0) {
-      const rawProj = localStorage.getItem("betro_projects");
-      if (rawProj) {
-        try { projects = JSON.parse(rawProj); return; } catch (e) {}
-      }
-    }
-
-    const activeStudies = caseStudies.filter(cs => (cs.status || "published") === "published");
-    const targetList = activeStudies.length > 0 ? activeStudies : caseStudies;
+  const mapAndSetStudies = (studiesList) => {
+    if (!Array.isArray(studiesList) || studiesList.length === 0) return;
+    const activeStudies = studiesList.filter(cs => (cs.status || "published") === "published");
+    const targetList = activeStudies.length > 0 ? activeStudies : studiesList;
 
     projects = targetList.map(cs => {
       const cardImg = cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || "images/p1.jpg";
+      const thumb = cs.cardImageThumb || (window.BetroDB && BetroDB.getOptimizedAssetUrl(cardImg, { preferThumb: true })) || cardImg;
       return {
         id: cs.id,
         src: cardImg,
+        thumb: thumb,
         companyName: cs.companyName || "Creative Project",
         category: cs.category || "Creative Campaign",
         shortDesc: cs.shortIntro || cs.brandStory || "Premium creative content developed by Betroverse.",
@@ -207,20 +180,70 @@ const initPortfolio = () => {
     });
   };
 
-  // --- Render Project Grid Showcase ---
+  const loadDynamicProjects = async () => {
+    // 1. Authoritative Cloud Database fetch from Supabase (with forCards: true)
+    if (window.BetroDB) {
+      try {
+        const fromCloud = await BetroDB.getCaseStudies({ includeDrafts: false, forCards: true });
+        if (Array.isArray(fromCloud) && fromCloud.length > 0) {
+          mapAndSetStudies(fromCloud);
+          return;
+        }
+      } catch (err) {
+        console.warn("[Portfolio] Cloud database fetch failed, using fallback:", err);
+      }
+    }
+
+    // 2. Local fallback if offline or Supabase not yet configured
+    const caseStudies = await fetchCaseStudiesFromStore();
+    if (Array.isArray(caseStudies) && caseStudies.length > 0) {
+      mapAndSetStudies(caseStudies);
+      return;
+    }
+
+    const rawProj = localStorage.getItem("betro_projects");
+    if (rawProj) {
+      try { projects = JSON.parse(rawProj); } catch (e) {}
+    }
+  };
+
+  // --- Render Project Grid Showcase with Progressive Loading ---
   const positionFloatingCards = () => {
     const gridContainer = document.getElementById("portfolio-grid");
     if (!gridContainer) return;
+
+    const signature = projects.map(p => `${p.id}:${p.src}:${p.companyName}`).join("|");
+    if (gridContainer.getAttribute("data-signature") === signature && gridContainer.children.length > 0) {
+      return; // Stable DOM guard: projects already rendered and unchanged
+    }
+    gridContainer.setAttribute("data-signature", signature);
     gridContainer.innerHTML = "";
 
-    projects.forEach((p) => {
+    projects.forEach((p, idx) => {
       const card = document.createElement("div");
       card.className = "portfolio-card";
       card.setAttribute("data-id", p.id);
 
+      // Progressive loading:
+      // First 4 items (viewport) load with eager priority.
+      // Subsequent items load lazily with async decoding.
+      const isPriority = idx < 4;
+      const isTopTwo = idx < 2;
+
+      // Use WebP thumbnail if available, fall back to p.src
+      const thumbUrl = p.thumb || (window.BetroDB && BetroDB.getOptimizedAssetUrl(p.src, { preferThumb: true })) || p.src;
+
       card.innerHTML = `
         <div class="portfolio-card-image-wrapper">
-          <img class="portfolio-card-image" src="${p.src}" alt="${p.companyName || 'Project'}" loading="lazy">
+          <img class="portfolio-card-image" 
+               src="${thumbUrl}" 
+               data-fallback="${p.src}"
+               alt="${p.companyName || 'Project'}" 
+               loading="${isPriority ? 'eager' : 'lazy'}" 
+               decoding="async" 
+               ${isTopTwo ? 'fetchpriority="high"' : ''}
+               width="600" 
+               height="375">
         </div>
         <div class="portfolio-card-body">
           <div class="portfolio-card-meta">
@@ -228,17 +251,23 @@ const initPortfolio = () => {
             <h3 class="portfolio-card-title">${p.companyName || 'Project Name'}</h3>
             <p class="portfolio-card-desc">${p.shortDesc || 'Premium creative work developed by Betroverse.'}</p>
           </div>
-          <button class="portfolio-card-btn">
+          <button class="portfolio-card-btn" aria-label="View details for ${p.companyName || 'Project'}">
             <span>View Details</span>
             <i class="ri-arrow-right-line"></i>
           </button>
         </div>
       `;
 
-      // Image Load Error Handling
+      // Resilient image error handling: if WebP fails, try original JPG/PNG; if both fail, show fallback
       const cardImgElem = card.querySelector(".portfolio-card-image");
       if (cardImgElem) {
         cardImgElem.onerror = function() {
+          const fallback = this.getAttribute("data-fallback");
+          if (fallback && this.src !== fallback && !this.dataset.triedFallback) {
+            this.dataset.triedFallback = "true";
+            this.src = fallback;
+            return;
+          }
           this.onerror = null;
           this.style.display = "none";
           const wrapper = card.querySelector(".portfolio-card-image-wrapper");
@@ -363,9 +392,23 @@ const initPortfolio = () => {
     });
   }
 
+  // 1. Instant Synchronous Cache Render (0ms delay)
+  try {
+    const cachedRaw = localStorage.getItem("betro_casestudies_cache") || localStorage.getItem("betro_casestudies");
+    if (cachedRaw) {
+      const parsed = JSON.parse(cachedRaw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        mapAndSetStudies(parsed);
+        positionFloatingCards();
+        dismissPreloader();
+      }
+    }
+  } catch (e) {}
+
   const reloadPortfolioGrid = async () => {
     await loadDynamicProjects();
     positionFloatingCards();
+    dismissPreloader();
   };
 
   reloadPortfolioGrid();
@@ -568,9 +611,19 @@ const initPortfolio = () => {
       item.setAttribute("data-brand-id", b.id);
 
       const img = document.createElement("img");
-      img.src = b.src;
+      const webpSrc = (window.BetroDB && BetroDB.getOptimizedAssetUrl(b.src)) || b.src;
+      img.src = webpSrc;
       img.alt = b.companyName || "Brand Logo";
       img.className = "brand-logo-img";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.setAttribute("data-fallback", b.src);
+      img.onerror = function() {
+        const fb = this.getAttribute("data-fallback");
+        if (fb && this.src !== fb) {
+          this.src = fb;
+        }
+      };
       if (b.style) {
         img.setAttribute("style", b.style);
       }
@@ -589,15 +642,6 @@ const initPortfolio = () => {
   };
 
   initBrandsCarousel();
-
-  // Re-render gallery on window resize to adjust columns dynamically
-  let resizeTimer;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      positionFloatingCards();
-    }, 150);
-  });
 
   // Real-time synchronization listeners across windows/tabs
   const handlePortfolioSync = async () => {
@@ -624,8 +668,10 @@ const initPortfolio = () => {
   window.addEventListener("betro_storage_updated", () => {
     handlePortfolioSync();
   });
-  window.addEventListener("betro_db_updated", () => {
-    handlePortfolioSync();
+  window.addEventListener("betro_db_updated", (e) => {
+    if (e && e.detail && e.detail.type) {
+      handlePortfolioSync();
+    }
   });
 };
 

@@ -209,10 +209,37 @@
   }
 
   /**
+   * Helper: Return optimized WebP URL if available for static images
+   */
+  function getOptimizedAssetUrl(pathOrUrl, options = {}) {
+    if (!pathOrUrl || typeof pathOrUrl !== "string") return pathOrUrl || "";
+    const clean = pathOrUrl.trim();
+    const { preferThumb = false } = options;
+
+    const match = clean.match(/^(\.\.\/)?images\/([a-zA-Z0-9_\-\.\s%()]+\.(?:png|jpg|jpeg))$/i);
+    if (match) {
+      const prefix = match[1] || "";
+      const filename = match[2];
+      const baseName = filename.replace(/\.(png|jpe?g)$/i, "");
+      if (baseName.toLowerCase().startsWith("frame 1")) return clean;
+      if (preferThumb) {
+        return `${prefix}images/${baseName}_thumb.webp`;
+      }
+      return `${prefix}images/${baseName}.webp`;
+    }
+
+    return clean;
+  }
+
+  /**
    * Helper: Map Supabase database row to Case Study object
    */
   function mapDbRowToCaseStudy(row) {
     if (!row) return null;
+    const cardImg = row.card_image || row.hero_image || "images/p1.jpg";
+    const heroImg = row.hero_image || "images/p1.jpg";
+    const logoImg = row.company_logo || "images/logo.png";
+
     return {
       id: row.id,
       slug: row.slug,
@@ -223,9 +250,13 @@
       clientName: row.client_name || row.company_name,
       year: row.year || "2024 - 2025",
       status: row.status || "published",
-      companyLogo: row.company_logo || "images/logo.png",
-      cardImage: row.card_image || row.hero_image || "images/p1.jpg",
-      heroImage: row.hero_image || "images/p1.jpg",
+      companyLogo: logoImg,
+      companyLogoWebp: getOptimizedAssetUrl(logoImg),
+      cardImage: cardImg,
+      cardImageThumb: getOptimizedAssetUrl(cardImg, { preferThumb: true }),
+      cardImageWebp: getOptimizedAssetUrl(cardImg),
+      heroImage: heroImg,
+      heroImageWebp: getOptimizedAssetUrl(heroImg),
       shortIntro: row.short_intro || "",
       fullDescription: row.full_description || "",
       brandStory: row.brand_story || "",
@@ -371,19 +402,51 @@
       }
     },
 
+    getOptimizedAssetUrl(url, opts) {
+      return getOptimizedAssetUrl(url, opts);
+    },
+
     /**
      * Retrieve all case studies (Published for public, all for admin)
+     * Features: Stale-While-Revalidate caching, selective column queries
      */
     async getCaseStudies(options = {}) {
-      const { forceRefresh = false, includeDrafts = false } = options;
+      const { forceRefresh = false, includeDrafts = false, forCards = false } = options;
 
+      // 1. FAST PATH: Return cached case studies immediately for instant UI display
+      if (!forceRefresh) {
+        const cached = safeStorage.get("betro_casestudies_cache");
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              if (!includeDrafts) return parsed.filter(cs => cs.status === "published");
+              return parsed;
+            }
+          } catch (e) {}
+        }
+      }
+
+      return this.revalidateCaseStudies({ includeDrafts, forCards });
+    },
+
+    /**
+     * Revalidate case studies from Supabase remote database
+     */
+    async revalidateCaseStudies(options = {}) {
+      const { includeDrafts = false, forCards = false } = options;
       const client = await this.ensureInit();
 
       if (client) {
         try {
+          // Column selection optimization per Section 10 of requirements
+          const selectCols = forCards
+            ? "id, slug, company_name, title, category, industry, client_name, year, status, company_logo, card_image, hero_image, short_intro, brand_story, services, display_order, created_at, updated_at"
+            : "*";
+
           let query = client
             .from("portfolio_projects")
-            .select("*")
+            .select(selectCols)
             .order("display_order", { ascending: true })
             .order("created_at", { ascending: false });
 
@@ -393,10 +456,14 @@
 
           const { data, error } = await query;
 
-          if (!error && Array.isArray(data) && data.length > 0) {
+          if (!error && Array.isArray(data)) {
             const mapped = data.map(mapDbRowToCaseStudy);
-            // Cache locally for fast page loads and offline resilience
-            safeStorage.set("betro_casestudies_cache", mapped);
+            if (!forCards) {
+              safeStorage.set("betro_casestudies_cache", mapped);
+            } else {
+              const existingRaw = safeStorage.get("betro_casestudies_cache");
+              if (!existingRaw) safeStorage.set("betro_casestudies_cache", mapped);
+            }
             return mapped;
           } else if (error) {
             console.error("[BetroDB] Failed to fetch case studies from database:", error.message);
@@ -432,7 +499,28 @@
     async getCaseStudyBySlug(slugOrId, options = {}) {
       if (!slugOrId) return null;
       const target = String(slugOrId).toLowerCase().trim();
+      const { forceRefresh = false } = options;
 
+      // 1. FAST PATH: Check cache for instant initial render
+      if (!forceRefresh) {
+        const cached = safeStorage.get("betro_casestudies_cache");
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed)) {
+              const found = parsed.find(c => (c.slug && c.slug.toLowerCase() === target) || c.id === target);
+              if (found && found.media && Array.isArray(found.media.gallery) && found.media.gallery.length > 0) {
+                return found;
+              }
+            }
+          } catch (e) {}
+        }
+      }
+
+      return this.revalidateSingleCaseStudy(target);
+    },
+
+    async revalidateSingleCaseStudy(target) {
       const client = await this.ensureInit();
 
       if (client) {
@@ -561,20 +649,50 @@
       const client = await this.ensureInit();
       if (!client) {
         const current = (await this.getCaseStudies({ includeDrafts: true })) || [];
-        const filtered = current.filter(c => c.id !== id);
+        const filtered = current.filter(c => c.id !== id && c.slug !== id);
         safeStorage.set("betro_casestudies_cache", filtered);
         this.broadcastChange("CASE_STUDY_DELETED", { id });
         return { success: true };
       }
 
       try {
+        // 1. Cascading cleanup: delete associated media assets from storage and media_assets table
+        try {
+          const { data: mediaRows } = await client
+            .from("media_assets")
+            .select("id, storage_path, url")
+            .or(`case_study_id.eq.${id},case_study_slug.eq.${id}`);
+
+          if (Array.isArray(mediaRows) && mediaRows.length > 0) {
+            const bucket = cleanBucket(activeConfig.storageBucket || DEFAULT_BUCKET);
+            const otherBucket = bucket === "betodata" ? "portfolio-media" : "betodata";
+            const pathsToRemove = mediaRows
+              .map(m => m.storage_path)
+              .filter(p => !!p);
+
+            if (pathsToRemove.length > 0) {
+              await client.storage.from(bucket).remove(pathsToRemove);
+              await client.storage.from(otherBucket).remove(pathsToRemove);
+            }
+
+            await client
+              .from("media_assets")
+              .delete()
+              .or(`case_study_id.eq.${id},case_study_slug.eq.${id}`);
+          }
+        } catch (mediaErr) {
+          console.warn("[BetroDB] Media cascade cleanup notice:", mediaErr);
+        }
+
+        // 2. Delete the project record from portfolio_projects
         const { error } = await client
           .from("portfolio_projects")
           .delete()
-          .eq("id", id);
+          .or(`id.eq.${id},slug.eq.${id}`);
 
         if (error) throw error;
 
+        // 3. Purge cached data
         safeStorage.remove("betro_casestudies_cache");
         this.broadcastChange("CASE_STUDY_DELETED", { id });
         return { success: true };
@@ -693,8 +811,8 @@
         }
 
         const structuredAsset = {
-          id: `media-${caseStudyId}-${fileType}-${Date.now()}`,
-          case_study_id: caseStudyId,
+          id: `media-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+          case_study_id: (caseStudyId && caseStudyId !== "general" && !String(caseStudyId).startsWith("cs-temp")) ? caseStudyId : null,
           case_study_slug: safeSlug,
           type: fileType,
           target_section: fileType === "video" ? "video_showcase" : "creative_showcase",
@@ -706,6 +824,25 @@
           status: "published",
           created_at: new Date().toISOString()
         };
+
+        // Persist record to Supabase media_assets table
+        try {
+          const { error: insErr } = await client
+            .from("media_assets")
+            .insert([structuredAsset]);
+
+          if (insErr) {
+            if (insErr.code === "23503" && structuredAsset.case_study_id) {
+              // Foreign key violation fallback: store with case_study_id = null
+              structuredAsset.case_study_id = null;
+              await client.from("media_assets").insert([structuredAsset]);
+            } else {
+              console.warn("[BetroDB] media_assets insert warning:", insErr.message);
+            }
+          }
+        } catch (dbErr) {
+          console.warn("[BetroDB] Could not insert to media_assets:", dbErr);
+        }
 
         if (onProgress) onProgress({ status: "success", pct: 100, text: "Upload Complete — Permanent CDN URL generated" });
 
@@ -719,18 +856,33 @@
     /**
      * Delete media from Supabase Storage & Database
      */
-    async deleteMedia(storagePath, assetId = null) {
+    async deleteMedia(storagePath, assetId = null, url = null) {
       const client = await this.ensureInit();
       if (!client) return { success: true };
 
       try {
-        if (storagePath) {
-          const bucket = activeConfig.storageBucket || DEFAULT_BUCKET;
-          await client.storage.from(bucket).remove([storagePath]);
+        let pathToDel = storagePath;
+        if (!pathToDel && url && typeof url === "string") {
+          const match = url.match(/\/object\/public\/[^/]+\/(.+)$/);
+          if (match) pathToDel = decodeURIComponent(match[1]);
         }
+
+        if (pathToDel) {
+          const bucket = cleanBucket(activeConfig.storageBucket || DEFAULT_BUCKET);
+          const otherBucket = bucket === "betodata" ? "portfolio-media" : "betodata";
+          await client.storage.from(bucket).remove([pathToDel]);
+          await client.storage.from(otherBucket).remove([pathToDel]);
+        }
+
         if (assetId) {
           await client.from("media_assets").delete().eq("id", assetId);
         }
+        if (url) {
+          await client.from("media_assets").delete().eq("url", url);
+        }
+
+        safeStorage.remove("betro_media_assets");
+        this.broadcastChange("MEDIA_DELETED", { id: assetId, storagePath: pathToDel, url });
         return { success: true };
       } catch (e) {
         console.error("[BetroDB] Delete media error:", e);
@@ -750,12 +902,14 @@
             .select("*")
             .order("created_at", { ascending: false });
 
-          if (!error && Array.isArray(data) && data.length > 0) {
+          if (!error && Array.isArray(data)) {
             return data.map(item => ({
               id: item.id,
               name: item.name || "Asset",
               type: item.type || "image",
               url: item.url,
+              storage_path: item.storage_path,
+              storagePath: item.storage_path,
               folder: item.target_section || "general",
               size: item.size || "Cloud Asset",
               caseStudyId: item.case_study_id,

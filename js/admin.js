@@ -773,6 +773,425 @@ document.addEventListener("DOMContentLoaded", () => {
     return newAsset;
   };
 
+  // ==========================================
+  // MEDIA REFERENCE & USAGE TRACKING (Requirement 4)
+  // ==========================================
+  const getMediaUsage = (assetUrl) => {
+    if (!assetUrl) return { isUsed: false, count: 0, references: [] };
+    const caseStudies = getBetroCaseStudies() || [];
+    const references = [];
+
+    const norm = (str) => {
+      if (!str || typeof str !== "string") return "";
+      let s = str.trim().toLowerCase();
+      const m = s.match(/\/([^/?#]+\.[a-z0-9]+)($|\?)/i);
+      return m ? m[1] : s;
+    };
+
+    const targetKey = norm(assetUrl);
+
+    caseStudies.forEach(cs => {
+      const match = (u) => {
+        if (!u || typeof u !== "string") return false;
+        if (u === assetUrl) return true;
+        if (targetKey && norm(u) === targetKey) return true;
+        return false;
+      };
+
+      if (match(cs.cardImage)) {
+        references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Card Cover" });
+      }
+      if (match(cs.heroImage)) {
+        references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Hero Banner" });
+      }
+      if (match(cs.companyLogo)) {
+        references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Company Logo" });
+      }
+      if (cs.media && Array.isArray(cs.media.gallery)) {
+        if (cs.media.gallery.some(match)) {
+          references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Showcase Gallery" });
+        }
+      }
+      if (cs.media && Array.isArray(cs.media.videos)) {
+        if (cs.media.videos.some(match)) {
+          references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Video Showcase" });
+        }
+      }
+      if (cs.media && cs.media.mockups) {
+        if (match(cs.media.mockups.desktop) || match(cs.media.mockups.mobile)) {
+          references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Mockups" });
+        }
+      }
+    });
+
+    return {
+      isUsed: references.length > 0,
+      count: references.length,
+      references
+    };
+  };
+
+  // ==========================================
+  // SAFE DELETE CONFIRMATION ENGINE (Requirement 3)
+  // ==========================================
+  let pendingDeleteAction = null;
+
+  const openSafeDeleteModal = (options) => {
+    const modal = document.getElementById("safe-delete-modal");
+    if (!modal) return;
+
+    const titleEl = document.getElementById("safe-delete-title");
+    const previewEl = document.getElementById("safe-delete-item-preview");
+    const warningBox = document.getElementById("safe-delete-usage-warning");
+    const warningText = document.getElementById("safe-delete-warning-text");
+    const errorBox = document.getElementById("safe-delete-error");
+    const confirmBtn = document.getElementById("safe-delete-confirm-btn");
+    const cancelBtn = document.getElementById("safe-delete-cancel-btn");
+
+    if (errorBox) errorBox.classList.add("hidden");
+    if (warningBox) warningBox.classList.add("hidden");
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = `<i class="ri-delete-bin-line"></i> DELETE`;
+    }
+    if (cancelBtn) cancelBtn.disabled = false;
+
+    const { type, id, title, slug, asset, usage } = options;
+
+    if (type === "casestudy") {
+      if (titleEl) titleEl.textContent = "Delete Case Study";
+      if (previewEl) {
+        previewEl.innerHTML = `
+          <div class="safe-delete-item-row">
+            <span class="safe-delete-badge">PROJECT</span>
+            <div style="display: flex; flex-direction: column;">
+              <strong style="color: #fff; font-size: 1rem;">${title}</strong>
+              <span style="font-size: 0.78rem; color: var(--text-muted); font-family: monospace;">/portfolio/${slug || id}</span>
+            </div>
+          </div>
+        `;
+      }
+      pendingDeleteAction = async () => {
+        // 1. Supabase database delete with cascading cleanup
+        if (window.BetroDB) {
+          const res = await BetroDB.deleteCaseStudy(id);
+          if (!res.success) {
+            throw new Error(res.error || "Delete failed from cloud database.");
+          }
+        }
+        // 2. Remove from local storage & cache
+        let list = await getFreshBetroCaseStudies();
+        list = list.filter(cs => cs.id !== id && cs.slug !== id && cs.slug !== slug);
+        await saveBetroCaseStudies(list);
+
+        // 3. Update legacy betro_projects
+        try {
+          const legacy = list.map(cs => ({
+            id: cs.id,
+            src: cs.cardImage || cs.heroImage || "images/p1.jpg",
+            companyName: cs.companyName,
+            category: cs.category,
+            shortDesc: cs.shortIntro,
+            services: cs.services,
+            companyId: cs.slug,
+            logo: cs.companyLogo
+          }));
+          localStorage.setItem("betro_projects", JSON.stringify(legacy));
+        } catch (e) { }
+
+        renderCaseStudiesTab();
+        renderDashboardOverview();
+      };
+    } else if (type === "media") {
+      if (titleEl) titleEl.textContent = "Delete Media Asset";
+      let thumb = "";
+      if (asset.type === "image") {
+        thumb = `<img src="${asset.url}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid var(--panel-border);">`;
+      } else if (asset.type === "video") {
+        thumb = `<div style="width: 52px; height: 52px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent-color); font-size: 1.5rem;"><i class="ri-video-line"></i></div>`;
+      } else {
+        thumb = `<div style="width: 52px; height: 52px; background: #000; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1.5rem;"><i class="ri-file-line"></i></div>`;
+      }
+
+      if (previewEl) {
+        previewEl.innerHTML = `
+          <div class="safe-delete-item-row">
+            ${thumb}
+            <div style="display: flex; flex-direction: column; overflow: hidden;">
+              <strong style="color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${asset.name}</strong>
+              <span style="font-size: 0.78rem; color: var(--text-muted);">${(asset.type || "Asset").toUpperCase()} • ${asset.size || "Unknown size"}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      if (usage && usage.isUsed && usage.references.length > 0) {
+        if (warningBox && warningText) {
+          warningBox.classList.remove("hidden");
+          warningText.innerHTML = `
+            <strong>Notice: This media is actively used in ${usage.count} project(s):</strong>
+            <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.8rem; line-height: 1.45;">
+              ${usage.references.map(r => `<li><strong>${r.project}</strong> (${r.role})</li>`).join("")}
+            </ul>
+            <span style="display: block; margin-top: 6px; font-size: 0.75rem; color: #fde68a;">
+              Deleting this file will remove it from the referenced project(s).
+            </span>
+          `;
+        }
+      }
+
+      pendingDeleteAction = async () => {
+        // 1. Backend Supabase delete
+        if (window.BetroDB) {
+          const res = await BetroDB.deleteMedia(asset.storage_path || asset.storagePath, asset.id, asset.url);
+          if (!res.success) {
+            throw new Error(res.error || "Delete failed from cloud storage.");
+          }
+        }
+
+        // 2. Cascade cleanup in case studies
+        if (usage && usage.isUsed) {
+          let projectsList = await getFreshBetroCaseStudies();
+          let modified = false;
+          projectsList = projectsList.map(p => {
+            let pChanged = false;
+            let pCopy = { ...p };
+            if (pCopy.cardImage === asset.url) { pCopy.cardImage = "images/p1.jpg"; pChanged = true; }
+            if (pCopy.heroImage === asset.url) { pCopy.heroImage = "images/p1.jpg"; pChanged = true; }
+            if (pCopy.companyLogo === asset.url) { pCopy.companyLogo = "images/logo.png"; pChanged = true; }
+            if (pCopy.media && Array.isArray(pCopy.media.gallery) && pCopy.media.gallery.includes(asset.url)) {
+              pCopy.media = {
+                ...pCopy.media,
+                gallery: pCopy.media.gallery.filter(u => u !== asset.url)
+              };
+              pChanged = true;
+            }
+            if (pCopy.media && Array.isArray(pCopy.media.videos) && pCopy.media.videos.includes(asset.url)) {
+              pCopy.media = {
+                ...pCopy.media,
+                videos: pCopy.media.videos.filter(u => u !== asset.url)
+              };
+              pChanged = true;
+            }
+            if (pChanged) {
+              modified = true;
+              if (window.BetroDB) {
+                BetroDB.saveCaseStudy(pCopy).catch(e => console.warn(e));
+              }
+            }
+            return pCopy;
+          });
+          if (modified) {
+            await saveBetroCaseStudies(projectsList);
+          }
+        }
+
+        // 3. Remove from media assets list
+        let currentAssets = getMediaAssets();
+        currentAssets = currentAssets.filter(a => a.id !== asset.id && a.url !== asset.url);
+        await saveMediaAssets(currentAssets);
+        BetroStorage.cache["betro_media_assets"] = currentAssets;
+
+        renderMediaLibraryTab();
+        renderDashboardOverview();
+      };
+    }
+
+    modal.classList.remove("hidden");
+  };
+
+  // Safe Delete Modal Confirm / Cancel Handlers
+  const safeDeleteModal = document.getElementById("safe-delete-modal");
+  const safeDeleteConfirmBtn = document.getElementById("safe-delete-confirm-btn");
+  const safeDeleteCancelBtn = document.getElementById("safe-delete-cancel-btn");
+  const safeDeleteCloseBtn = document.getElementById("safe-delete-close-btn");
+
+  const closeSafeDeleteModal = () => {
+    safeDeleteModal?.classList.add("hidden");
+    pendingDeleteAction = null;
+  };
+
+  safeDeleteCancelBtn?.addEventListener("click", closeSafeDeleteModal);
+  safeDeleteCloseBtn?.addEventListener("click", closeSafeDeleteModal);
+
+  safeDeleteConfirmBtn?.addEventListener("click", async () => {
+    if (!pendingDeleteAction) return;
+    const errorBox = document.getElementById("safe-delete-error");
+    const errorMsg = document.getElementById("safe-delete-error-msg");
+
+    safeDeleteConfirmBtn.disabled = true;
+    if (safeDeleteCancelBtn) safeDeleteCancelBtn.disabled = true;
+    safeDeleteConfirmBtn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Deleting...`;
+    if (errorBox) errorBox.classList.add("hidden");
+
+    try {
+      await pendingDeleteAction();
+      closeSafeDeleteModal();
+      showAdminToast("Deleted successfully.", "success");
+    } catch (err) {
+      console.error("[SafeDelete] Operation failed:", err);
+      safeDeleteConfirmBtn.disabled = false;
+      if (safeDeleteCancelBtn) safeDeleteCancelBtn.disabled = false;
+      safeDeleteConfirmBtn.innerHTML = `<i class="ri-delete-bin-line"></i> DELETE`;
+      if (errorMsg) errorMsg.textContent = "Delete failed: " + (err.message || "Please try again.");
+      if (errorBox) errorBox.classList.remove("hidden");
+      showAdminToast("Delete failed. Please try again.", "error");
+    }
+  });
+
+  // ==========================================
+  // MEDIA DETAILS & FILE REPLACEMENT ENGINE (Requirement 4)
+  // ==========================================
+  let activeDetailsAsset = null;
+
+  const openMediaDetailsModal = (asset) => {
+    if (!asset) return;
+    activeDetailsAsset = asset;
+    const modal = document.getElementById("media-details-modal");
+    if (!modal) return;
+
+    const previewContainer = document.getElementById("media-details-preview-container");
+    const nameEl = document.getElementById("media-details-name");
+    const typeEl = document.getElementById("media-details-type");
+    const sizeEl = document.getElementById("media-details-size");
+    const dateEl = document.getElementById("media-details-date");
+    const urlEl = document.getElementById("media-details-url");
+    const openLink = document.getElementById("media-details-open-link");
+    const usageList = document.getElementById("media-details-usage-list");
+
+    if (nameEl) nameEl.textContent = asset.name || "Asset";
+    if (typeEl) typeEl.textContent = (asset.type || "image").toUpperCase();
+    if (sizeEl) sizeEl.textContent = asset.size || "Unknown size";
+    if (dateEl) dateEl.textContent = asset.date || "Recent";
+    if (urlEl) urlEl.textContent = asset.url || "";
+    if (openLink) openLink.href = asset.url || "#";
+
+    if (previewContainer) {
+      if (asset.type === "image") {
+        previewContainer.innerHTML = `<img src="${asset.url}" alt="${asset.name}">`;
+      } else if (asset.type === "video") {
+        previewContainer.innerHTML = `<video src="${asset.url}" controls muted style="max-height: 100%;"></video>`;
+      } else {
+        previewContainer.innerHTML = `<i class="ri-file-pdf-fill" style="font-size: 4rem; color: #f87171;"></i>`;
+      }
+    }
+
+    // Reference usage calculation
+    const usage = getMediaUsage(asset.url);
+    if (usageList) {
+      if (usage.isUsed && usage.references.length > 0) {
+        usageList.innerHTML = usage.references.map(r => `
+          <div class="media-usage-pill-item">
+            <span class="proj-name"><i class="ri-folder-line"></i> ${r.project}</span>
+            <span class="proj-role">${r.role}</span>
+          </div>
+        `).join("");
+      } else {
+        usageList.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-muted); padding: 4px 0;"><i class="ri-checkbox-circle-line" style="color: var(--accent-color);"></i> Unreferenced — safe to replace or delete.</div>`;
+      }
+    }
+
+    modal.classList.remove("hidden");
+  };
+
+  // Media Details Modal Controls
+  const mediaDetailsModal = document.getElementById("media-details-modal");
+  document.getElementById("media-details-close-btn")?.addEventListener("click", () => mediaDetailsModal?.classList.add("hidden"));
+  document.getElementById("media-details-done-btn")?.addEventListener("click", () => mediaDetailsModal?.classList.add("hidden"));
+
+  document.getElementById("media-details-copy-url-btn")?.addEventListener("click", () => {
+    if (activeDetailsAsset?.url) {
+      navigator.clipboard.writeText(activeDetailsAsset.url);
+      showAdminToast("Asset URL copied to clipboard!", "success");
+    }
+  });
+
+  document.getElementById("media-details-delete-btn")?.addEventListener("click", () => {
+    if (activeDetailsAsset) {
+      const assetToDel = activeDetailsAsset;
+      mediaDetailsModal?.classList.add("hidden");
+      openSafeDeleteModal({
+        type: "media",
+        asset: assetToDel,
+        usage: getMediaUsage(assetToDel.url)
+      });
+    }
+  });
+
+  // Replace media file handler
+  const replaceFileInput = document.getElementById("media-replace-file-input");
+  replaceFileInput?.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeDetailsAsset) return;
+    e.target.value = ""; // reset for next time
+
+    const oldUrl = activeDetailsAsset.url;
+    showAdminToast(`Uploading replacement "${file.name}"...`, "info", 5000);
+
+    try {
+      const newAsset = await uploadMediaFile(file, activeDetailsAsset.folder || "showcase");
+      const newUrl = newAsset.url;
+
+      // Update case studies referencing oldUrl
+      let caseStudies = await getFreshBetroCaseStudies();
+      let updatedCount = 0;
+      caseStudies = caseStudies.map(cs => {
+        let changed = false;
+        let cCopy = { ...cs };
+        if (cCopy.cardImage === oldUrl) { cCopy.cardImage = newUrl; changed = true; }
+        if (cCopy.heroImage === oldUrl) { cCopy.heroImage = newUrl; changed = true; }
+        if (cCopy.companyLogo === oldUrl) { cCopy.companyLogo = newUrl; changed = true; }
+        if (cCopy.media && Array.isArray(cCopy.media.gallery)) {
+          if (cCopy.media.gallery.includes(oldUrl)) {
+            cCopy.media = {
+              ...cCopy.media,
+              gallery: cCopy.media.gallery.map(u => u === oldUrl ? newUrl : u)
+            };
+            changed = true;
+          }
+        }
+        if (cCopy.media && Array.isArray(cCopy.media.videos)) {
+          if (cCopy.media.videos.includes(oldUrl)) {
+            cCopy.media = {
+              ...cCopy.media,
+              videos: cCopy.media.videos.map(u => u === oldUrl ? newUrl : u)
+            };
+            changed = true;
+          }
+        }
+        if (changed) {
+          updatedCount++;
+          if (window.BetroDB) {
+            BetroDB.saveCaseStudy(cCopy).catch(err => console.warn(err));
+          }
+        }
+        return cCopy;
+      });
+
+      if (updatedCount > 0) {
+        await saveBetroCaseStudies(caseStudies);
+      }
+
+      // Update active asset
+      activeDetailsAsset.url = newUrl;
+      activeDetailsAsset.name = file.name;
+      activeDetailsAsset.size = newAsset.size;
+
+      openMediaDetailsModal(activeDetailsAsset);
+      renderMediaLibraryTab();
+      renderDashboardOverview();
+      showAdminToast("Uploaded successfully. Media replaced across website.", "success");
+    } catch (err) {
+      console.error("[ReplaceMedia] Failed:", err);
+      showAdminToast("Upload failed: " + (err.message || "Please try again."), "error", 6000);
+    }
+  });
+
+  const replaceMediaAssetQuick = (targetAsset) => {
+    activeDetailsAsset = targetAsset;
+    replaceFileInput?.click();
+  };
+
   // Render Central Media Library Tab Panel
   let currentMediaTypeFilter = "all";
   const renderMediaLibraryTab = async () => {
@@ -809,7 +1228,11 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.innerHTML = "";
 
     if (assets.length === 0) {
-      grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 2rem; text-align: center; color: var(--text-secondary);">No media assets found. Drag and drop files above to upload!</div>`;
+      grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 3rem 1.5rem; text-align: center; color: var(--text-secondary); background: rgba(255,255,255,0.02); border-radius: var(--radius-lg); border: 1px dashed var(--panel-border);">
+        <i class="ri-folder-image-line" style="font-size: 2.5rem; opacity: 0.4; display: block; margin-bottom: 8px;"></i>
+        <h4 style="color: var(--text-primary); font-size: 1.1rem; margin-bottom: 4px;">No Media Assets Found</h4>
+        <p style="font-size: 0.85rem; max-width: 360px; margin: 0 auto 1.25rem auto;">Upload images or videos via the button above or drag and drop files onto the upload zone.</p>
+      </div>`;
       return;
     }
 
@@ -817,44 +1240,64 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "media-asset-card";
 
+      const usage = getMediaUsage(asset.url);
+      const isUsed = usage.isUsed;
+
       let thumbHtml = "";
       if (asset.type === "image") {
-        thumbHtml = `<img src="${asset.url}" alt="${asset.name}">`;
+        thumbHtml = `<img src="${asset.url}" alt="${asset.name}" loading="lazy">`;
       } else if (asset.type === "video") {
-        thumbHtml = `<video src="${asset.url}" muted></video>`;
+        thumbHtml = `<video src="${asset.url}" muted preload="metadata"></video><i class="ri-play-circle-fill" style="position: absolute; font-size: 2rem; color: #fff; opacity: 0.85;"></i>`;
       } else {
-        thumbHtml = `<i class="ri-file-pdf-fill doc-icon"></i>`;
+        thumbHtml = `<i class="ri-file-pdf-fill" style="font-size: 3rem; color: #f87171;"></i>`;
       }
 
+      const usageBadgeHtml = isUsed
+        ? `<span class="media-usage-pill used" title="Used in ${usage.count} project(s)"><i class="ri-link"></i> USED (${usage.count})</span>`
+        : `<span class="media-usage-pill unused" title="Not referenced in any project"><i class="ri-link-unlink"></i> UNUSED</span>`;
+
       card.innerHTML = `
-        <div class="media-asset-thumb">
+        <span class="media-type-badge">${(asset.type || "IMG")}</span>
+        ${usageBadgeHtml}
+        <div class="media-asset-thumb" title="Click to view full details">
           ${thumbHtml}
         </div>
         <div class="media-asset-info">
           <div class="media-asset-name" title="${asset.name}">${asset.name}</div>
           <div class="media-asset-meta">
-            <span>${asset.type.toUpperCase()}</span>
-            <span>${asset.size}</span>
+            <span>${asset.size || "Cloud Asset"}</span>
+            <span>${asset.date || ""}</span>
           </div>
         </div>
         <div class="media-asset-actions">
-          <button type="button" class="admin-btn secondary-btn copy-url-btn" title="Copy URL"><i class="ri-file-copy-line"></i></button>
-          <button type="button" class="admin-btn danger-btn delete-asset-btn" title="Delete"><i class="ri-delete-bin-line"></i></button>
+          <button type="button" class="admin-btn secondary-btn info-asset-btn" title="View details and usage">
+            <i class="ri-information-line"></i>
+          </button>
+          <button type="button" class="admin-btn secondary-btn replace-asset-btn" title="Replace file across site">
+            <i class="ri-repeat-line"></i>
+          </button>
+          <button type="button" class="admin-btn secondary-btn copy-url-btn" title="Copy public CDN URL">
+            <i class="ri-file-copy-line"></i>
+          </button>
+          <button type="button" class="admin-btn danger-btn delete-asset-btn" title="Delete media asset">
+            <i class="ri-delete-bin-line"></i>
+          </button>
         </div>
       `;
 
+      card.querySelector(".media-asset-thumb")?.addEventListener("click", () => openMediaDetailsModal(asset));
+      card.querySelector(".info-asset-btn")?.addEventListener("click", () => openMediaDetailsModal(asset));
+      card.querySelector(".replace-asset-btn")?.addEventListener("click", () => replaceMediaAssetQuick(asset));
       card.querySelector(".copy-url-btn")?.addEventListener("click", () => {
         navigator.clipboard.writeText(asset.url);
-        alert("Asset URL copied to clipboard!");
+        showAdminToast("Asset URL copied to clipboard!", "success");
       });
-
       card.querySelector(".delete-asset-btn")?.addEventListener("click", () => {
-        if (confirm(`Delete asset "${asset.name}"?`)) {
-          let list = getMediaAssets();
-          list = list.filter(a => a.id !== asset.id);
-          saveMediaAssets(list);
-          renderMediaLibraryTab();
-        }
+        openSafeDeleteModal({
+          type: "media",
+          asset,
+          usage: getMediaUsage(asset.url)
+        });
       });
 
       grid.appendChild(card);
@@ -884,10 +1327,11 @@ document.addEventListener("DOMContentLoaded", () => {
     mediaFileInput.addEventListener("change", (e) => {
       const files = Array.from(e.target.files);
       handleMultiFilesUpload(files);
+      e.target.value = "";
     });
   }
 
-  const handleMultiFilesUpload = (files) => {
+  const handleMultiFilesUpload = async (files) => {
     if (!files || files.length === 0) return;
     const progressBox = document.getElementById("media-upload-progress");
     const progressFill = document.getElementById("media-upload-progress-fill");
@@ -897,22 +1341,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let completed = 0;
     const total = files.length;
+    let failed = 0;
 
-    files.forEach((file) => {
-      uploadMediaFile(file)
-        .then(() => {
-          completed++;
-          const pct = Math.round((completed / total) * 100);
-          if (progressFill) progressFill.style.width = pct + "%";
-          if (progressText) progressText.textContent = `Uploading... ${pct}% (${completed}/${total})`;
-          if (completed === total) {
-            setTimeout(() => {
-              if (progressBox) progressBox.classList.add("hidden");
-            }, 800);
-          }
-        })
-        .catch(() => { });
-    });
+    for (let i = 0; i < total; i++) {
+      const file = files[i];
+      if (progressText) progressText.textContent = `Uploading file ${i + 1} of ${total}: "${file.name}"...`;
+      try {
+        await uploadMediaFile(file, "showcase", (p) => {
+          const overallPct = Math.round(((i + (p.pct / 100)) / total) * 100);
+          if (progressFill) progressFill.style.width = overallPct + "%";
+        });
+        completed++;
+      } catch (err) {
+        console.error(`Failed uploading ${file.name}:`, err);
+        failed++;
+      }
+    }
+
+    if (progressFill) progressFill.style.width = "100%";
+    if (progressText) progressText.textContent = `Completed! ${completed} of ${total} files uploaded.`;
+
+    setTimeout(() => {
+      if (progressBox) progressBox.classList.add("hidden");
+    }, 1200);
+
+    await renderMediaLibraryTab();
+    renderDashboardOverview();
+
+    if (failed === 0) {
+      showAdminToast(`Uploaded ${completed} file${completed > 1 ? "s" : ""} successfully.`, "success");
+    } else {
+      showAdminToast(`Uploaded ${completed} file(s). ${failed} file(s) failed.`, "error");
+    }
   };
 
   document.getElementById("media-library-search")?.addEventListener("input", renderMediaLibraryTab);
@@ -1274,10 +1734,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const getBetroCaseStudies = () => {
     const cached = BetroStorage.cache["betro_casestudies"];
-    if (cached && Array.isArray(cached) && cached.length > 0) return cached;
+    if (cached && Array.isArray(cached)) return cached;
 
     const storedSync = BetroStorage.getItemSync("betro_casestudies");
-    if (storedSync && Array.isArray(storedSync) && storedSync.length > 0) {
+    if (storedSync && Array.isArray(storedSync)) {
       BetroStorage.cache["betro_casestudies"] = storedSync;
       return storedSync;
     }
@@ -1305,8 +1765,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.BetroDB) {
       try {
         const fromDb = await BetroDB.getCaseStudies({ forceRefresh: true, includeDrafts: true });
-        if (fromDb && Array.isArray(fromDb) && fromDb.length > 0) {
+        if (fromDb && Array.isArray(fromDb)) {
           BetroStorage.cache["betro_casestudies"] = fromDb;
+          await BetroStorage.setItem("betro_casestudies", fromDb);
           return fromDb;
         }
       } catch (e) {
@@ -1314,7 +1775,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     const fresh = await BetroStorage.getItem("betro_casestudies");
-    if (fresh && Array.isArray(fresh) && fresh.length > 0) {
+    if (fresh && Array.isArray(fresh)) {
       BetroStorage.cache["betro_casestudies"] = fresh;
       return fresh;
     }
@@ -1465,6 +1926,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const category = document.getElementById("cs-category")?.value?.trim() || "Creative Campaign";
     const industry = document.getElementById("cs-industry")?.value?.trim() || "General Business";
     const clientName = document.getElementById("cs-client-name")?.value?.trim() || companyName;
+    const year = document.getElementById("cs-year")?.value?.trim() || "2024 - 2025";
     const status = document.getElementById("cs-status")?.value || "published";
 
     const logoUrl = document.getElementById("cs-logo-url")?.value?.trim() || "images/logo.png";
@@ -1544,6 +2006,7 @@ document.addEventListener("DOMContentLoaded", () => {
             category,
             industry,
             clientName,
+            year,
             status,
             companyLogo: logoUrl,
             cardImage: cardImageUrl || cs.cardImage || heroUrl,
@@ -1575,7 +2038,7 @@ document.addEventListener("DOMContentLoaded", () => {
           industry,
           clientName,
           status,
-          year: "2024 - 2025",
+          year: year,
           companyLogo: logoUrl,
           cardImage: cardImageUrl || heroUrl,
           heroImage: heroUrl,
@@ -1604,7 +2067,7 @@ document.addEventListener("DOMContentLoaded", () => {
         industry,
         clientName,
         status,
-        year: "2024 - 2025",
+        year: year,
         companyLogo: logoUrl,
         cardImage: cardImageUrl || heroUrl,
         heroImage: heroUrl,
@@ -1874,7 +2337,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    caseStudies.forEach(cs => {
+    caseStudies.forEach((cs, idx) => {
       const card = document.createElement("div");
       card.className = "cs-project-card";
 
@@ -1910,6 +2373,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <button type="button" class="admin-btn primary-btn cs-btn-edit edit-cs-btn" data-id="${cs.id}">
               <i class="ri-edit-line"></i> Edit
             </button>
+            <button type="button" class="admin-btn secondary-btn cs-btn-move move-cs-up-btn" data-id="${cs.id}" title="Move earlier in portfolio" ${idx === 0 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>
+              <i class="ri-arrow-up-s-line"></i>
+            </button>
+            <button type="button" class="admin-btn secondary-btn cs-btn-move move-cs-down-btn" data-id="${cs.id}" title="Move later in portfolio" ${idx === caseStudies.length - 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>
+              <i class="ri-arrow-down-s-line"></i>
+            </button>
             <button type="button" class="admin-btn secondary-btn cs-btn-copy duplicate-cs-btn" data-id="${cs.id}" title="Duplicate Project">
               <i class="ri-file-copy-line"></i>
             </button>
@@ -1924,6 +2393,8 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       card.querySelector(".edit-cs-btn")?.addEventListener("click", () => openCSModal(cs.id));
+      card.querySelector(".move-cs-up-btn")?.addEventListener("click", () => moveCSOrder(cs.id, "up"));
+      card.querySelector(".move-cs-down-btn")?.addEventListener("click", () => moveCSOrder(cs.id, "down"));
       card.querySelector(".duplicate-cs-btn")?.addEventListener("click", () => duplicateCS(cs.id));
       card.querySelector(".toggle-cs-status")?.addEventListener("click", () => toggleCSStatus(cs.id));
       card.querySelector(".delete-cs-btn")?.addEventListener("click", () => deleteCS(cs.id));
@@ -1931,6 +2402,40 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.appendChild(card);
     });
   }
+
+  const moveCSOrder = async (csId, direction) => {
+    let list = await getFreshBetroCaseStudies();
+    const index = list.findIndex(c => c.id === csId);
+    if (index === -1) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= list.length) return;
+
+    // Swap positions
+    const temp = list[index];
+    list[index] = list[newIndex];
+    list[newIndex] = temp;
+
+    // Re-index display_order
+    list.forEach((item, idx) => {
+      item.displayOrder = idx;
+      item.display_order = idx;
+    });
+
+    await saveBetroCaseStudies(list);
+
+    if (window.BetroDB) {
+      try {
+        await BetroDB.saveCaseStudy(list[index]);
+        await BetroDB.saveCaseStudy(list[newIndex]);
+      } catch (e) {
+        console.warn("Could not save reordered case studies to cloud:", e);
+      }
+    }
+
+    renderCaseStudiesTab();
+    showAdminToast("Project order updated.", "success");
+  };
 
   const duplicateCS = async (csId) => {
     let list = await getFreshBetroCaseStudies();
@@ -1971,16 +2476,15 @@ document.addEventListener("DOMContentLoaded", () => {
     showAdminToast(`Project is now ${updatedCS?.status === "published" ? "Live (Published)" : "Draft (Hidden)"}.`, "info");
   };
 
-  const deleteCS = async (csId) => {
-    if (!confirm("Are you sure you want to delete this Case Study? This cannot be undone.")) return;
-    if (window.BetroDB) {
-      try { await BetroDB.deleteCaseStudy(csId); } catch (e) { console.error("Cloud delete error:", e); }
-    }
-    let list = await getFreshBetroCaseStudies();
-    list = list.filter(cs => cs.id !== csId);
-    await saveBetroCaseStudies(list);
-    renderCaseStudiesTab();
-    showAdminToast("Case Study removed successfully.", "info");
+  const deleteCS = (csId) => {
+    const list = getBetroCaseStudies();
+    const target = list.find(c => c.id === csId);
+    openSafeDeleteModal({
+      type: "casestudy",
+      id: csId,
+      title: target?.companyName || "Case Study",
+      slug: target?.slug || csId
+    });
   };
 
   // Case Study Editor Controls & Tabs Initialization
@@ -3041,6 +3545,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("cs-category").value = cs.category || "";
         document.getElementById("cs-industry").value = cs.industry || "";
         document.getElementById("cs-client-name").value = cs.clientName || "";
+        if (document.getElementById("cs-year")) document.getElementById("cs-year").value = cs.year || "2024 - 2025";
         document.getElementById("cs-status").value = cs.status || "published";
 
         document.getElementById("cs-logo-url").value = cs.companyLogo || "";
