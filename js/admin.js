@@ -15,38 +15,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Default brand logos
   const defaultBrands = [
-    { id: "brand-1", src: "images/golden.png" },
-    { id: "brand-2", src: "images/celes.png" },
-    { id: "brand-3", src: "images/toi.png", style: "width: 40%;" },
-    { id: "brand-4", src: "images/AlainArchitecture.png" },
-    { id: "brand-5", src: "images/Gurumitra.png" },
-    { id: "brand-6", src: "images/Nahdimandi-white.png" },
-    { id: "brand-7", src: "images/NiceMobiles.png" },
-    { id: "brand-8", src: "images/Soofimandi-white.png" },
-    { id: "brand-9", src: "images/KeyFactory.png" },
-    { id: "brand-10", src: "images/ENGO FINAL LOGO-01.png" },
-    { id: "brand-11", src: "images/Artboard 5.png" },
-    { id: "brand-12", src: "images/Picsart_25-09-24_21-31-47-226.png" }
+    { id: "brand-1", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png" },
+    { id: "brand-2", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png" },
+    { id: "brand-3", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;" },
+    { id: "brand-4", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png" },
+    { id: "brand-5", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png" },
+    { id: "brand-6", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png" },
+    { id: "brand-7", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png" },
+    { id: "brand-8", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png" },
+    { id: "brand-9", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png" },
+    { id: "brand-10", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png" },
+    { id: "brand-11", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png" },
+    { id: "brand-12", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png" }
   ];
 
   // Default portfolio projects
   const defaultProjects = [
-    { id: "proj-1", src: "images/p1.jpg" },
-    { id: "proj-2", src: "images/p2.jpg" },
-    { id: "proj-3", src: "images/p3.jpg" },
-    { id: "proj-4", src: "images/p4.jpg" },
-    { id: "proj-5", src: "images/p5.jpg" },
-    { id: "proj-6", src: "images/p6.jpg" },
-    { id: "proj-7", src: "images/p7.jpg" },
-    { id: "proj-8", src: "images/p8.jpg" },
-    { id: "proj-9", src: "images/s1.jpg" },
-    { id: "proj-10", src: "images/s2.jpg" },
-    { id: "proj-11", src: "images/s3.jpg" },
-    { id: "proj-12", src: "images/s4.jpg" },
-    { id: "proj-13", src: "images/s5.jpg" },
-    { id: "proj-14", src: "images/s6.jpg" },
-    { id: "proj-15", src: "images/s7.jpg" },
-    { id: "proj-16", src: "images/s8.jpg" }
+    { id: "proj-1", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg" },
+    { id: "proj-2", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg" },
+    { id: "proj-3", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg" },
+    { id: "proj-4", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg" },
+    { id: "proj-5", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg" },
+    { id: "proj-6", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg" },
+    { id: "proj-7", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg" },
+    { id: "proj-8", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg" },
+    { id: "proj-9", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg" },
+    { id: "proj-10", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg" },
+    { id: "proj-11", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg" },
+    { id: "proj-12", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg" },
+    { id: "proj-13", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg" },
+    { id: "proj-14", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg" },
+    { id: "proj-15", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg" },
+    { id: "proj-16", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg" }
   ];
 
   // --- Views Navigation ---
@@ -330,18 +330,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- CENTRAL MEDIA MANAGEMENT SYSTEM ---
   const defaultMediaAssets = [
-    { id: "asset-1", name: "logo.png", type: "image", folder: "logos", size: "24 KB", url: "images/logo.png", date: "Default" },
-    { id: "asset-2", name: "p1.jpg", type: "image", folder: "banners", size: "142 KB", url: "images/p1.jpg", date: "Default" },
-    { id: "asset-3", name: "p2.jpg", type: "image", folder: "showcase", size: "180 KB", url: "images/p2.jpg", date: "Default" },
-    { id: "asset-4", name: "p3.jpg", type: "image", folder: "showcase", size: "165 KB", url: "images/p3.jpg", date: "Default" },
-    { id: "asset-5", name: "p4.jpg", type: "image", folder: "showcase", size: "190 KB", url: "images/p4.jpg", date: "Default" },
-    { id: "asset-6", name: "p5.jpg", type: "image", folder: "showcase", size: "155 KB", url: "images/p5.jpg", date: "Default" },
-    { id: "asset-7", name: "s1.jpg", type: "image", folder: "showcase", size: "110 KB", url: "images/s1.jpg", date: "Default" },
-    { id: "asset-8", name: "golden.png", type: "image", folder: "logos", size: "35 KB", url: "images/golden.png", date: "Default" },
-    { id: "asset-9", name: "celes.png", type: "image", folder: "logos", size: "28 KB", url: "images/celes.png", date: "Default" },
-    { id: "asset-10", name: "toi.png", type: "image", folder: "logos", size: "30 KB", url: "images/toi.png", date: "Default" },
-    { id: "asset-11", name: "NiceMobiles.png", type: "image", folder: "logos", size: "32 KB", url: "images/NiceMobiles.png", date: "Default" },
-    { id: "asset-12", name: "Picsart_25-09-24_21-31-47-226.png", type: "image", folder: "logos", size: "45 KB", url: "images/Picsart_25-09-24_21-31-47-226.png", date: "Default" }
+    { id: "asset-1", name: "logo.png", type: "image", folder: "logos", size: "24 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png", date: "Default" },
+    { id: "asset-2", name: "p1.jpg", type: "image", folder: "banners", size: "142 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg", date: "Default" },
+    { id: "asset-3", name: "p2.jpg", type: "image", folder: "showcase", size: "180 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg", date: "Default" },
+    { id: "asset-4", name: "p3.jpg", type: "image", folder: "showcase", size: "165 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg", date: "Default" },
+    { id: "asset-5", name: "p4.jpg", type: "image", folder: "showcase", size: "190 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg", date: "Default" },
+    { id: "asset-6", name: "p5.jpg", type: "image", folder: "showcase", size: "155 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", date: "Default" },
+    { id: "asset-7", name: "s1.jpg", type: "image", folder: "showcase", size: "110 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg", date: "Default" },
+    { id: "asset-8", name: "golden.png", type: "image", folder: "logos", size: "35 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", date: "Default" },
+    { id: "asset-9", name: "celes.png", type: "image", folder: "logos", size: "28 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", date: "Default" },
+    { id: "asset-10", name: "toi.png", type: "image", folder: "logos", size: "30 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", date: "Default" },
+    { id: "asset-11", name: "NiceMobiles.png", type: "image", folder: "logos", size: "32 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", date: "Default" },
+    { id: "asset-12", name: "Picsart_25-09-24_21-31-47-226.png", type: "image", folder: "logos", size: "45 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", date: "Default" }
   ];
 
   // ==========================================
@@ -935,7 +935,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const legacy = list.map(cs => ({
             id: cs.id,
-            src: cs.cardImage || cs.heroImage || "images/p1.jpg",
+            src: cs.cardImage || cs.heroImage || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg",
             companyName: cs.companyName,
             category: cs.category,
             shortDesc: cs.shortIntro,
@@ -1029,9 +1029,9 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let p of projectsList) {
           let pChanged = false;
           let pCopy = { ...p };
-          if (match(pCopy.cardImage)) { pCopy.cardImage = "images/p1.jpg"; pChanged = true; }
-          if (match(pCopy.heroImage)) { pCopy.heroImage = "images/p1.jpg"; pChanged = true; }
-          if (match(pCopy.companyLogo)) { pCopy.companyLogo = "images/logo.png"; pChanged = true; }
+          if (match(pCopy.cardImage)) { pCopy.cardImage = "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg"; pChanged = true; }
+          if (match(pCopy.heroImage)) { pCopy.heroImage = "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg"; pChanged = true; }
+          if (match(pCopy.companyLogo)) { pCopy.companyLogo = "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png"; pChanged = true; }
           if (pCopy.media && Array.isArray(pCopy.media.gallery)) {
             const orig = pCopy.media.gallery.length;
             pCopy.media.gallery = pCopy.media.gallery.filter(u => !match(u));
@@ -1582,8 +1582,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const defaultCaseStudies = [
     {
       id: "cs-mylaban", slug: "mylaban", status: "published",
-      companyName: "MyLaban", companyLogo: "images/Picsart_25-09-24_21-31-47-226.png",
-      heroImage: "images/p1.jpg", cardImage: "images/p1.jpg",
+      companyName: "MyLaban", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg",
       category: "Creative Branding & Social Campaign", industry: "Food & Beverage Dessert Lounge",
       clientName: "MyLaban Dessert Shop", year: "2024 - 2025",
       shortIntro: "Specialty dessert shop branding and high-converting social media marketing campaign in Kochi.",
@@ -1593,14 +1593,14 @@ document.addEventListener("DOMContentLoaded", () => {
       projectObjective: "Craft a comprehensive brand identity, mouth-watering food photography, viral AI video reels, and aesthetic social media campaigns to maximize engagement.",
       services: ["Creative Design", "Social Media Management", "Video Production", "AI Video Creation", "Video Content Creation", "Brand Identity", "Photography"],
       overview: { challenge: "Differentiating MyLaban in a competitive food scene by highlighting unique Egyptian dessert flavors.", strategy: "Developing viral short-form video reels, AI-enhanced food visuals, and aesthetic Instagram layouts.", solution: "Creating mouth-watering video content showcasing signature desserts and authentic preparation techniques.", execution: "Multichannel distribution across Instagram, YouTube Shorts, and local influencer campaigns.", results: "Over 500k video views and a significant surge in store footfall and brand engagement." },
-      media: { gallery: ["images/p1.jpg", "images/p5.jpg", "images/s1.jpg"], videos: [], mockups: { desktop: "images/p1.jpg", tablet: "images/p5.jpg", mobile: "images/s1.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg", "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg" } },
       results: { stat1Num: "+500K", stat1Label: "Social Reel Views", stat2Num: "+60%", stat2Label: "Footfall Growth", stat3Num: "4.2x", stat3Label: "ROI Increase", stat4Num: "100%", stat4Label: "Brand Satisfaction", feedbackQuote: "Betroverse completely transformed our video marketing. Their reels and short-form content brought us viral traction and customer engagement!", feedbackAuthor: "MyLaban Founder", feedbackRole: "Kochi Dessert Lounge" },
-      seo: { title: "MyLaban Case Study | Creative Branding & Video Production by Betroverse", description: "Explore how Betroverse built viral video campaigns, brand strategy, and social media growth for MyLaban Dessert Shop.", keywords: "MyLaban, dessert branding, video production, Kochi marketing, Betroverse", ogImage: "images/p1.jpg", canonicalUrl: "https://betroverse.in/portfolio/mylaban" }
+      seo: { title: "MyLaban Case Study | Creative Branding & Video Production by Betroverse", description: "Explore how Betroverse built viral video campaigns, brand strategy, and social media growth for MyLaban Dessert Shop.", keywords: "MyLaban, dessert branding, video production, Kochi marketing, Betroverse", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg", canonicalUrl: "https://betroverse.in/portfolio/mylaban" }
     },
     {
       id: "cs-sa-adiya", slug: "sa-adiya", status: "published",
-      companyName: "Sa-Adiya Golden Jubilee", companyLogo: "images/golden.png",
-      heroImage: "images/p2.jpg", cardImage: "images/p2.jpg",
+      companyName: "Sa-Adiya Golden Jubilee", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg",
       category: "Event Branding & Celebration Collateral", industry: "Event Branding & Academic Institutions",
       clientName: "Sa-Adiya Foundation", year: "2024 - 2025",
       shortIntro: "Flyers, registration guidelines, and social media announcements for Sa-Adiya's grand Golden Jubilee celebrations.",
@@ -1610,14 +1610,14 @@ document.addEventListener("DOMContentLoaded", () => {
       projectObjective: "Deliver golden-themed stage graphics, registration notices, and commemorative flyers.",
       services: ["Creative Design", "Social Media Management", "Event Branding", "Print Collateral"],
       overview: { challenge: "Designing elegant, cohesive event branding suitable for a major 50-year celebration.", strategy: "Using golden thematic elements, clear typography, and structured announcement layouts.", solution: "Creating registration notices, event schedules, and ceremonial posters.", execution: "Multichannel distribution via social media platforms and print media flyers.", results: "Widespread community reach and successful event attendance across all sessions." },
-      media: { gallery: ["images/p2.jpg"], videos: [], mockups: { desktop: "images/p2.jpg", tablet: "images/p2.jpg", mobile: "images/p2.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg" } },
       results: { stat1Num: "+100K", stat1Label: "Event Reach", stat2Num: "50 Yrs", stat2Label: "Celebrated Legacy", stat3Num: "100%", stat3Label: "Participation", stat4Num: "100%", stat4Label: "Satisfaction", feedbackQuote: "The Golden Jubilee event banners and flyers designed by Betroverse added immense prestige to our 50-year celebrations.", feedbackAuthor: "Sa-Adiya Jubilee Committee", feedbackRole: "Educational Foundation" },
-      seo: { title: "Sa-Adiya Golden Jubilee Case Study | Event Branding by Betroverse", description: "Explore Sa-Adiya's Golden Jubilee event branding.", keywords: "Sa-Adiya, Golden Jubilee, event branding, Betroverse", ogImage: "images/p2.jpg", canonicalUrl: "https://betroverse.in/portfolio/sa-adiya" }
+      seo: { title: "Sa-Adiya Golden Jubilee Case Study | Event Branding by Betroverse", description: "Explore Sa-Adiya's Golden Jubilee event branding.", keywords: "Sa-Adiya, Golden Jubilee, event branding, Betroverse", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg", canonicalUrl: "https://betroverse.in/portfolio/sa-adiya" }
     },
     {
       id: "cs-toi-cafe", slug: "toi-cafe", status: "published",
-      companyName: "Toi Cafe", companyLogo: "images/toi.png",
-      heroImage: "images/p3.jpg", cardImage: "images/p3.jpg",
+      companyName: "Toi Cafe", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg",
       category: "Specialty Cafe & Visual Branding", industry: "Specialty Coffee & Desserts",
       clientName: "Toi Cafe & Dessert Lounge", year: "2024 - 2025",
       shortIntro: "Aesthetic social media campaign, specialty beverage photography, and custom menu layout design.",
@@ -1627,14 +1627,14 @@ document.addEventListener("DOMContentLoaded", () => {
       projectObjective: "Deliver high-end beverage photography, custom menu cards, and targeted social ad campaigns.",
       services: ["Creative Design", "Social Media Management", "Photography", "Menu Layout Design", "Branding"],
       overview: { challenge: "Positioning Toi Cafe as the top aesthetic coffee & dessert spot.", strategy: "High-end beverage photography, warm coffee tone palettes, and clean grid layouts.", solution: "Designing elegant menus and weekly social media highlights.", execution: "Professional photo shoots and targeted digital ad campaigns.", results: "Substantial increase in cafe weekend visits and online social engagement." },
-      media: { gallery: ["images/p3.jpg", "images/p6.jpg", "images/s4.jpg"], videos: [], mockups: { desktop: "images/p3.jpg", tablet: "images/p6.jpg", mobile: "images/s4.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg", "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg", "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg" } },
       results: { stat1Num: "+350K", stat1Label: "Social Reach", stat2Num: "+50%", stat2Label: "Weekend Customer Increase", stat3Num: "3.0x", stat3Label: "ROI Impact", stat4Num: "100%", stat4Label: "Client Approval", feedbackQuote: "The aesthetic social media posts and menu layouts designed by Betroverse captured our cafe's vibe perfectly!", feedbackAuthor: "Toi Cafe Team", feedbackRole: "Specialty Cafe & Lounge" },
-      seo: { title: "Toi Cafe Case Study | Specialty Coffee Branding by Betroverse", description: "Discover Toi Cafe's menu design and aesthetic social media campaigns.", keywords: "Toi Cafe, coffee branding, menu design, Betroverse", ogImage: "images/p3.jpg", canonicalUrl: "https://betroverse.in/portfolio/toi-cafe" }
+      seo: { title: "Toi Cafe Case Study | Specialty Coffee Branding by Betroverse", description: "Discover Toi Cafe's menu design and aesthetic social media campaigns.", keywords: "Toi Cafe, coffee branding, menu design, Betroverse", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg", canonicalUrl: "https://betroverse.in/portfolio/toi-cafe" }
     },
     {
       id: "cs-ph-mobiles", slug: "ph-mobiles", status: "published",
-      companyName: "PH Mobiles", companyLogo: "images/NiceMobiles.png",
-      heroImage: "images/p4.jpg", cardImage: "images/p4.jpg",
+      companyName: "PH Mobiles", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg",
       category: "Retail Marketing & Visual Advertising", industry: "Smartphone & Electronics Retail",
       clientName: "PH Mobiles Retail", year: "2024 - 2025",
       shortIntro: "Product layouts, festival offer graphics, and visual flyers for smartphone retail campaigns.",
@@ -1643,14 +1643,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Boost holiday store walk-ins, promote trade-in deals, and launch high-impact retail banners.",
       services: ["Creative Design", "Social Media Management", "Promo Campaigns", "Print Layouts"],
       overview: { challenge: "Standing out in competitive smartphone retail markets during seasonal sales.", strategy: "Creating vibrant product graphics with clear pricing badges.", solution: "Designing digital trade-in flyers and festival offer banners.", execution: "Multichannel broadcast on social media and print distribution.", results: "Increased retail inquiries and store sales conversion." },
-      media: { gallery: ["images/p4.jpg", "images/s5.jpg"], videos: [], mockups: { desktop: "images/p4.jpg", tablet: "images/s5.jpg", mobile: "images/p4.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg", "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg" } },
       results: { stat1Num: "+200K", stat1Label: "Ad Impressions", stat2Num: "+40%", stat2Label: "Store Inquiries", stat3Num: "2.8x", stat3Label: "Sales Boost", stat4Num: "100%", stat4Label: "Satisfaction", feedbackQuote: "Betroverse designed outstanding promotional graphics for our festival sales!", feedbackAuthor: "PH Mobiles Leadership", feedbackRole: "Smartphone Retail Store" },
-      seo: { title: "PH Mobiles Case Study | Retail Marketing by Betroverse", description: "Smartphone promotion flyers and retail campaigns for PH Mobiles.", keywords: "PH Mobiles, retail marketing, Betroverse", ogImage: "images/p4.jpg", canonicalUrl: "https://betroverse.in/portfolio/ph-mobiles" }
+      seo: { title: "PH Mobiles Case Study | Retail Marketing by Betroverse", description: "Smartphone promotion flyers and retail campaigns for PH Mobiles.", keywords: "PH Mobiles, retail marketing, Betroverse", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg", canonicalUrl: "https://betroverse.in/portfolio/ph-mobiles" }
     },
     {
       id: "cs-mylaban-dessert", slug: "mylaban-dessert-shop", status: "published",
-      companyName: "MyLaban Dessert Shop", companyLogo: "images/Picsart_25-09-24_21-31-47-226.png",
-      heroImage: "images/p5.jpg", cardImage: "images/p5.jpg",
+      companyName: "MyLaban Dessert Shop", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg",
       category: "Content Creation & Video Production", industry: "Dessert & Food Lounge",
       clientName: "MyLaban Desserts", year: "2024 - 2025",
       shortIntro: "Creative dessert video production and digital showcase.",
@@ -1659,14 +1659,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Boost social engagement and drive dessert lovers to the store.",
       services: ["Creative Design", "Social Media Management", "Video Production"],
       overview: { challenge: "Capturing dessert textures in video.", strategy: "High-frame-rate food shoots.", solution: "Cinematic reel edits.", execution: "Instagram Reels launch.", results: "High customer interaction." },
-      media: { gallery: ["images/p5.jpg"], videos: [], mockups: { desktop: "images/p5.jpg", tablet: "images/p5.jpg", mobile: "images/p5.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg" } },
       results: { stat1Num: "+300K", stat1Label: "Views", stat2Num: "+45%", stat2Label: "Orders", stat3Num: "3.5x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "MyLaban Dessert Shop Case Study", description: "Video content and creative branding for MyLaban Dessert Shop.", keywords: "MyLaban, video production", ogImage: "images/p5.jpg", canonicalUrl: "https://betroverse.in/portfolio/mylaban-dessert-shop" }
+      seo: { title: "MyLaban Dessert Shop Case Study", description: "Video content and creative branding for MyLaban Dessert Shop.", keywords: "MyLaban, video production", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", canonicalUrl: "https://betroverse.in/portfolio/mylaban-dessert-shop" }
     },
     {
       id: "cs-toi-cafe-photo", slug: "toi-cafe-photography", status: "published",
-      companyName: "Toi Cafe Photography", companyLogo: "images/toi.png",
-      heroImage: "images/p6.jpg", cardImage: "images/p6.jpg",
+      companyName: "Toi Cafe Photography", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg",
       category: "Photography & Social Ads", industry: "Cafe & Beverage",
       clientName: "Toi Cafe", year: "2024 - 2025",
       shortIntro: "Premium photography assets and specialty coffee marketing.",
@@ -1675,14 +1675,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Establish a luxury cafe aesthetic across digital channels.",
       services: ["Photography", "Social Media Management", "Creative Design"],
       overview: { challenge: "Creating consistent aesthetic imagery.", strategy: "Dedicated food photography sessions.", solution: "Curated Instagram grid.", execution: "Digital advertising.", results: "Increased brand reputation." },
-      media: { gallery: ["images/p6.jpg"], videos: [], mockups: { desktop: "images/p6.jpg", tablet: "images/p6.jpg", mobile: "images/p6.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg" } },
       results: { stat1Num: "+250K", stat1Label: "Reach", stat2Num: "+40%", stat2Label: "Walk-ins", stat3Num: "2.9x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Toi Cafe Photography Case Study", description: "Food & beverage photography for Toi Cafe.", keywords: "Toi Cafe, photography", ogImage: "images/p6.jpg", canonicalUrl: "https://betroverse.in/portfolio/toi-cafe-photography" }
+      seo: { title: "Toi Cafe Photography Case Study", description: "Food & beverage photography for Toi Cafe.", keywords: "Toi Cafe, photography", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg", canonicalUrl: "https://betroverse.in/portfolio/toi-cafe-photography" }
     },
     {
       id: "cs-gurumitra", slug: "gurumitra-foundation", status: "published",
-      companyName: "Gurumitra Foundation", companyLogo: "images/Gurumitra.png",
-      heroImage: "images/p7.jpg", cardImage: "images/p7.jpg",
+      companyName: "Gurumitra Foundation", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg",
       category: "Educational Design & Print", industry: "Education & Non-Profit",
       clientName: "Gurumitra Foundation", year: "2024 - 2025",
       shortIntro: "Clean print brochures and notice layouts for academic outreach.",
@@ -1691,14 +1691,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Inform parents and students about academic enrollment programs.",
       services: ["Creative Design", "Print Layout", "Branding"],
       overview: { challenge: "Presenting detailed educational data cleanly.", strategy: "Modular grid layouts.", solution: "Clear brochures.", execution: "Print & PDF distribution.", results: "High enrollment intake." },
-      media: { gallery: ["images/p7.jpg"], videos: [], mockups: { desktop: "images/p7.jpg", tablet: "images/p7.jpg", mobile: "images/p7.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg" } },
       results: { stat1Num: "+50K", stat1Label: "Brochures Delivered", stat2Num: "+80%", stat2Label: "Enrollment Intake", stat3Num: "4.0x", stat3Label: "Outreach", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Gurumitra Foundation Case Study", description: "Educational print collateral for Gurumitra Foundation.", keywords: "Gurumitra, education", ogImage: "images/p7.jpg", canonicalUrl: "https://betroverse.in/portfolio/gurumitra-foundation" }
+      seo: { title: "Gurumitra Foundation Case Study", description: "Educational print collateral for Gurumitra Foundation.", keywords: "Gurumitra, education", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg", canonicalUrl: "https://betroverse.in/portfolio/gurumitra-foundation" }
     },
     {
       id: "cs-nice-mobiles", slug: "nice-mobiles", status: "published",
-      companyName: "Nice Mobiles", companyLogo: "images/NiceMobiles.png",
-      heroImage: "images/p8.jpg", cardImage: "images/p8.jpg",
+      companyName: "Nice Mobiles", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg",
       category: "Promo Campaigns & Retail Banners", industry: "Electronics Retail",
       clientName: "Nice Mobiles Retail", year: "2024 - 2025",
       shortIntro: "Holiday promotional graphics and discount visual flyers.",
@@ -1707,14 +1707,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Drive foot traffic and increase retail trade-ins.",
       services: ["Creative Design", "Social Media Management", "Promo Campaigns"],
       overview: { challenge: "Capturing holiday shopper attention.", strategy: "Vibrant discount badges.", solution: "Digital offer banners.", execution: "Social ads.", results: "Record store sales." },
-      media: { gallery: ["images/p8.jpg"], videos: [], mockups: { desktop: "images/p8.jpg", tablet: "images/p8.jpg", mobile: "images/p8.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg" } },
       results: { stat1Num: "+400K", stat1Label: "Ad Views", stat2Num: "+65%", stat2Label: "Sales Growth", stat3Num: "3.8x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Nice Mobiles Case Study", description: "Retail promo campaigns for Nice Mobiles.", keywords: "Nice Mobiles, retail promo", ogImage: "images/p8.jpg", canonicalUrl: "https://betroverse.in/portfolio/nice-mobiles" }
+      seo: { title: "Nice Mobiles Case Study", description: "Retail promo campaigns for Nice Mobiles.", keywords: "Nice Mobiles, retail promo", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg", canonicalUrl: "https://betroverse.in/portfolio/nice-mobiles" }
     },
     {
       id: "cs-mylaban-identity", slug: "mylaban-brand-identity", status: "published",
-      companyName: "MyLaban Brand Identity", companyLogo: "images/Picsart_25-09-24_21-31-47-226.png",
-      heroImage: "images/s1.jpg", cardImage: "images/s1.jpg",
+      companyName: "MyLaban Brand Identity", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg",
       category: "AI Video Production", industry: "Food & Beverage",
       clientName: "MyLaban", year: "2024 - 2025",
       shortIntro: "AI video creation for signature dessert visual promotions.",
@@ -1723,14 +1723,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Create viral short-form video commercials.",
       services: ["AI Video Creation", "Video Production", "Creative Design"],
       overview: { challenge: "Standing out on Instagram Reels.", strategy: "AI-enhanced motion graphics.", solution: "Viral reel series.", execution: "Social rollout.", results: "Massive organic reach." },
-      media: { gallery: ["images/s1.jpg"], videos: [], mockups: { desktop: "images/s1.jpg", tablet: "images/s1.jpg", mobile: "images/s1.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg" } },
       results: { stat1Num: "+600K", stat1Label: "Reel Impressions", stat2Num: "+75%", stat2Label: "Engagement", stat3Num: "4.5x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "MyLaban Brand Identity Case Study", description: "AI video creation for MyLaban.", keywords: "AI video, MyLaban", ogImage: "images/s1.jpg", canonicalUrl: "https://betroverse.in/portfolio/mylaban-brand-identity" }
+      seo: { title: "MyLaban Brand Identity Case Study", description: "AI video creation for MyLaban.", keywords: "AI video, MyLaban", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg", canonicalUrl: "https://betroverse.in/portfolio/mylaban-brand-identity" }
     },
     {
       id: "cs-nahdi-mandi", slug: "nahdi-mandi", status: "published",
-      companyName: "Nahdi Mandi", companyLogo: "images/Nahdimandi-white.png",
-      heroImage: "images/s2.jpg", cardImage: "images/s2.jpg",
+      companyName: "Nahdi Mandi", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg",
       category: "Social Media Ads & Branding", industry: "Traditional Dining & Mandi",
       clientName: "Nahdi Mandi Restaurant", year: "2024 - 2025",
       shortIntro: "Arabic dining flyers and promotional visual banners.",
@@ -1739,14 +1739,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Boost dinner dining reservations and weekend orders.",
       services: ["Creative Design", "Social Media Management", "Branding"],
       overview: { challenge: "Promoting authentic Arabic dining experiences.", strategy: "Rich culinary photography.", solution: "Promotional dining banners.", execution: "Local targeted ads.", results: "Increased dining bookings." },
-      media: { gallery: ["images/s2.jpg"], videos: [], mockups: { desktop: "images/s2.jpg", tablet: "images/s2.jpg", mobile: "images/s2.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg" } },
       results: { stat1Num: "+300K", stat1Label: "Ad Reach", stat2Num: "+55%", stat2Label: "Table Reservations", stat3Num: "3.2x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Nahdi Mandi Case Study", description: "Social media marketing for Nahdi Mandi.", keywords: "Nahdi Mandi, dining ads", ogImage: "images/s2.jpg", canonicalUrl: "https://betroverse.in/portfolio/nahdi-mandi" }
+      seo: { title: "Nahdi Mandi Case Study", description: "Social media marketing for Nahdi Mandi.", keywords: "Nahdi Mandi, dining ads", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg", canonicalUrl: "https://betroverse.in/portfolio/nahdi-mandi" }
     },
     {
       id: "cs-celes", slug: "celes-lifestyle", status: "published",
-      companyName: "Celes Lifestyle", companyLogo: "images/celes.png",
-      heroImage: "images/s3.jpg", cardImage: "images/s3.jpg",
+      companyName: "Celes Lifestyle", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg",
       category: "Luxury Campaign & Aesthetics", industry: "Luxury Fashion & Lifestyle",
       clientName: "Celes Lifestyle", year: "2024 - 2025",
       shortIntro: "Minimalist marketing assets and aesthetic Instagram layout grids.",
@@ -1755,14 +1755,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Establish high-end brand perception among luxury consumers.",
       services: ["Creative Design", "Social Media Management", "Luxury Branding"],
       overview: { challenge: "Conveying exclusivity and refined aesthetics.", strategy: "Minimalist typography & monochrome palettes.", solution: "Curated grid layouts.", execution: "Instagram showcase.", results: "High brand prestige." },
-      media: { gallery: ["images/s3.jpg"], videos: [], mockups: { desktop: "images/s3.jpg", tablet: "images/s3.jpg", mobile: "images/s3.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg" } },
       results: { stat1Num: "+180K", stat1Label: "Impressions", stat2Num: "+50%", stat2Label: "Brand Inquiries", stat3Num: "3.1x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Celes Lifestyle Case Study", description: "Luxury branding for Celes Lifestyle.", keywords: "Celes, luxury branding", ogImage: "images/s3.jpg", canonicalUrl: "https://betroverse.in/portfolio/celes-lifestyle" }
+      seo: { title: "Celes Lifestyle Case Study", description: "Luxury branding for Celes Lifestyle.", keywords: "Celes, luxury branding", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg", canonicalUrl: "https://betroverse.in/portfolio/celes-lifestyle" }
     },
     {
       id: "cs-toi-cafe-aesthetics", slug: "toi-cafe-aesthetics", status: "published",
-      companyName: "Toi Cafe Aesthetics", companyLogo: "images/toi.png",
-      heroImage: "images/s4.jpg", cardImage: "images/s4.jpg",
+      companyName: "Toi Cafe Aesthetics", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg",
       category: "Branding Design & Menu Layout", industry: "Cafe & Desserts",
       clientName: "Toi Cafe", year: "2024 - 2025",
       shortIntro: "Menu and beverage promotions with premium visual layout.",
@@ -1771,14 +1771,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Enhance customer ordering experience at the cafe.",
       services: ["Menu Layout Design", "Creative Design", "Branding"],
       overview: { challenge: "Creating a clear, elegant menu.", strategy: "Clean typography & beverage icons.", solution: "Laminated print menus & digital version.", execution: "In-store deployment.", results: "Positive customer feedback." },
-      media: { gallery: ["images/s4.jpg"], videos: [], mockups: { desktop: "images/s4.jpg", tablet: "images/s4.jpg", mobile: "images/s4.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg" } },
       results: { stat1Num: "+150K", stat1Label: "Views", stat2Num: "+35%", stat2Label: "Beverage Sales", stat3Num: "2.7x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Toi Cafe Aesthetics Case Study", description: "Menu design for Toi Cafe.", keywords: "Toi Cafe, menu design", ogImage: "images/s4.jpg", canonicalUrl: "https://betroverse.in/portfolio/toi-cafe-aesthetics" }
+      seo: { title: "Toi Cafe Aesthetics Case Study", description: "Menu design for Toi Cafe.", keywords: "Toi Cafe, menu design", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg", canonicalUrl: "https://betroverse.in/portfolio/toi-cafe-aesthetics" }
     },
     {
       id: "cs-nice-mobiles-retail", slug: "nice-mobiles-retail", status: "published",
-      companyName: "Nice Mobiles Retail", companyLogo: "images/NiceMobiles.png",
-      heroImage: "images/s5.jpg", cardImage: "images/s5.jpg",
+      companyName: "Nice Mobiles Retail", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg",
       category: "Sales Advertising & Promo", industry: "Retail Smartphone Sales",
       clientName: "Nice Mobiles", year: "2024 - 2025",
       shortIntro: "Engaging flyers for mobile trade-in campaigns.",
@@ -1787,14 +1787,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Maximize mobile exchange program participation.",
       services: ["Creative Design", "Promo Campaigns", "Print Layout"],
       overview: { challenge: "Communicating exchange values clearly.", strategy: "Comparison flyers with value badges.", solution: "Visual promo flyers.", execution: "In-store and digital blast.", results: "High exchange volume." },
-      media: { gallery: ["images/s5.jpg"], videos: [], mockups: { desktop: "images/s5.jpg", tablet: "images/s5.jpg", mobile: "images/s5.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg" } },
       results: { stat1Num: "+220K", stat1Label: "Ad Reach", stat2Num: "+48%", stat2Label: "Trade-ins", stat3Num: "3.0x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Nice Mobiles Retail Case Study", description: "Trade-in sales advertising for Nice Mobiles.", keywords: "Nice Mobiles, trade-in ads", ogImage: "images/s5.jpg", canonicalUrl: "https://betroverse.in/portfolio/nice-mobiles-retail" }
+      seo: { title: "Nice Mobiles Retail Case Study", description: "Trade-in sales advertising for Nice Mobiles.", keywords: "Nice Mobiles, trade-in ads", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg", canonicalUrl: "https://betroverse.in/portfolio/nice-mobiles-retail" }
     },
     {
       id: "cs-nahdi-mandi-rest", slug: "nahdi-mandi-restaurant", status: "published",
-      companyName: "Nahdi Mandi Restaurant", companyLogo: "images/Nahdimandi-white.png",
-      heroImage: "images/s6.jpg", cardImage: "images/s6.jpg",
+      companyName: "Nahdi Mandi Restaurant", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg",
       category: "Visual Marketing & Menu", industry: "Restaurant & Catering",
       clientName: "Nahdi Mandi", year: "2024 - 2025",
       shortIntro: "Menu announcement graphics and specialty dish posts.",
@@ -1803,14 +1803,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Promote new dish additions to weekend family diners.",
       services: ["Creative Design", "Social Media Management"],
       overview: { challenge: "Highlighting new menu items.", strategy: "Rich photography & call-to-action badges.", solution: "Dish announcement graphics.", execution: "Social ads.", results: "Increased dish sales." },
-      media: { gallery: ["images/s6.jpg"], videos: [], mockups: { desktop: "images/s6.jpg", tablet: "images/s6.jpg", mobile: "images/s6.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg" } },
       results: { stat1Num: "+280K", stat1Label: "Reach", stat2Num: "+52%", stat2Label: "Dish Sales", stat3Num: "3.3x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Nahdi Mandi Restaurant Case Study", description: "Menu launch marketing for Nahdi Mandi.", keywords: "Nahdi Mandi, food marketing", ogImage: "images/s6.jpg", canonicalUrl: "https://betroverse.in/portfolio/nahdi-mandi-restaurant" }
+      seo: { title: "Nahdi Mandi Restaurant Case Study", description: "Menu launch marketing for Nahdi Mandi.", keywords: "Nahdi Mandi, food marketing", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg", canonicalUrl: "https://betroverse.in/portfolio/nahdi-mandi-restaurant" }
     },
     {
       id: "cs-celes-brand", slug: "celes-lifestyle-brand", status: "published",
-      companyName: "Celes Lifestyle Brand", companyLogo: "images/celes.png",
-      heroImage: "images/s7.jpg", cardImage: "images/s7.jpg",
+      companyName: "Celes Lifestyle Brand", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg",
       category: "Social Management & Branding", industry: "Lifestyle & Apparel",
       clientName: "Celes", year: "2024 - 2025",
       shortIntro: "Aesthetic branding layout for events and campaigns.",
@@ -1819,14 +1819,14 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Grow social community and drive event attendance.",
       services: ["Social Media Management", "Creative Design", "Branding"],
       overview: { challenge: "Building strong brand loyalty.", strategy: "Consistent visual aesthetics.", solution: "Campaign layouts.", execution: "Monthly social content.", results: "Steady follower growth." },
-      media: { gallery: ["images/s7.jpg"], videos: [], mockups: { desktop: "images/s7.jpg", tablet: "images/s7.jpg", mobile: "images/s7.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg" } },
       results: { stat1Num: "+190K", stat1Label: "Impressions", stat2Num: "+42%", stat2Label: "Follower Growth", stat3Num: "2.8x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Celes Lifestyle Brand Case Study", description: "Social media management for Celes Lifestyle Brand.", keywords: "Celes, social management", ogImage: "images/s7.jpg", canonicalUrl: "https://betroverse.in/portfolio/celes-lifestyle-brand" }
+      seo: { title: "Celes Lifestyle Brand Case Study", description: "Social media management for Celes Lifestyle Brand.", keywords: "Celes, social management", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg", canonicalUrl: "https://betroverse.in/portfolio/celes-lifestyle-brand" }
     },
     {
       id: "cs-independent", slug: "independent", status: "published",
-      companyName: "Independent Designs", companyLogo: "images/logo.png",
-      heroImage: "images/s8.jpg", cardImage: "images/s8.jpg",
+      companyName: "Independent Designs", companyLogo: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png",
+      heroImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg", cardImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg",
       category: "Graphic Showcase & Posters", industry: "Creative Design & Typography",
       clientName: "Betroverse Studio", year: "2024 - 2025",
       shortIntro: "A collection of typographic layout poster assets.",
@@ -1835,9 +1835,9 @@ document.addEventListener("DOMContentLoaded", () => {
       brandGoals: "Demonstrate Betroverse's versatile graphic design capabilities.",
       services: ["Creative Design", "Branding", "Typography"],
       overview: { challenge: "Showcasing creative graphic design skills.", strategy: "Diverse typographic styles.", solution: "Portfolio poster gallery.", execution: "Digital showcase.", results: "Inbound design leads." },
-      media: { gallery: ["images/s8.jpg"], videos: [], mockups: { desktop: "images/s8.jpg", tablet: "images/s8.jpg", mobile: "images/s8.jpg" } },
+      media: { gallery: ["https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg"], videos: [], mockups: { desktop: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg", tablet: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg", mobile: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg" } },
       results: { stat1Num: "+120K", stat1Label: "Views", stat2Num: "+38%", stat2Label: "Design Leads", stat3Num: "3.0x", stat3Label: "ROI", stat4Num: "100%", stat4Label: "Satisfaction" },
-      seo: { title: "Independent Designs Case Study", description: "Typographic posters and graphic design showcase by Betroverse.", keywords: "graphic design, typography, Betroverse", ogImage: "images/s8.jpg", canonicalUrl: "https://betroverse.in/portfolio/independent" }
+      seo: { title: "Independent Designs Case Study", description: "Typographic posters and graphic design showcase by Betroverse.", keywords: "graphic design, typography, Betroverse", ogImage: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg", canonicalUrl: "https://betroverse.in/portfolio/independent" }
     }
   ];
 
@@ -2040,9 +2040,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const year = document.getElementById("cs-year")?.value?.trim() || "2024 - 2025";
     const status = document.getElementById("cs-status")?.value || "published";
 
-    const logoUrl = document.getElementById("cs-logo-url")?.value?.trim() || "images/logo.png";
+    const logoUrl = document.getElementById("cs-logo-url")?.value?.trim() || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png";
     const cardImageUrl = document.getElementById("cs-cardimg-url")?.value?.trim() || "";
-    const heroUrl = document.getElementById("cs-hero-url")?.value?.trim() || "images/p1.jpg";
+    const heroUrl = document.getElementById("cs-hero-url")?.value?.trim() || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg";
 
     const shortIntro = document.getElementById("cs-short-intro")?.value?.trim() || "";
     const brandStory = document.getElementById("cs-brand-story")?.value?.trim() || "";
@@ -2218,7 +2218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sync to legacy betro_projects for full backward compatibility
     const legacyProjects = list.map(cs => ({
       id: cs.id,
-      src: cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || "images/p1.jpg",
+      src: cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg",
       companyName: cs.companyName,
       category: cs.category,
       shortDesc: cs.shortIntro,
@@ -2373,7 +2373,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <tbody>
               ${recentItems.map(item => {
                 const isPub = (item.status || "published") === "published";
-                const thumb = item.cardImage || item.heroImage || (item.media && item.media.gallery && item.media.gallery[0]) || item.companyLogo || 'images/logo.png';
+                const thumb = item.cardImage || item.heroImage || (item.media && item.media.gallery && item.media.gallery[0]) || item.companyLogo || 'https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png';
                 return `
                   <tr>
                     <td>
@@ -2463,8 +2463,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const isPublished = (cs.status || "published") === "published";
       const isFeatured = !!cs.featured;
-      const coverImg = cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || cs.companyLogo || 'images/p1.jpg';
-      const logoImg = cs.companyLogo || 'images/logo.png';
+      const coverImg = cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || cs.companyLogo || 'https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg';
+      const logoImg = cs.companyLogo || 'https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png';
 
       card.innerHTML = `
         <div class="cs-card-banner">
@@ -3529,8 +3529,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const companyName = document.getElementById("cs-company-name")?.value || "Company Name";
     const category = document.getElementById("cs-category")?.value || "Category Pill";
-    const logoUrl = document.getElementById("cs-logo-url")?.value || "images/logo.png";
-    const heroUrl = document.getElementById("cs-hero-url")?.value || "images/p1.jpg";
+    const logoUrl = document.getElementById("cs-logo-url")?.value || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png";
+    const heroUrl = document.getElementById("cs-hero-url")?.value || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg";
     const shortIntro = document.getElementById("cs-short-intro")?.value || "Short project intro tagline...";
     const brandStory = document.getElementById("cs-brand-story")?.value || "Brand background story...";
     const brandGoals = document.getElementById("cs-brand-goals")?.value || "Project targets & goals...";
