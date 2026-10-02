@@ -473,20 +473,36 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!item) return null;
     const isObj = typeof item === "object" && item !== null;
     const url = isObj ? (item.url || item.src || "") : String(item);
+    if (!url) return null;
     const defaultName = url.startsWith("data:") ? `${type}_${index + 1}` : (url.split("/").pop() || "media_asset");
 
+    let existingAsset = null;
+    const cachedAssets = BetroStorage.cache["betro_media_assets"];
+    if (Array.isArray(cachedAssets)) {
+      existingAsset = cachedAssets.find(a => a.url === url);
+    }
+
+    const assignedId = (isObj && item.id)
+      ? item.id
+      : (existingAsset?.id || `media-${caseStudyId || "cs"}-${type}-${Date.now()}-${Math.floor(Math.random() * 10000)}`);
+
+    const assignedStoragePath = (isObj && (item.storage_path || item.storagePath))
+      ? (item.storage_path || item.storagePath)
+      : (existingAsset?.storage_path || existingAsset?.storagePath || (window.BetroDB && BetroDB.extractStoragePath ? BetroDB.extractStoragePath(url).storagePath : null));
+
     return {
-      id: (isObj && item.id) ? item.id : `media-${caseStudyId || "cs"}-${type}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      id: assignedId,
       case_study_id: (isObj && item.case_study_id) ? item.case_study_id : (caseStudyId || "cs-general"),
       case_study_slug: (isObj && item.case_study_slug) ? item.case_study_slug : (caseStudySlug || "general"),
       type: (isObj && item.type) ? item.type : type,
       target_section: (isObj && item.target_section) ? item.target_section : section,
       url: url,
+      storage_path: assignedStoragePath,
       display_order: (isObj && typeof item.display_order === "number") ? item.display_order : index,
       status: (isObj && item.status) ? item.status : "published",
-      name: (isObj && item.name) ? item.name : defaultName,
-      size: (isObj && item.size) ? item.size : "Optimized",
-      created_at: (isObj && item.created_at) ? item.created_at : Date.now(),
+      name: (isObj && item.name) ? item.name : (existingAsset?.name || defaultName),
+      size: (isObj && item.size) ? item.size : (existingAsset?.size || "Optimized"),
+      created_at: (isObj && item.created_at) ? item.created_at : (existingAsset?.created_at || Date.now()),
       updated_at: Date.now()
     };
   };
@@ -560,14 +576,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const getMediaAssets = () => {
     const cached = BetroStorage.cache["betro_media_assets"];
-    if (cached && Array.isArray(cached) && cached.length > 0) return cached;
+    if (cached !== undefined && Array.isArray(cached)) return cached;
 
     const storedSync = BetroStorage.getItemSync("betro_media_assets");
-    if (storedSync && Array.isArray(storedSync) && storedSync.length > 0) {
+    if (storedSync !== null && Array.isArray(storedSync)) {
       BetroStorage.cache["betro_media_assets"] = storedSync;
       return storedSync;
     }
-    return defaultMediaAssets;
+    return [];
   };
 
   const saveMediaAssets = (assets) => {
@@ -715,9 +731,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         const assets = getMediaAssets();
-        assets.unshift(asset);
+        const existingIdx = assets.findIndex(a => a.id === asset.id || a.url === asset.url);
+        if (existingIdx >= 0) {
+          assets[existingIdx] = asset;
+        } else {
+          assets.unshift(asset);
+        }
+        BetroStorage.cache["betro_media_assets"] = assets;
         await saveMediaAssets(assets);
-        renderMediaLibraryTab();
+        await renderMediaLibraryTab();
+        await renderDashboardOverview();
 
         showAdminToast(`Uploaded "${file.name}" to Cloud Storage!`, "success");
         return asset;
@@ -765,8 +788,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const assets = getMediaAssets();
     assets.unshift(newAsset);
+    BetroStorage.cache["betro_media_assets"] = assets;
     await saveMediaAssets(assets);
-    renderMediaLibraryTab();
+    await renderMediaLibraryTab();
+    await renderDashboardOverview();
 
     if (onProgress) onProgress({ status: "success", pct: 100, text: "Saved locally (Connect Supabase in Settings for live cloud CDN)" });
     showAdminToast(`File buffered locally. Connect Supabase in Settings for production.`, "info", 5000);
@@ -781,46 +806,64 @@ document.addEventListener("DOMContentLoaded", () => {
     const caseStudies = getBetroCaseStudies() || [];
     const references = [];
 
-    const norm = (str) => {
-      if (!str || typeof str !== "string") return "";
-      let s = str.trim().toLowerCase();
-      const m = s.match(/\/([^/?#]+\.[a-z0-9]+)($|\?)/i);
-      return m ? m[1] : s;
+    const getCleanPath = (u) => {
+      if (!u || typeof u !== "string") return "";
+      try {
+        const parsed = new URL(u);
+        return parsed.pathname.toLowerCase();
+      } catch (e) {
+        return u.split("?")[0].toLowerCase().trim();
+      }
     };
 
-    const targetKey = norm(assetUrl);
+    const targetCleanPath = getCleanPath(assetUrl);
+
+    const match = (u) => {
+      if (!u || typeof u !== "string") return false;
+      if (u === assetUrl) return true;
+      if (targetCleanPath && getCleanPath(u) === targetCleanPath) return true;
+      return false;
+    };
 
     caseStudies.forEach(cs => {
-      const match = (u) => {
-        if (!u || typeof u !== "string") return false;
-        if (u === assetUrl) return true;
-        if (targetKey && norm(u) === targetKey) return true;
-        return false;
-      };
-
-      if (match(cs.cardImage)) {
-        references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Card Cover" });
-      }
-      if (match(cs.heroImage)) {
-        references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Hero Banner" });
-      }
-      if (match(cs.companyLogo)) {
-        references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Company Logo" });
-      }
+      let matchedRoles = [];
+      if (match(cs.cardImage)) matchedRoles.push("Card Cover");
+      if (match(cs.heroImage)) matchedRoles.push("Hero Banner");
+      if (match(cs.companyLogo)) matchedRoles.push("Company Logo");
       if (cs.media && Array.isArray(cs.media.gallery)) {
-        if (cs.media.gallery.some(match)) {
-          references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Showcase Gallery" });
-        }
+        if (cs.media.gallery.some(match)) matchedRoles.push("Showcase Gallery");
       }
       if (cs.media && Array.isArray(cs.media.videos)) {
-        if (cs.media.videos.some(match)) {
-          references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Video Showcase" });
-        }
+        if (cs.media.videos.some(match)) matchedRoles.push("Video Showcase");
+      }
+      if (cs.media && Array.isArray(cs.media.assets)) {
+        if (cs.media.assets.some(a => match(typeof a === 'string' ? a : a?.url))) matchedRoles.push("Media Assets");
       }
       if (cs.media && cs.media.mockups) {
-        if (match(cs.media.mockups.desktop) || match(cs.media.mockups.mobile)) {
-          references.push({ project: cs.companyName, slug: cs.slug, id: cs.id, role: "Mockups" });
-        }
+        if (match(cs.media.mockups.desktop) || match(cs.media.mockups.mobile)) matchedRoles.push("Mockups");
+      }
+      if (Array.isArray(cs.gallerySections)) {
+        cs.gallerySections.forEach(sec => {
+          if (Array.isArray(sec.images) && sec.images.some(img => match(typeof img === 'string' ? img : img?.url))) {
+            matchedRoles.push(`Section: ${sec.title || "Gallery"}`);
+          }
+        });
+      }
+      if (Array.isArray(cs.blocks)) {
+        cs.blocks.forEach(b => {
+          if (b && (match(b.imageUrl) || match(b.mediaUrl) || match(b.url))) {
+            matchedRoles.push("Content Block");
+          }
+        });
+      }
+
+      if (matchedRoles.length > 0) {
+        references.push({
+          project: cs.companyName || cs.slug || cs.id,
+          slug: cs.slug,
+          id: cs.id,
+          role: matchedRoles.join(", ")
+        });
       }
     });
 
@@ -835,12 +878,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // SAFE DELETE CONFIRMATION ENGINE (Requirement 3)
   // ==========================================
   let pendingDeleteAction = null;
+  let pendingDeleteType = "media";
 
   const openSafeDeleteModal = (options) => {
     const modal = document.getElementById("safe-delete-modal");
     if (!modal) return;
 
     const titleEl = document.getElementById("safe-delete-title");
+    const subtitleEl = document.getElementById("safe-delete-subtitle");
     const previewEl = document.getElementById("safe-delete-item-preview");
     const warningBox = document.getElementById("safe-delete-usage-warning");
     const warningText = document.getElementById("safe-delete-warning-text");
@@ -856,10 +901,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (cancelBtn) cancelBtn.disabled = false;
 
-    const { type, id, title, slug, asset, usage } = options;
+    const { type, id, title, slug, asset, usage, fromCaseStudyId, onSuccess } = options;
+    pendingDeleteType = type;
 
     if (type === "casestudy") {
       if (titleEl) titleEl.textContent = "Delete Case Study";
+      if (subtitleEl) subtitleEl.textContent = "Are you sure you want to permanently delete this project?";
       if (previewEl) {
         previewEl.innerHTML = `
           <div class="safe-delete-item-row">
@@ -899,11 +946,13 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("betro_projects", JSON.stringify(legacy));
         } catch (e) { }
 
+        if (typeof onSuccess === "function") onSuccess();
         renderCaseStudiesTab();
         renderDashboardOverview();
       };
     } else if (type === "media") {
       if (titleEl) titleEl.textContent = "Delete Media Asset";
+      if (subtitleEl) subtitleEl.textContent = "Are you sure you want to permanently delete this media?";
       let thumb = "";
       if (asset.type === "image") {
         thumb = `<img src="${asset.url}" style="width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid var(--panel-border);">`;
@@ -934,66 +983,125 @@ document.addEventListener("DOMContentLoaded", () => {
               ${usage.references.map(r => `<li><strong>${r.project}</strong> (${r.role})</li>`).join("")}
             </ul>
             <span style="display: block; margin-top: 6px; font-size: 0.75rem; color: #fde68a;">
-              Deleting this file will remove it from the referenced project(s).
+              Deleting this file permanently will clean references across all projects.
             </span>
           `;
         }
       }
 
       pendingDeleteAction = async () => {
-        // 1. Backend Supabase delete
-        if (window.BetroDB) {
-          const res = await BetroDB.deleteMedia(asset.storage_path || asset.storagePath, asset.id, asset.url);
-          if (!res.success) {
-            throw new Error(res.error || "Delete failed from cloud storage.");
+        // Deep helper to match asset URL
+        const getCleanPath = (u) => {
+          if (!u || typeof u !== "string") return "";
+          try {
+            return new URL(u).pathname.toLowerCase();
+          } catch (e) {
+            return u.split("?")[0].toLowerCase().trim();
           }
-        }
+        };
+        const targetCleanPath = getCleanPath(asset.url);
+        const match = (u) => {
+          if (!u || typeof u !== "string") return false;
+          if (u === asset.url) return true;
+          if (targetCleanPath && getCleanPath(u) === targetCleanPath) return true;
+          return false;
+        };
 
-        // 2. Cascade cleanup in case studies
-        if (usage && usage.isUsed) {
-          let projectsList = await getFreshBetroCaseStudies();
-          let modified = false;
-          projectsList = projectsList.map(p => {
-            let pChanged = false;
-            let pCopy = { ...p };
-            if (pCopy.cardImage === asset.url) { pCopy.cardImage = "images/p1.jpg"; pChanged = true; }
-            if (pCopy.heroImage === asset.url) { pCopy.heroImage = "images/p1.jpg"; pChanged = true; }
-            if (pCopy.companyLogo === asset.url) { pCopy.companyLogo = "images/logo.png"; pChanged = true; }
-            if (pCopy.media && Array.isArray(pCopy.media.gallery) && pCopy.media.gallery.includes(asset.url)) {
-              pCopy.media = {
-                ...pCopy.media,
-                gallery: pCopy.media.gallery.filter(u => u !== asset.url)
-              };
-              pChanged = true;
-            }
-            if (pCopy.media && Array.isArray(pCopy.media.videos) && pCopy.media.videos.includes(asset.url)) {
-              pCopy.media = {
-                ...pCopy.media,
-                videos: pCopy.media.videos.filter(u => u !== asset.url)
-              };
-              pChanged = true;
-            }
-            if (pChanged) {
-              modified = true;
-              if (window.BetroDB) {
-                BetroDB.saveCaseStudy(pCopy).catch(e => console.warn(e));
+        // 1. Check if referenced across case studies
+        let projectsList = await getFreshBetroCaseStudies();
+        const otherReferencingProjects = projectsList.filter(p => {
+          if (fromCaseStudyId && p.id === fromCaseStudyId) return false;
+          let hasRef = false;
+          if (match(p.cardImage) || match(p.heroImage) || match(p.companyLogo)) hasRef = true;
+          if (p.media && Array.isArray(p.media.gallery) && p.media.gallery.some(match)) hasRef = true;
+          if (p.media && Array.isArray(p.media.videos) && p.media.videos.some(match)) hasRef = true;
+          if (p.media && Array.isArray(p.media.assets) && p.media.assets.some(a => match(typeof a === 'string' ? a : a?.url))) hasRef = true;
+          if (p.media && p.media.mockups && (match(p.media.mockups.desktop) || match(p.media.mockups.mobile))) hasRef = true;
+          return hasRef;
+        });
+
+        // Safe storage cleanup rule (Requirement 8):
+        // If it is referenced by other Case Studies, do NOT delete physical file from storage.
+        const shouldDeletePhysicalFile = otherReferencingProjects.length === 0;
+
+        // 2. Cascade cleanup across all referencing case studies
+        let modified = false;
+        for (let p of projectsList) {
+          let pChanged = false;
+          let pCopy = { ...p };
+          if (match(pCopy.cardImage)) { pCopy.cardImage = "images/p1.jpg"; pChanged = true; }
+          if (match(pCopy.heroImage)) { pCopy.heroImage = "images/p1.jpg"; pChanged = true; }
+          if (match(pCopy.companyLogo)) { pCopy.companyLogo = "images/logo.png"; pChanged = true; }
+          if (pCopy.media && Array.isArray(pCopy.media.gallery)) {
+            const orig = pCopy.media.gallery.length;
+            pCopy.media.gallery = pCopy.media.gallery.filter(u => !match(u));
+            if (pCopy.media.gallery.length !== orig) pChanged = true;
+          }
+          if (pCopy.media && Array.isArray(pCopy.media.videos)) {
+            const orig = pCopy.media.videos.length;
+            pCopy.media.videos = pCopy.media.videos.filter(u => !match(u));
+            if (pCopy.media.videos.length !== orig) pChanged = true;
+          }
+          if (pCopy.media && Array.isArray(pCopy.media.assets)) {
+            const orig = pCopy.media.assets.length;
+            pCopy.media.assets = pCopy.media.assets.filter(a => !match(typeof a === 'string' ? a : a?.url));
+            if (pCopy.media.assets.length !== orig) pChanged = true;
+          }
+          if (Array.isArray(pCopy.gallerySections)) {
+            pCopy.gallerySections.forEach(sec => {
+              if (Array.isArray(sec.images)) {
+                const orig = sec.images.length;
+                sec.images = sec.images.filter(img => !match(typeof img === 'string' ? img : img?.url));
+                if (sec.images.length !== orig) pChanged = true;
               }
+            });
+          }
+          if (Array.isArray(pCopy.blocks)) {
+            pCopy.blocks.forEach(b => {
+              if (b) {
+                if (match(b.imageUrl)) { b.imageUrl = ""; pChanged = true; }
+                if (match(b.mediaUrl)) { b.mediaUrl = ""; pChanged = true; }
+                if (match(b.url)) { b.url = ""; pChanged = true; }
+              }
+            });
+          }
+
+          if (pChanged) {
+            modified = true;
+            if (window.BetroDB) {
+              await BetroDB.saveCaseStudy(pCopy);
             }
-            return pCopy;
-          });
-          if (modified) {
-            await saveBetroCaseStudies(projectsList);
           }
         }
 
-        // 3. Remove from media assets list
+        if (modified) {
+          projectsList = await getFreshBetroCaseStudies();
+          await saveBetroCaseStudies(projectsList);
+        }
+
+        // 3. Backend Supabase delete
+        if (window.BetroDB) {
+          const res = await BetroDB.deleteMedia(
+            asset.storage_path || asset.storagePath,
+            asset.id,
+            asset.url,
+            { skipStorageDelete: !shouldDeletePhysicalFile }
+          );
+          if (!res.success) {
+            throw new Error(res.error || "Failed to delete media from cloud database.");
+          }
+        }
+
+        // 4. Remove from media assets list and sync storage
         let currentAssets = getMediaAssets();
         currentAssets = currentAssets.filter(a => a.id !== asset.id && a.url !== asset.url);
-        await saveMediaAssets(currentAssets);
         BetroStorage.cache["betro_media_assets"] = currentAssets;
+        await saveMediaAssets(currentAssets);
 
-        renderMediaLibraryTab();
-        renderDashboardOverview();
+        if (typeof onSuccess === "function") onSuccess();
+
+        await renderMediaLibraryTab();
+        await renderDashboardOverview();
       };
     }
 
@@ -1027,7 +1135,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await pendingDeleteAction();
       closeSafeDeleteModal();
-      showAdminToast("Deleted successfully.", "success");
+      const successMsg = pendingDeleteType === "casestudy" ? "Case study deleted successfully." : "Media deleted successfully.";
+      showAdminToast(successMsg, "success");
     } catch (err) {
       console.error("[SafeDelete] Operation failed:", err);
       safeDeleteConfirmBtn.disabled = false;
@@ -1035,7 +1144,8 @@ document.addEventListener("DOMContentLoaded", () => {
       safeDeleteConfirmBtn.innerHTML = `<i class="ri-delete-bin-line"></i> DELETE`;
       if (errorMsg) errorMsg.textContent = "Delete failed: " + (err.message || "Please try again.");
       if (errorBox) errorBox.classList.remove("hidden");
-      showAdminToast("Delete failed. Please try again.", "error");
+      const failMsg = pendingDeleteType === "casestudy" ? "Failed to delete case study. Please try again." : "Failed to delete media. Please try again.";
+      showAdminToast(failMsg, "error");
     }
   });
 
@@ -1201,8 +1311,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.BetroDB && BetroDB.isConfigured()) {
       try {
         const cloudAssets = await BetroDB.getAllMediaAssets();
-        if (cloudAssets && cloudAssets.length > 0) {
+        if (Array.isArray(cloudAssets)) {
           BetroStorage.cache["betro_media_assets"] = cloudAssets;
+          await BetroStorage.setItem("betro_media_assets", cloudAssets);
         }
       } catch (e) {
         console.warn("[MediaLibrary] Cloud assets load error:", e);
@@ -1290,7 +1401,7 @@ document.addEventListener("DOMContentLoaded", () => {
       card.querySelector(".replace-asset-btn")?.addEventListener("click", () => replaceMediaAssetQuick(asset));
       card.querySelector(".copy-url-btn")?.addEventListener("click", () => {
         navigator.clipboard.writeText(asset.url);
-        showAdminToast("Asset URL copied to clipboard!", "success");
+        showAdminToast("Copied successfully.", "success");
       });
       card.querySelector(".delete-asset-btn")?.addEventListener("click", () => {
         openSafeDeleteModal({
@@ -2187,17 +2298,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const publishedCount = list.filter(c => (c.status || "published") === "published").length;
     const draftCount = list.filter(c => (c.status || "published") === "draft").length;
 
-    // Calculate real gallery assets across case studies and media library
-    let totalGallery = 0;
-    let totalVideos = 0;
-    list.forEach(c => {
-      if (c.media && Array.isArray(c.media.gallery)) totalGallery += c.media.gallery.length;
-      if (c.media && Array.isArray(c.media.videos)) totalVideos += c.media.videos.length;
-    });
+    // Calculate real gallery assets and video count strictly from authoritative database media records
+    let mediaList = [];
+    if (window.BetroDB && BetroDB.isConfigured()) {
+      try {
+        const cloudAssets = await BetroDB.getAllMediaAssets();
+        if (Array.isArray(cloudAssets)) {
+          mediaList = cloudAssets;
+          BetroStorage.cache["betro_media_assets"] = cloudAssets;
+        } else {
+          mediaList = getMediaAssets();
+        }
+      } catch (e) {
+        mediaList = getMediaAssets();
+      }
+    } else {
+      mediaList = getMediaAssets();
+    }
 
-    const storedAssets = BetroStorage.cache["betro_media_assets"] || defaultMediaAssets || [];
-    totalGallery += storedAssets.filter(a => a.type === "image").length;
-    totalVideos += storedAssets.filter(a => a.type === "video").length;
+    const totalGallery = mediaList.filter(a => a.type === "image" || !a.type).length;
+    const totalVideos = mediaList.filter(a => a.type === "video").length;
 
     // Update real metric spans
     const elTotal = document.getElementById("stat-total-projects");
@@ -2722,6 +2842,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const currentCsId = document.getElementById("cs-edit-id")?.value;
+
     activeGallery.forEach((item, idx) => {
       const url = typeof item === "string" ? item : (item ? item.url : "");
       const isVideo = (typeof item === "object" && item.type === "video") || url.endsWith(".mp4") || url.endsWith(".webm");
@@ -2731,21 +2853,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const mediaHtml = isVideo
         ? `<video src="${url}" muted style="width: 100%; height: 100%; object-fit: cover;"></video>`
-        : `<img src="${url}" alt="Gallery Image ${idx + 1}">`;
+        : `<img src="${url}" alt="Gallery Image ${idx + 1}" loading="lazy">`;
 
       card.innerHTML = `
-        ${mediaHtml}
-        <button type="button" class="gal-delete-badge del-gal-btn" title="Delete Image">
-          <i class="ri-delete-bin-line"></i>
-        </button>
-        <div class="showcase-item-actions">
+        <div class="showcase-thumb-wrap">
+          ${mediaHtml}
+        </div>
+        <div class="showcase-item-top-actions">
+          <button type="button" class="gal-action-btn preview-btn" title="Preview Image">
+            <i class="ri-eye-line"></i>
+          </button>
+          <button type="button" class="gal-action-btn remove-btn" title="Remove from this Case Study only (stays in Media Library)">
+            <i class="ri-close-line"></i> Remove
+          </button>
+        </div>
+        <div class="showcase-item-bottom-actions">
           <button type="button" class="mini-gal-btn move-left-gal-btn" ${idx === 0 ? 'disabled' : ''} title="Move Left"><i class="ri-arrow-left-s-line"></i></button>
           <button type="button" class="mini-gal-btn move-right-gal-btn" ${idx === activeGallery.length - 1 ? 'disabled' : ''} title="Move Right"><i class="ri-arrow-right-s-line"></i></button>
           <button type="button" class="mini-gal-btn replace-gal-btn" title="Replace Image"><i class="ri-refresh-line"></i></button>
+          <button type="button" class="gal-action-btn delete-perm-btn" title="Permanently delete from database & storage">
+            <i class="ri-delete-bin-line"></i> Delete
+          </button>
         </div>
       `;
 
-      card.querySelector(".move-left-gal-btn")?.addEventListener("click", async () => {
+      card.querySelector(".preview-btn")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.open(url, "_blank");
+      });
+
+      card.querySelector(".move-left-gal-btn")?.addEventListener("click", async (e) => {
+        e.stopPropagation();
         if (idx > 0) {
           const temp = activeGallery[idx];
           activeGallery[idx] = activeGallery[idx - 1];
@@ -2757,7 +2895,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      card.querySelector(".move-right-gal-btn")?.addEventListener("click", async () => {
+      card.querySelector(".move-right-gal-btn")?.addEventListener("click", async (e) => {
+        e.stopPropagation();
         if (idx < activeGallery.length - 1) {
           const temp = activeGallery[idx];
           activeGallery[idx] = activeGallery[idx + 1];
@@ -2769,9 +2908,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      card.querySelector(".replace-gal-btn")?.addEventListener("click", () => {
+      card.querySelector(".replace-gal-btn")?.addEventListener("click", (e) => {
+        e.stopPropagation();
         openMediaPicker(async (newUrl) => {
-          const currentCsId = document.getElementById("cs-edit-id")?.value;
           const currentSlug = document.getElementById("cs-slug")?.value || "project";
           activeGallery[idx] = normalizeMediaAsset(newUrl, currentCsId, currentSlug, "image", "creative_showcase", idx);
           await persistCurrentCaseStudyMedia();
@@ -2781,14 +2920,43 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      card.querySelector(".del-gal-btn")?.addEventListener("click", async (e) => {
+      // "Remove from Case Study" (Requirement 3: removes only from this Case Study; keeps in Media Library)
+      card.querySelector(".remove-btn")?.addEventListener("click", async (e) => {
         e.stopPropagation();
         activeGallery.splice(idx, 1);
         await persistCurrentCaseStudyMedia();
         renderShowcaseGallery();
         markEditorDirty();
         updateLivePreview();
-        showAdminToast("Image removed from gallery.", "info");
+        showAdminToast("Image removed from Case Study.", "info");
+      });
+
+      // "Delete Permanently" (Requirement 3: deletes asset from database & storage if safe)
+      card.querySelector(".delete-perm-btn")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+        let assetObj = BetroStorage.cache["betro_media_assets"]?.find(a => a.url === url);
+        if (!assetObj) {
+          assetObj = {
+            id: typeof item === "object" && item?.id ? item.id : `media-${currentCsId || 'cs'}-${Date.now()}`,
+            url: url,
+            name: url.split("/").pop() || "media_asset",
+            type: isVideo ? "video" : "image",
+            storage_path: window.BetroDB && BetroDB.extractStoragePath ? BetroDB.extractStoragePath(url).storagePath : null
+          };
+        }
+        openSafeDeleteModal({
+          type: "media",
+          asset: assetObj,
+          usage: getMediaUsage(url),
+          fromCaseStudyId: currentCsId,
+          onSuccess: async () => {
+            activeGallery.splice(idx, 1);
+            await persistCurrentCaseStudyMedia();
+            renderShowcaseGallery();
+            markEditorDirty();
+            updateLivePreview();
+          }
+        });
       });
 
       grid.appendChild(card);
@@ -2899,6 +3067,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const currentCsId = document.getElementById("cs-edit-id")?.value;
+
     activeVideos.forEach((vid, idx) => {
       const vidUrl = typeof vid === "string" ? vid : (vid ? vid.url : "");
       const isEmbed = vidUrl.includes("youtube.com") || vidUrl.includes("vimeo.com") || vidUrl.includes("embed");
@@ -2916,12 +3086,18 @@ document.addEventListener("DOMContentLoaded", () => {
           <strong style="display: block; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 4px;">Video Asset ${idx + 1}</strong>
           <span style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace;">${vidUrl.substring(0, 45)}...</span>
         </div>
-        <div style="display: flex; gap: 4px;">
+        <div style="display: flex; gap: 4px; align-items: center;">
+          <button type="button" class="admin-btn secondary-btn preview-vid-btn" style="padding: 6px 10px;" title="Preview Video"><i class="ri-eye-line"></i></button>
           <button type="button" class="admin-btn secondary-btn move-up-vid-btn" ${idx === 0 ? 'disabled' : ''} style="padding: 6px 10px;" title="Move Up"><i class="ri-arrow-up-s-line"></i></button>
           <button type="button" class="admin-btn secondary-btn move-down-vid-btn" ${idx === activeVideos.length - 1 ? 'disabled' : ''} style="padding: 6px 10px;" title="Move Down"><i class="ri-arrow-down-s-line"></i></button>
-          <button type="button" class="admin-btn danger-btn del-vid-btn" style="padding: 6px 10px;"><i class="ri-delete-bin-line"></i> Remove</button>
+          <button type="button" class="admin-btn secondary-btn remove-vid-btn" style="padding: 6px 10px;" title="Remove from Case Study only"><i class="ri-close-line"></i> Remove</button>
+          <button type="button" class="admin-btn danger-btn del-vid-perm-btn" style="padding: 6px 10px;" title="Delete Permanently from Media Library & Storage"><i class="ri-delete-bin-line"></i> Delete</button>
         </div>
       `;
+
+      item.querySelector(".preview-vid-btn")?.addEventListener("click", () => {
+        window.open(vidUrl, "_blank");
+      });
 
       item.querySelector(".move-up-vid-btn")?.addEventListener("click", async () => {
         if (idx > 0) {
@@ -2947,13 +3123,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      item.querySelector(".del-vid-btn")?.addEventListener("click", async () => {
+      // Remove from Case Study only
+      item.querySelector(".remove-vid-btn")?.addEventListener("click", async () => {
         activeVideos.splice(idx, 1);
         await persistCurrentCaseStudyMedia();
         renderVideosList();
         markEditorDirty();
         updateLivePreview();
         showAdminToast("Video removed from Case Study.", "info");
+      });
+
+      // Delete Permanently
+      item.querySelector(".del-vid-perm-btn")?.addEventListener("click", () => {
+        let assetObj = BetroStorage.cache["betro_media_assets"]?.find(a => a.url === vidUrl);
+        if (!assetObj) {
+          assetObj = {
+            id: typeof vid === "object" && vid?.id ? vid.id : `media-${currentCsId || 'cs'}-${Date.now()}`,
+            url: vidUrl,
+            name: vidUrl.split("/").pop() || "video_asset",
+            type: "video",
+            storage_path: window.BetroDB && BetroDB.extractStoragePath ? BetroDB.extractStoragePath(vidUrl).storagePath : null
+          };
+        }
+        openSafeDeleteModal({
+          type: "media",
+          asset: assetObj,
+          usage: getMediaUsage(vidUrl),
+          fromCaseStudyId: currentCsId,
+          onSuccess: async () => {
+            activeVideos.splice(idx, 1);
+            await persistCurrentCaseStudyMedia();
+            renderVideosList();
+            markEditorDirty();
+            updateLivePreview();
+          }
+        });
       });
 
       list.appendChild(item);

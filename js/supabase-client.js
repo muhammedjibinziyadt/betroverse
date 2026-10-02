@@ -99,6 +99,21 @@
   }
 
   /**
+   * Extract storage relative path and bucket from a public Supabase CDN URL
+   */
+  function extractStoragePath(url, fallbackPath = null) {
+    if (fallbackPath && fallbackPath !== "null" && typeof fallbackPath === "string") {
+      return fallbackPath.trim();
+    }
+    if (!url || typeof url !== "string") return null;
+    const match = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/?#]+)\/([^?#]+)/i);
+    if (match) {
+      return decodeURIComponent(match[2]);
+    }
+    return null;
+  }
+
+  /**
    * Discover Supabase credentials from available sources:
    * 1. Window runtime config (window.BETRO_CONFIG)
    * 2. Vercel Serverless API (/api/config)
@@ -549,8 +564,22 @@
 
               cs.media = cs.media || {};
               cs.media.assets = mediaData;
-              cs.media.gallery = galleryAssets.map(g => g.url);
-              cs.media.videos = videoAssets.map(v => v.url);
+              // If portfolio_projects had explicit media.gallery order, keep it, but ensure all URLs are active
+              if (Array.isArray(cs.media.gallery) && cs.media.gallery.length > 0) {
+                const activeUrls = new Set(mediaData.map(m => m.url));
+                const filtered = cs.media.gallery.filter(u => activeUrls.has(u));
+                cs.media.gallery = filtered.length > 0 ? filtered : galleryAssets.map(g => g.url);
+              } else {
+                cs.media.gallery = galleryAssets.map(g => g.url);
+              }
+
+              if (Array.isArray(cs.media.videos) && cs.media.videos.length > 0) {
+                const activeVids = new Set(mediaData.map(m => m.url));
+                const filtered = cs.media.videos.filter(u => activeVids.has(u));
+                cs.media.videos = filtered.length > 0 ? filtered : videoAssets.map(v => v.url);
+              } else {
+                cs.media.videos = videoAssets.map(v => v.url);
+              }
             }
 
             return cs;
@@ -603,19 +632,75 @@
         const savedCS = mapDbRowToCaseStudy(data);
 
         // 2. Synchronize media_assets table
-        if (csData.media && Array.isArray(csData.media.assets)) {
-          for (let i = 0; i < csData.media.assets.length; i++) {
-            const a = csData.media.assets[i];
+        if (csData.media) {
+          const currentAssets = Array.isArray(csData.media.assets) ? csData.media.assets : [];
+          const activeUrls = new Set();
+
+          if (Array.isArray(csData.media.gallery)) {
+            csData.media.gallery.forEach(u => {
+              const val = typeof u === 'string' ? u : (u ? u.url : "");
+              if (val) activeUrls.add(val);
+            });
+          }
+          if (Array.isArray(csData.media.videos)) {
+            csData.media.videos.forEach(u => {
+              const val = typeof u === 'string' ? u : (u ? u.url : "");
+              if (val) activeUrls.add(val);
+            });
+          }
+          currentAssets.forEach(a => {
+            if (a && a.url) activeUrls.add(a.url);
+          });
+
+          // Unlink any assets previously linked to this case study that have been removed
+          try {
+            const { data: prevLinked } = await client
+              .from("media_assets")
+              .select("id, url")
+              .eq("case_study_id", savedCS.id);
+
+            if (Array.isArray(prevLinked)) {
+              for (const oldA of prevLinked) {
+                if (!activeUrls.has(oldA.url)) {
+                  await client
+                    .from("media_assets")
+                    .update({ case_study_id: null, case_study_slug: null })
+                    .eq("id", oldA.id);
+                }
+              }
+            }
+          } catch (unlinkErr) {
+            console.warn("[BetroDB] Media unlink check notice:", unlinkErr);
+          }
+
+          // Upsert current assets without creating duplicate rows
+          for (let i = 0; i < currentAssets.length; i++) {
+            const a = currentAssets[i];
             if (!a || !a.url) continue;
 
+            const stPath = extractStoragePath(a.url, a.storage_path || a.storagePath);
+
+            // Reuse existing record ID for this URL to avoid duplicates
+            let targetId = a.id;
+            try {
+              const { data: existingRecords } = await client
+                .from("media_assets")
+                .select("id")
+                .eq("url", a.url)
+                .limit(1);
+              if (existingRecords && existingRecords.length > 0) {
+                targetId = existingRecords[0].id;
+              }
+            } catch (findErr) {}
+
             const assetRow = {
-              id: a.id || `media-${savedCS.id}-${a.type || 'image'}-${Date.now()}-${i}`,
+              id: targetId || `media-${savedCS.id}-${a.type || 'image'}-${i}`,
               case_study_id: savedCS.id,
               case_study_slug: savedCS.slug,
               type: a.type || "image",
               target_section: a.target_section || "creative_showcase",
               url: a.url,
-              storage_path: a.storage_path || null,
+              storage_path: stPath,
               name: a.name || `Asset ${i + 1}`,
               size: a.size || "Optimized",
               display_order: typeof a.display_order === "number" ? a.display_order : i,
@@ -631,6 +716,7 @@
 
         // Invalidate local caches
         safeStorage.remove("betro_casestudies_cache");
+        safeStorage.remove("betro_media_assets");
         this.broadcastChange("CASE_STUDY_UPDATED", savedCS);
 
         return { success: true, data: savedCS };
@@ -856,44 +942,54 @@
     /**
      * Delete media from Supabase Storage & Database
      */
-    async deleteMedia(storagePath, assetId = null, url = null) {
+    async deleteMedia(storagePath, assetId = null, url = null, options = {}) {
       const client = await this.ensureInit();
       if (!client) return { success: true };
 
       try {
-        let pathToDel = storagePath;
-        if (!pathToDel && url && typeof url === "string") {
-          const match = url.match(/\/object\/public\/[^/]+\/(.+)$/);
-          if (match) pathToDel = decodeURIComponent(match[1]);
-        }
+        const pathToDel = extractStoragePath(url, storagePath);
 
-        if (pathToDel) {
+        // Remove storage object if applicable and not skipped
+        if (pathToDel && !options.skipStorageDelete) {
           const bucket = cleanBucket(activeConfig.storageBucket || DEFAULT_BUCKET);
           const otherBucket = bucket === "betodata" ? "portfolio-media" : "betodata";
-          await client.storage.from(bucket).remove([pathToDel]);
-          await client.storage.from(otherBucket).remove([pathToDel]);
+          try {
+            await client.storage.from(bucket).remove([pathToDel]);
+          } catch (stErr) {
+            console.warn("[BetroDB] Storage remove notice (bucket):", stErr);
+          }
+          try {
+            await client.storage.from(otherBucket).remove([pathToDel]);
+          } catch (stErr2) {
+            // fallback bucket check
+          }
         }
 
+        // Delete from media_assets table
         if (assetId) {
-          await client.from("media_assets").delete().eq("id", assetId);
+          const { error: errId } = await client.from("media_assets").delete().eq("id", assetId);
+          if (errId) throw new Error(errId.message || "Failed to delete media record by ID");
         }
         if (url) {
-          await client.from("media_assets").delete().eq("url", url);
+          const { error: errUrl } = await client.from("media_assets").delete().eq("url", url);
+          if (errUrl) throw new Error(errUrl.message || "Failed to delete media record by URL");
         }
 
+        // Invalidate all local caches
         safeStorage.remove("betro_media_assets");
+        safeStorage.remove("betro_casestudies_cache");
         this.broadcastChange("MEDIA_DELETED", { id: assetId, storagePath: pathToDel, url });
         return { success: true };
       } catch (e) {
         console.error("[BetroDB] Delete media error:", e);
-        return { success: false, error: e.message };
+        return { success: false, error: e.message || "Delete operation failed" };
       }
     },
 
     /**
      * Retrieve all media assets from Supabase cloud
      */
-    async getAllMediaAssets() {
+    async getAllMediaAssets(options = {}) {
       const client = await this.ensureInit();
       if (client) {
         try {
@@ -903,19 +999,33 @@
             .order("created_at", { ascending: false });
 
           if (!error && Array.isArray(data)) {
-            return data.map(item => ({
-              id: item.id,
-              name: item.name || "Asset",
-              type: item.type || "image",
-              url: item.url,
-              storage_path: item.storage_path,
-              storagePath: item.storage_path,
-              folder: item.target_section || "general",
-              size: item.size || "Cloud Asset",
-              caseStudyId: item.case_study_id,
-              caseStudySlug: item.case_study_slug,
-              date: item.created_at ? new Date(item.created_at).toLocaleDateString() : "Recent"
-            }));
+            // Deduplicate by URL to ensure a single authoritative record per asset
+            const seen = new Set();
+            const unique = [];
+
+            for (const item of data) {
+              if (!item.url) continue;
+              if (seen.has(item.url)) continue;
+              seen.add(item.url);
+
+              const stPath = extractStoragePath(item.url, item.storage_path);
+
+              unique.push({
+                id: item.id,
+                name: item.name || "Asset",
+                type: item.type || "image",
+                url: item.url,
+                storage_path: stPath,
+                storagePath: stPath,
+                folder: item.target_section || "general",
+                size: item.size || "Cloud Asset",
+                caseStudyId: item.case_study_id,
+                caseStudySlug: item.case_study_slug,
+                date: item.created_at ? new Date(item.created_at).toLocaleDateString() : "Recent"
+              });
+            }
+
+            return unique;
           }
         } catch (e) {
           console.warn("[BetroDB] Error fetching all media assets:", e);
