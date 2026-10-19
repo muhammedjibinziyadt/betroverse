@@ -51,28 +51,17 @@ ScrollReveal().reveal(".header__btns", {
   ...scrollRevealOption,
   delay: 500,
 });
-ScrollReveal().reveal(".bgdraw", {
-  ...scrollRevealOption,
-  delay: 500,
-});
 
 // --------------------------------About ------------------------------------------
-
-ScrollReveal().reveal(".about_right h3", {
-  ...scrollRevealOption,
-  delay: 700,
-  origin:"top",
-    interval: 700,
-});
-ScrollReveal().reveal(".about_right ul li", {
-  ...scrollRevealOption,
-  interval: 500,
-});
 
 ScrollReveal().reveal(".about_left", {
   ...scrollRevealOption,
   delay: 500,
   origin:"left",
+});
+ScrollReveal().reveal(".about_right ul li", {
+  ...scrollRevealOption,
+  interval: 200,
 });
 
 
