@@ -152,52 +152,7 @@ ScrollReveal().reveal(".bottom_clint ul li img", {
 //   }
 // });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const interval = 2000;
 
-  const startCounter = (el) => {
-    if (el.dataset.started) return;
-    el.dataset.started = 'true';
-
-    let start = 0;
-    const end = parseInt(el.getAttribute('data-val')) || 0;
-    const suffix = el.getAttribute('data-suffix') || "K"; // 👈 new attribute
-
-    el.textContent = start;
-
-    if (end <= 0) return;
-
-    const stepTime = Math.max(Math.floor(interval / end), 10);
-
-    const tick = () => {
-      start++;
-      el.textContent = start.toLocaleString();
-      if (start < end) {
-        setTimeout(tick, stepTime);
-      } else {
-        el.textContent = end.toLocaleString() + suffix; // 👈 add suffix at the end
-      }
-    };
-    tick();
-  };
-
-  // Observe each container2 separately
-  if ('IntersectionObserver' in window) {
-    const obs = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const num = entry.target.querySelector('.num');
-          if (num) startCounter(num);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.5 });
-
-    document.querySelectorAll('.count .container2').forEach(box => {
-      obs.observe(box);
-    });
-  }
-});
 
 // ==========================================================================
 // Betroverse Navigation & Interactive Components
