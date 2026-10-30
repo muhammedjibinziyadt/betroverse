@@ -17,83 +17,82 @@ if (document.readyState === "interactive" || document.readyState === "complete")
 window.addEventListener("load", dismissPreloader);
 
 const scrollRevealOption = {
-  distance: "100px",
+  distance: "24px",
   origin: "bottom",
-  duration: 2000,
+  duration: 700,
+  easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+  viewFactor: 0.05,
+  mobile: true,
 };
 
 // -----------------------Hero Animations------------------------------
 
-ScrollReveal().reveal("header.section__container h1", {
-  ...scrollRevealOption,
-  delay: 700,
-  origin:"right",
-    interval: 700,
-});
-ScrollReveal().reveal("nav", {
-  ...scrollRevealOption,
-  delay: 700,
-  origin:"top",
-    interval: 700,
-});
-ScrollReveal().reveal(".header__container h2", {
-  ...scrollRevealOption,
-  delay: 500,
-  origin:"top",
-});
+if (typeof ScrollReveal !== "undefined") {
+  ScrollReveal().reveal("header.section__container h1", {
+    ...scrollRevealOption,
+    delay: 200,
+    origin: "bottom",
+  });
+  ScrollReveal().reveal(".header__container h2", {
+    ...scrollRevealOption,
+    delay: 100,
+    origin: "top",
+  });
+  ScrollReveal().reveal(".header__container p", {
+    ...scrollRevealOption,
+    delay: 250,
+    origin: "bottom",
+  });
+  ScrollReveal().reveal(".header__btns", {
+    ...scrollRevealOption,
+    delay: 300,
+  });
 
-ScrollReveal().reveal(".header__container p", {
-  ...scrollRevealOption,
-  delay: 500,
-   origin:"left",
-});
-ScrollReveal().reveal(".header__btns", {
-  ...scrollRevealOption,
-  delay: 500,
-});
+  // --------------------------------About ------------------------------------------
 
-// --------------------------------About ------------------------------------------
+  ScrollReveal().reveal(".about_left", {
+    ...scrollRevealOption,
+    delay: 150,
+  });
+  ScrollReveal().reveal(".about_right ul li", {
+    ...scrollRevealOption,
+    interval: 80,
+  });
 
-ScrollReveal().reveal(".about_left", {
-  ...scrollRevealOption,
-  delay: 500,
-  origin:"left",
-});
-ScrollReveal().reveal(".about_right ul li", {
-  ...scrollRevealOption,
-  interval: 200,
-});
+  // ------------------------------------Services-------------------------------------
 
+  ScrollReveal().reveal(".room__card", {
+    ...scrollRevealOption,
+    interval: 80,
+    delay: 100,
+  });
 
-// ------------------------------------Services-------------------------------------
+  // -----------------------------------Process---------------------------------------
+  ScrollReveal().reveal(".process__card", {
+    ...scrollRevealOption,
+    interval: 80,
+    delay: 100,
+  });
 
-ScrollReveal().reveal(".room__card", {
-  ...scrollRevealOption,
-  interval: 500,
-});
+  // -----------------------------------Pricing---------------------------------------
+  ScrollReveal().reveal(".pricing__card", {
+    ...scrollRevealOption,
+    interval: 80,
+    delay: 100,
+  });
 
-// -----------------------------------sub-------------------------------------------
-ScrollReveal().reveal(".subscribe__content .section__header", {
-  ...scrollRevealOption,
-  delay: 500,
-});
+  // -----------------------------------Subscribe-------------------------------------
+  ScrollReveal().reveal(".subscribe__content", {
+    ...scrollRevealOption,
+    delay: 150,
+  });
 
-
-//----------------------------------------contact------------------------------------------
-ScrollReveal().reveal(".container .content", {
-  ...scrollRevealOption,
-  delay: 500,
-});
-
-ScrollReveal().reveal(".container .content", {
-  ...scrollRevealOption,
-  delay: 500,
-});
-
-ScrollReveal().reveal(".bottom_clint ul li img", {
-  ...scrollRevealOption,
-  interval: 200,
-});
+  //------------------------------------Contact---------------------------------------
+  ScrollReveal().reveal(".container .content3", {
+    ...scrollRevealOption,
+    delay: 150,
+  });
+}
 
 // document.addEventListener('DOMContentLoaded', () => {
 //   const valueDisplays = document.querySelectorAll('.num');

@@ -1506,5 +1506,51 @@
       refreshAndRender(true);
     }
   });
+
+  // --- Mobile Drawer Navigation for Case Study Pages ---
+  const initCaseStudyNav = () => {
+    const menuToggle = document.getElementById("menu-toggle");
+    const closeDrawer = document.getElementById("close-drawer");
+    const mobileDrawer = document.getElementById("mobile-drawer");
+    const drawerOverlay = document.getElementById("drawer-overlay");
+    const mobileDrawerLinks = document.querySelectorAll(".mobile-nav-item");
+
+    if (menuToggle && mobileDrawer && drawerOverlay) {
+      const openMobileMenu = () => {
+        menuToggle.classList.add("active");
+        mobileDrawer.classList.add("open");
+        drawerOverlay.classList.add("open");
+        menuToggle.setAttribute("aria-expanded", "true");
+        mobileDrawer.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      };
+
+      const closeMobileMenu = () => {
+        menuToggle.classList.remove("active");
+        mobileDrawer.classList.remove("open");
+        drawerOverlay.classList.remove("open");
+        menuToggle.setAttribute("aria-expanded", "false");
+        mobileDrawer.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      };
+
+      menuToggle.addEventListener("click", () => {
+        if (mobileDrawer.classList.contains("open")) {
+          closeMobileMenu();
+        } else {
+          openMobileMenu();
+        }
+      });
+
+      if (closeDrawer) closeDrawer.addEventListener("click", closeMobileMenu);
+      drawerOverlay.addEventListener("click", closeMobileMenu);
+      mobileDrawerLinks.forEach(link => link.addEventListener("click", closeMobileMenu));
+    }
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCaseStudyNav);
+  } else {
+    initCaseStudyNav();
+  }
 })();
 

@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="css/service.css">
+    <title>Betroverse | Contact & Registration</title>
+    <link rel="stylesheet" href="css/service.css?v=3.5">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
+
 <body>
-      <div id="preloader">
-    <div class="loader"></div>
-  </div>
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
     <!-- <div class="bg-decoration">
         <div class="bg-circle"></div>
         <div class="bg-circle"></div>
@@ -34,8 +36,10 @@
             <div class="hero-content">
                 <div class="hero-text">
                     <h1>Reserve Your Spot for Expert Digital Solutions</h1>
-                    <p>Get started with our professional digital services tailored to your business needs. Simply fill in your details, choose the service you want, and our team will connect with you shortly. Limited slots available, so don’t wait!</p>
-                    
+                    <p>Get started with our professional digital services tailored to your business needs. Simply fill
+                        in your details, choose the service you want, and our team will connect with you shortly.
+                        Limited slots available, so don’t wait!</p>
+
                     <!-- <div class="hero-stats">
                         <div class="stat">
                             <span class="stat-number">2,500+</span>
@@ -58,25 +62,29 @@
                             <h3>Secure Your Spot</h3>
                             <p>December 15, 2025 • 2:00 PM EST</p>
                         </div> -->
-                        
+
                         <form id="gform" action="">
                             <div class="form-group">
                                 <label for="firstName">First Name</label>
-                                <input type="text" id="firstName" name="First name" class="form-input" placeholder="Enter your first name" required>
+                                <input type="text" id="firstName" name="First name" class="form-input"
+                                    placeholder="Enter your first name" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="lastName">Last Name</label>
-                                <input type="text" id="lastName" name="Last name" class="form-input" placeholder="Enter your last name" required>
+                                <input type="text" id="lastName" name="Last name" class="form-input"
+                                    placeholder="Enter your last name" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="email">Email Address</label>
-                                <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required>
+                                <input type="email" id="email" name="email" class="form-input"
+                                    placeholder="your@email.com" required>
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone Numner</label>
-                                <input type="text" id="phone" name="phone" class="form-input" placeholder="Enter the number" required>
+                                <input type="text" id="phone" name="phone" class="form-input"
+                                    placeholder="Enter the number" required>
                             </div>
 
                             <!-- <div class="form-group">
@@ -116,9 +124,9 @@
             </div>
     </main>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Preloader logic
-            window.addEventListener("load", function() {
+            window.addEventListener("load", function () {
                 setTimeout(() => {
                     const preloader = document.getElementById("preloader");
                     if (preloader) preloader.classList.add("hide");
@@ -132,13 +140,13 @@
                 const submitBtn = form.querySelector('.submit-btn');
                 const originalBtnText = submitBtn ? submitBtn.textContent : "Submit Request";
 
-                form.addEventListener('submit', async function(e) {
+                form.addEventListener('submit', async function (e) {
                     e.preventDefault();
-                    
+
                     // Simple validation
                     const requiredFields = form.querySelectorAll('[required]');
                     let isValid = true;
-                    
+
                     requiredFields.forEach(field => {
                         if (!field.value.trim()) {
                             isValid = false;
@@ -191,7 +199,7 @@
                                 status: 'new',
                                 notes: ""
                             };
-                            
+
                             const localLeadsData = localStorage.getItem("betro_leads");
                             const leadsList = localLeadsData ? JSON.parse(localLeadsData) : [];
                             leadsList.unshift(newLead);
@@ -215,15 +223,15 @@
                 // Enhanced input interactions
                 const inputs = form.querySelectorAll('.form-input');
                 inputs.forEach(input => {
-                    input.addEventListener('focus', function() {
+                    input.addEventListener('focus', function () {
                         this.parentElement.style.transform = 'translateY(-2px)';
                     });
 
-                    input.addEventListener('blur', function() {
+                    input.addEventListener('blur', function () {
                         this.parentElement.style.transform = 'translateY(0)';
                     });
 
-                    input.addEventListener('input', function() {
+                    input.addEventListener('input', function () {
                         if (this.value.trim()) {
                             this.style.borderColor = '#10B981';
                         } else {
@@ -235,7 +243,7 @@
                 // Email validation
                 const emailInput = document.getElementById('email');
                 if (emailInput) {
-                    emailInput.addEventListener('blur', function() {
+                    emailInput.addEventListener('blur', function () {
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                         if (this.value && !emailRegex.test(this.value)) {
                             this.style.borderColor = '#EF4444';
@@ -248,7 +256,7 @@
             }
 
             // Parallax circles
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 const scrolled = window.pageYOffset;
                 const circles = document.querySelectorAll('.bg-circle');
                 circles.forEach((circle, index) => {
@@ -279,4 +287,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

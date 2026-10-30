@@ -11,9 +11,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="dns-prefetch" href="https://fvbauhcwshgqboakeiux.supabase.co" />
 
-  <link rel="stylesheet" href="../css/style.css" type="text/css" />
-  <link rel="stylesheet" href="../css/portfolio-redesign.css" type="text/css" />
-  <link rel="stylesheet" href="../css/case-study.css" type="text/css" />
+  <link rel="stylesheet" href="../css/style.css?v=3.5" type="text/css" />
+  <link rel="stylesheet" href="../css/portfolio-redesign.css?v=3.5" type="text/css" />
+  <link rel="stylesheet" href="../css/case-study.css?v=3.5" type="text/css" />
   <script type="text/javascript" src="../js/darkmod.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32x32.png" />
@@ -48,8 +48,40 @@
           <span>Get Started</span>
           <i class="ri-arrow-right-line"></i>
         </a>
+        <button class="mobile-menu-btn" id="menu-toggle" aria-expanded="false" aria-label="Open navigation menu" type="button">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
       </div>
     </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav-drawer" id="mobile-drawer" aria-hidden="true">
+      <div class="mobile-drawer-header">
+        <img src="../images/logo.png" alt="Betroverse Logo" class="logo-img">
+        <button class="close-drawer-btn" id="close-drawer" aria-label="Close navigation menu" type="button">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <ul class="mobile-menu">
+        <li><a href="../index.html#home" class="mobile-nav-item">Home</a></li>
+        <li><a href="../index.html#about" class="mobile-nav-item">About</a></li>
+        <li><a href="../index.html#services" class="mobile-nav-item">Services</a></li>
+        <li><a href="../portfolio.html" class="mobile-nav-item active">Portfolio</a></li>
+        <li><a href="../index.html#process" class="mobile-nav-item">Process</a></li>
+        <li><a href="../index.html#pricing" class="mobile-nav-item">Pricing</a></li>
+        <li><a href="../index.html#testimonials" class="mobile-nav-item">Testimonials</a></li>
+        <li><a href="../index.html#faq" class="mobile-nav-item">FAQ</a></li>
+        <li><a href="../index.html#contact" class="mobile-nav-item">Contact</a></li>
+      </ul>
+      <div class="mobile-drawer-actions">
+        <a href="https://wa.me/916282528914" target="_blank" class="mobile-cta-btn">
+          Get Started <i class="ri-arrow-right-line"></i>
+        </a>
+      </div>
+    </div>
+    <div class="drawer-overlay" id="drawer-overlay"></div>
   </header>
 
   <!-- ================= SECTION 1: HERO SECTION ================= -->
