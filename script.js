@@ -74,13 +74,6 @@ if (typeof ScrollReveal !== "undefined") {
     delay: 100,
   });
 
-  // -----------------------------------Pricing---------------------------------------
-  ScrollReveal().reveal(".pricing__card", {
-    ...scrollRevealOption,
-    interval: 80,
-    delay: 100,
-  });
-
   // -----------------------------------Subscribe-------------------------------------
   ScrollReveal().reveal(".subscribe__content", {
     ...scrollRevealOption,
