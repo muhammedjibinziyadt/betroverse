@@ -379,58 +379,98 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- 7. Dynamic Brands Rendering from LocalStorage ---
+  // --- 7. Dynamic Brands Rendering from LocalStorage & Admin Panel ---
   const loadDynamicBrands = () => {
     const defaultBrands = [
-      { id: "brand-1", src: "images/golden.png" },
-      { id: "brand-2", src: "images/celes.png" },
-      { id: "brand-3", src: "images/toi.png", style: "width: 40%;" },
-      { id: "brand-4", src: "images/AlainArchitecture.png" },
-      { id: "brand-5", src: "images/Gurumitra.png" },
-      { id: "brand-6", src: "images/Nahdimandi-white.png" },
-      { id: "brand-7", src: "images/NiceMobiles.png" },
-      { id: "brand-8", src: "images/Soofimandi-white.png" },
-      { id: "brand-9", src: "images/KeyFactory.png" },
-      { id: "brand-10", src: "images/ENGO FINAL LOGO-01.png" },
-      { id: "brand-11", src: "images/Artboard 5.png" },
-      { id: "brand-12", src: "images/Picsart_25-09-24_21-31-47-226.png" }
+      { id: "brand-1", src: "images/golden.png", companyId: "sa-adiya", companyName: "Sa-Adiya Golden Jubilee" },
+      { id: "brand-2", src: "images/celes.png", companyId: "celes", companyName: "Celes Lifestyle" },
+      { id: "brand-3", src: "images/toi.png", style: "width: 40%;", companyId: "toi-cafe", companyName: "Toi Cafe" },
+      { id: "brand-4", src: "images/AlainArchitecture.png", companyId: "alain-architecture", companyName: "Alain Architecture" },
+      { id: "brand-5", src: "images/Gurumitra.png", companyId: "gurumitra", companyName: "Gurumitra Foundation" },
+      { id: "brand-6", src: "images/Nahdimandi-white.png", companyId: "nahdi-mandi", companyName: "Nahdi Mandi Restaurant" },
+      { id: "brand-7", src: "images/NiceMobiles.png", companyId: "nice-mobiles", companyName: "Nice Mobiles" },
+      { id: "brand-8", src: "images/Soofimandi-white.png", companyId: "soofi-mandi", companyName: "Soofi Mandi" },
+      { id: "brand-9", src: "images/KeyFactory.png", companyId: "key-factory", companyName: "Key Factory" },
+      { id: "brand-10", src: "images/ENGO FINAL LOGO-01.png", companyId: "engo", companyName: "ENGO" },
+      { id: "brand-11", src: "images/Artboard 5.png", companyId: "educart", companyName: "EduCart" },
+      { id: "brand-12", src: "images/Picsart_25-09-24_21-31-47-226.png", companyId: "mylaban", companyName: "MyLaban" }
     ];
 
-    const storedBrands = localStorage.getItem("betro_brands");
-    let brands = [];
-    if (!storedBrands) {
-      localStorage.setItem("betro_brands", JSON.stringify(defaultBrands));
-      brands = defaultBrands;
-    } else {
-      brands = JSON.parse(storedBrands);
+    const storedBrandsRaw = localStorage.getItem("betro_brands");
+    let activeBrands = defaultBrands;
+    if (storedBrandsRaw) {
+      try {
+        const parsed = JSON.parse(storedBrandsRaw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          activeBrands = parsed.map(b => {
+            const matchedDef = defaultBrands.find(db => db.id === b.id || db.src === b.src);
+            return matchedDef ? { ...matchedDef, ...b } : {
+              id: b.id || "brand-" + Math.random(),
+              src: b.src,
+              companyId: b.companyId || "independent",
+              companyName: b.name || "Partner Brand"
+            };
+          });
+        }
+      } catch (e) {
+        activeBrands = defaultBrands;
+      }
     }
 
-    const brandsList = document.getElementById("home-brands-list");
-    if (brandsList) {
-      brandsList.innerHTML = "";
-      brands.forEach(b => {
-        const li = document.createElement("li");
+    const track = document.getElementById("brands-marquee-track");
+    if (track) {
+      track.innerHTML = "";
+      // Duplicate list to create 2 identical consecutive sets for 100% seamless marquee scrolling
+      const marqueeBrands = [...activeBrands, ...activeBrands];
+
+      marqueeBrands.forEach((b) => {
+        const item = document.createElement("div");
+        item.className = "brand-marquee-item";
+        item.setAttribute("data-brand-id", b.id);
+
         const img = document.createElement("img");
-        const base = b.src.replace(/\.(png|jpe?g)$/i, "");
-        img.src = `${base}.webp`;
-        img.alt = "Brand Logo";
+        const webpSrc = (window.BetroDB && BetroDB.getOptimizedAssetUrl(b.src)) || b.src;
+        img.src = webpSrc;
+        img.alt = b.companyName || "Brand Logo";
+        img.className = "brand-logo-img";
         img.loading = "lazy";
         img.decoding = "async";
         img.setAttribute("data-fallback", b.src);
         img.onerror = function() {
           const fb = this.getAttribute("data-fallback");
-          if (fb && this.src !== fb) this.src = fb;
+          if (fb && this.src !== fb) {
+            this.src = fb;
+          }
         };
         if (b.style) {
           img.setAttribute("style", b.style);
         }
-        li.appendChild(img);
-        brandsList.appendChild(li);
+
+        item.appendChild(img);
+
+        // On click, navigate to dedicated Case Study page
+        item.addEventListener("click", (e) => {
+          e.preventDefault();
+          const companyId = b.companyId || "independent";
+          window.location.href = `portfolio/${companyId}.html`;
+        });
+
+        track.appendChild(item);
       });
     }
   };
 
   loadDynamicBrands();
+
+  // Real-time synchronization listeners across windows/tabs
+  window.addEventListener("storage", (e) => {
+    if (e.key === "betro_brands") {
+      loadDynamicBrands();
+    }
+  });
+  window.addEventListener("betro_storage_updated", () => {
+    loadDynamicBrands();
+  });
 });
 
 

@@ -1396,6 +1396,10 @@ body.light-mode .portfolio-card:hover {
   -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
 }
 
+.brands-marquee-container:hover .brands-marquee-track {
+  animation-play-state: paused;
+}
+
 .brands-marquee-track {
   display: flex;
   align-items: center;
