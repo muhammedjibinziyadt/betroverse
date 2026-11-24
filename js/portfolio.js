@@ -151,7 +151,7 @@ const initPortfolio = () => {
         try {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        } catch (e) {}
+        } catch (e) { }
       }
       return [];
     }
@@ -203,7 +203,7 @@ const initPortfolio = () => {
 
     const rawProj = localStorage.getItem("betro_projects");
     if (rawProj) {
-      try { projects = JSON.parse(rawProj); } catch (e) {}
+      try { projects = JSON.parse(rawProj); } catch (e) { }
     }
   };
 
@@ -261,7 +261,7 @@ const initPortfolio = () => {
       // Resilient image error handling: if WebP fails, try original JPG/PNG; if both fail, show fallback
       const cardImgElem = card.querySelector(".portfolio-card-image");
       if (cardImgElem) {
-        cardImgElem.onerror = function() {
+        cardImgElem.onerror = function () {
           const fallback = this.getAttribute("data-fallback");
           if (fallback && this.src !== fallback && !this.dataset.triedFallback) {
             this.dataset.triedFallback = "true";
@@ -328,10 +328,10 @@ const initPortfolio = () => {
     // Render related projects scroller
     detailRelatedList.innerHTML = "";
     const companyId = project.companyId || "independent";
-    
+
     // Filter all projects with the same companyId
     const relatedProjects = allProjects.filter(p => p.companyId === companyId);
-    
+
     relatedProjects.forEach(rp => {
       const img = document.createElement("img");
       img.src = rp.src;
@@ -340,16 +340,16 @@ const initPortfolio = () => {
       if (rp.id === project.id) {
         img.classList.add("active");
       }
-      
+
       // Clicking a related thumbnail switches the active view inside the modal
       img.addEventListener("click", () => {
         detailRelatedList.querySelectorAll(".related-thumbnail").forEach(t => t.classList.remove("active"));
         img.classList.add("active");
-        
+
         detailActiveImg.src = rp.src;
         detailActiveImg.alt = rp.companyName || "Project Image";
       });
-      
+
       detailRelatedList.appendChild(img);
     });
 
@@ -364,7 +364,7 @@ const initPortfolio = () => {
     if (!modal) return;
     modal.classList.remove("open");
     document.body.style.overflow = ""; // Restore body scrolling
-    
+
     const handler = () => {
       modal.classList.add("hidden");
       modal.removeEventListener("transitionend", handler);
@@ -403,7 +403,7 @@ const initPortfolio = () => {
         dismissPreloader();
       }
     }
-  } catch (e) {}
+  } catch (e) { }
 
   const reloadPortfolioGrid = async () => {
     await loadDynamicProjects();
@@ -423,7 +423,7 @@ const initPortfolio = () => {
           reloadPortfolioGrid();
         }
       };
-    } catch (e) {}
+    } catch (e) { }
   }
   window.addEventListener("storage", (e) => {
     if (e.key === "betro_casestudies" || e.key === "betro_projects") {
@@ -437,10 +437,10 @@ const initPortfolio = () => {
   // --- 5. Brand Logo Carousel ("Brands Who Believe in Us") ---
   const initBrandsCarousel = () => {
     const defaultBrandsList = [
-      { 
-        id: "brand-1", 
-        src: "images/golden.png", 
-        companyId: "sa-adiya", 
+      {
+        id: "brand-1",
+        src: "images/golden.png",
+        companyId: "sa-adiya",
         companyName: "Sa-Adiya Golden Jubilee",
         category: "Event Branding",
         shortDesc: "Flyers and layouts for Sa-Adiya's grand Golden Jubilee celebrations.",
@@ -448,10 +448,10 @@ const initPortfolio = () => {
         services: ["Creative Design", "Social Media Management"],
         previewImg: "images/p2.jpg"
       },
-      { 
-        id: "brand-2", 
-        src: "images/celes.png", 
-        companyId: "celes", 
+      {
+        id: "brand-2",
+        src: "images/celes.png",
+        companyId: "celes",
         companyName: "Celes Lifestyle",
         category: "Luxury Campaign",
         shortDesc: "Minimalist marketing assets and aesthetic Instagram layout grids.",
@@ -459,11 +459,11 @@ const initPortfolio = () => {
         services: ["Creative Design", "Social Media Management"],
         previewImg: "images/s3.jpg"
       },
-      { 
-        id: "brand-3", 
-        src: "images/toi.png", 
-        style: "width: 40%;", 
-        companyId: "toi-cafe", 
+      {
+        id: "brand-3",
+        src: "images/toi.png",
+        style: "width: 40%;",
+        companyId: "toi-cafe",
         companyName: "Toi Cafe",
         category: "Specialty Cafe",
         shortDesc: "Aesthetic social media campaign and custom menu layouts.",
@@ -471,10 +471,10 @@ const initPortfolio = () => {
         services: ["Creative Design", "Social Media Management", "Photography"],
         previewImg: "images/p3.jpg"
       },
-      { 
-        id: "brand-4", 
-        src: "images/AlainArchitecture.png", 
-        companyId: "alain-architecture", 
+      {
+        id: "brand-4",
+        src: "images/AlainArchitecture.png",
+        companyId: "alain-architecture",
         companyName: "Alain Architecture",
         category: "Architectural Design",
         shortDesc: "Luxury architectural presentations and digital portfolio showcases.",
@@ -482,10 +482,10 @@ const initPortfolio = () => {
         services: ["Architectural Branding", "Visual Design", "Digital Marketing"],
         previewImg: "images/p2.jpg"
       },
-      { 
-        id: "brand-5", 
-        src: "images/Gurumitra.png", 
-        companyId: "gurumitra", 
+      {
+        id: "brand-5",
+        src: "images/Gurumitra.png",
+        companyId: "gurumitra",
         companyName: "Gurumitra Foundation",
         category: "Educational Design",
         shortDesc: "Clean print brochures and notice layouts for academic outreach.",
@@ -493,10 +493,10 @@ const initPortfolio = () => {
         services: ["Creative Design", "Print Layout"],
         previewImg: "images/p7.jpg"
       },
-      { 
-        id: "brand-6", 
-        src: "images/Nahdimandi-white.png", 
-        companyId: "nahdi-mandi", 
+      {
+        id: "brand-6",
+        src: "images/Nahdimandi-white.png",
+        companyId: "nahdi-mandi",
         companyName: "Nahdi Mandi Restaurant",
         category: "Social Media Ads",
         shortDesc: "Arabic dining flyers and promotional visual banners.",
@@ -504,10 +504,10 @@ const initPortfolio = () => {
         services: ["Creative Design", "Social Media Management"],
         previewImg: "images/s2.jpg"
       },
-      { 
-        id: "brand-7", 
-        src: "images/NiceMobiles.png", 
-        companyId: "nice-mobiles", 
+      {
+        id: "brand-7",
+        src: "images/NiceMobiles.png",
+        companyId: "nice-mobiles",
         companyName: "Nice Mobiles",
         category: "Promo Campaigns",
         shortDesc: "Holiday promotional graphics and discount visual flyers.",
@@ -515,10 +515,10 @@ const initPortfolio = () => {
         services: ["Creative Design", "Social Media Management"],
         previewImg: "images/p8.jpg"
       },
-      { 
-        id: "brand-8", 
-        src: "images/Soofimandi-white.png", 
-        companyId: "soofi-mandi", 
+      {
+        id: "brand-8",
+        src: "images/Soofimandi-white.png",
+        companyId: "soofi-mandi",
         companyName: "Soofi Mandi",
         category: "Yemeni Culinary Branding",
         shortDesc: "Authentic restaurant visual identity and promotional dining media.",
@@ -526,10 +526,10 @@ const initPortfolio = () => {
         services: ["Creative Design", "Social Media Management", "Video Production"],
         previewImg: "images/s2.jpg"
       },
-      { 
-        id: "brand-9", 
-        src: "images/KeyFactory.png", 
-        companyId: "key-factory", 
+      {
+        id: "brand-9",
+        src: "images/KeyFactory.png",
+        companyId: "key-factory",
         companyName: "Key Factory",
         category: "Commercial Marketing",
         shortDesc: "High-end security and locking solutions digital branding.",
@@ -537,10 +537,10 @@ const initPortfolio = () => {
         services: ["Creative Design", "Promotional Campaigns"],
         previewImg: "images/s5.jpg"
       },
-      { 
-        id: "brand-10", 
-        src: "images/ENGO FINAL LOGO-01.png", 
-        companyId: "engo", 
+      {
+        id: "brand-10",
+        src: "images/ENGO FINAL LOGO-01.png",
+        companyId: "engo",
         companyName: "ENGO",
         category: "Tech & Lifestyle",
         shortDesc: "Digital campaign assets and innovative graphic design.",
@@ -548,10 +548,10 @@ const initPortfolio = () => {
         services: ["Branding Design", "Digital Content Creation"],
         previewImg: "images/p1.jpg"
       },
-      { 
-        id: "brand-11", 
-        src: "images/Artboard 5.png", 
-        companyId: "educart", 
+      {
+        id: "brand-11",
+        src: "images/Artboard 5.png",
+        companyId: "educart",
         companyName: "EduCart",
         category: "Publishing & EdTech",
         shortDesc: "Custom publishing layouts and digital learning marketing.",
@@ -559,10 +559,10 @@ const initPortfolio = () => {
         services: ["Print Layout", "Educational Design", "Social Media Management"],
         previewImg: "images/p7.jpg"
       },
-      { 
-        id: "brand-12", 
-        src: "images/Picsart_25-09-24_21-31-47-226.png", 
-        companyId: "mylaban", 
+      {
+        id: "brand-12",
+        src: "images/Picsart_25-09-24_21-31-47-226.png",
+        companyId: "mylaban",
         companyName: "MyLaban",
         category: "Creative Branding",
         shortDesc: "Specialty dessert branding and social media campaign in Kochi.",
@@ -602,8 +602,8 @@ const initPortfolio = () => {
     if (!track) return;
     track.innerHTML = "";
 
-    // Duplicate list to create 2 identical consecutive sets for 100% seamless marquee scrolling
-    const marqueeBrands = [...activeBrands, ...activeBrands];
+    // Render active brands in static grid (no duplication)
+    const marqueeBrands = activeBrands;
 
     marqueeBrands.forEach((b) => {
       const item = document.createElement("div");
@@ -618,7 +618,7 @@ const initPortfolio = () => {
       img.loading = "lazy";
       img.decoding = "async";
       img.setAttribute("data-fallback", b.src);
-      img.onerror = function() {
+      img.onerror = function () {
         const fb = this.getAttribute("data-fallback");
         if (fb && this.src !== fb) {
           this.src = fb;
@@ -658,7 +658,7 @@ const initPortfolio = () => {
           handlePortfolioSync();
         }
       };
-    } catch (e) {}
+    } catch (e) { }
   }
   window.addEventListener("storage", (e) => {
     if (e.key === "betro_casestudies" || e.key === "betro_projects" || e.key === "betro_casestudies_cache") {

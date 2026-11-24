@@ -1369,7 +1369,10 @@ body.light-mode .portfolio-card:hover {
 
 .portfolio-brands-container {
   width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .portfolio-brands-section .top_clint h5 {
@@ -1389,47 +1392,36 @@ body.light-mode .portfolio-card:hover {
 
 .brands-marquee-container {
   width: 100%;
-  overflow: hidden;
   position: relative;
-  padding: 1rem 0;
-  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-}
-
-.brands-marquee-container:hover .brands-marquee-track {
-  animation-play-state: paused;
+  padding: 0;
+  overflow: visible;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
 }
 
 .brands-marquee-track {
-  display: flex;
-  align-items: center;
-  width: max-content;
-  animation: continuousBrandScroll 25s linear infinite;
-  will-change: transform;
-}
-
-@keyframes continuousBrandScroll {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-50%, 0, 0);
-  }
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+  width: 100%;
+  animation: none !important;
+  transform: none !important;
+  will-change: auto;
+  box-sizing: border-box;
 }
 
 .brand-marquee-item {
-  flex: 0 0 auto;
+  width: 100%;
+  height: 105px;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 105px;
-  width: 165px;
-  margin: 0 18px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 16px;
-  padding: 0.85rem 1.25rem;
-  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  padding: 1rem 1.25rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   user-select: none;
   backdrop-filter: blur(10px);
@@ -1440,15 +1432,21 @@ body.light-mode .portfolio-card:hover {
 .brand-marquee-item:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(74, 185, 108, 0.4);
-  transform: scale(1.04);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(74, 185, 108, 0.12);
 }
 
 .brand-logo-img {
   max-height: 52px;
   max-width: 85%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  object-position: center;
+  display: block;
+  margin: 0 auto;
   filter: brightness(0.95) contrast(1.05);
-  transition: filter 0.3s ease;
+  transition: filter 0.3s ease, transform 0.3s ease;
   pointer-events: none;
 }
 
@@ -1475,20 +1473,26 @@ body.light-mode .brand-marquee-item:hover {
   border-color: var(--primary-color, #4ab96c);
 }
 
-/* Responsive logo sizes & spacing for visible counts */
+/* Responsive logo grid for tablet and mobile */
 @media (max-width: 1024px) {
+  .portfolio-brands-container {
+    padding: 0 20px;
+  }
   .portfolio-brands-section .top_clint h5 {
     font-size: 2.3rem;
     margin-bottom: 2.2rem;
   }
+  .brands-marquee-track {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
   .brand-marquee-item {
     height: 95px;
-    width: 145px;
-    margin: 0 14px;
     padding: 0.75rem 1rem;
   }
   .brand-logo-img {
     max-height: 46px;
+    max-width: 85%;
   }
 }
 
@@ -1496,14 +1500,25 @@ body.light-mode .brand-marquee-item:hover {
   .portfolio-brands-section {
     padding: 4rem 0;
   }
+  .portfolio-brands-container {
+    padding: 0 16px;
+  }
+  .portfolio-brands-section .top_clint h5 {
+    font-size: 2rem;
+    margin-bottom: 1.8rem;
+  }
+  .brands-marquee-track {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
   .brand-marquee-item {
-    height: 85px;
-    width: 130px;
-    margin: 0 10px;
+    height: 80px;
     padding: 0.65rem 0.85rem;
+    border-radius: 12px;
   }
   .brand-logo-img {
     max-height: 40px;
+    max-width: 85%;
   }
 }
 
@@ -1511,19 +1526,25 @@ body.light-mode .brand-marquee-item:hover {
   .portfolio-brands-section {
     padding: 3rem 0;
   }
+  .portfolio-brands-container {
+    padding: 0 12px;
+  }
   .portfolio-brands-section .top_clint h5 {
-    font-size: 1.85rem;
+    font-size: 1.75rem;
     margin-bottom: 1.5rem;
+  }
+  .brands-marquee-track {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
   }
   .brand-marquee-item {
     height: 75px;
-    width: 105px;
-    margin: 0 7px;
     padding: 0.5rem 0.75rem;
     border-radius: 12px;
   }
   .brand-logo-img {
-    max-height: 34px;
+    max-height: 35px;
+    max-width: 85%;
   }
 }
 

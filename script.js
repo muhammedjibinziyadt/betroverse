@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const activeId = entry.target.getAttribute("id");
-        
+
         // Skip background utility section ids
         if (activeId === "subscribe") return;
 
@@ -254,11 +254,11 @@ document.addEventListener("DOMContentLoaded", () => {
   faqItems.forEach(item => {
     const question = item.querySelector(".faq__question");
     const answer = item.querySelector(".faq__answer");
-    
+
     if (question && answer) {
       question.addEventListener("click", () => {
         const isActive = item.classList.contains("active");
-        
+
         // Close all other accordion items
         faqItems.forEach(otherItem => {
           if (otherItem !== item && otherItem.classList.contains("active")) {
@@ -308,28 +308,28 @@ document.addEventListener("DOMContentLoaded", () => {
   if (homeForm) {
     homeForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      
+
       const submitBtn = homeForm.querySelector("button[type='submit']");
       const name = document.getElementById("home-contact-name").value.trim();
       const email = document.getElementById("home-contact-email").value.trim();
       const message = document.getElementById("home-contact-message").value.trim();
-      
+
       const originalText = submitBtn.textContent;
       submitBtn.disabled = true;
       submitBtn.textContent = "Sending...";
-      
+
       // Parse first name and last name
       const nameParts = name.split(" ");
       const firstName = nameParts[0];
       const lastName = nameParts.slice(1).join(" ");
-      
+
       const params = new URLSearchParams();
       params.append("First name", firstName);
       params.append("Last name", lastName || "");
       params.append("email", email);
       params.append("phone", "");
       params.append("service", "General Inquiry");
-      
+
       try {
         // Submit to Google Apps Script
         await fetch("https://script.google.com/macros/s/AKfycbz-YUhYE2JkkqDzCeNjkPikgvSRhwuxOz3PR_FHk-d1Zab_ki5Jnd6C2pIjRfwLOGSN/exec", {
@@ -340,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
           },
           body: params.toString()
         });
-        
+
         // Save locally to localStorage under 'betro_leads' for local admin dashboard
         const newLead = {
           id: "local-" + Date.now(),
@@ -354,12 +354,12 @@ document.addEventListener("DOMContentLoaded", () => {
           status: "new",
           notes: ""
         };
-        
+
         const localLeadsData = localStorage.getItem("betro_leads");
         const leadsList = localLeadsData ? JSON.parse(localLeadsData) : [];
         leadsList.unshift(newLead);
         localStorage.setItem("betro_leads", JSON.stringify(leadsList));
-        
+
         alert("Thank you! Your message has been sent successfully.");
         homeForm.reset();
       } catch (err) {
@@ -413,8 +413,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const track = document.getElementById("brands-marquee-track");
     if (track) {
       track.innerHTML = "";
-      // Duplicate list to create 2 identical consecutive sets for 100% seamless marquee scrolling
-      const marqueeBrands = [...activeBrands, ...activeBrands];
+      // Render active brands in static grid (no duplication)
+      const marqueeBrands = activeBrands;
 
       marqueeBrands.forEach((b) => {
         const item = document.createElement("div");
@@ -429,7 +429,7 @@ document.addEventListener("DOMContentLoaded", () => {
         img.loading = "lazy";
         img.decoding = "async";
         img.setAttribute("data-fallback", b.src);
-        img.onerror = function() {
+        img.onerror = function () {
           const fb = this.getAttribute("data-fallback");
           if (fb && this.src !== fb) {
             this.src = fb;
