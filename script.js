@@ -375,48 +375,59 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 7. Dynamic Brands Rendering from LocalStorage & Admin Panel ---
   const loadDynamicBrands = () => {
     const defaultBrands = [
-      { id: "brand-1", src: "images/golden.png", companyId: "sa-adiya", companyName: "Sa-Adiya Golden Jubilee" },
-      { id: "brand-2", src: "images/celes.png", companyId: "celes", companyName: "Celes Lifestyle" },
-      { id: "brand-3", src: "images/toi.png", style: "width: 40%;", companyId: "toi-cafe", companyName: "Toi Cafe" },
-      { id: "brand-4", src: "images/AlainArchitecture.png", companyId: "alain-architecture", companyName: "Alain Architecture" },
-      { id: "brand-5", src: "images/Gurumitra.png", companyId: "gurumitra", companyName: "Gurumitra Foundation" },
-      { id: "brand-6", src: "images/Nahdimandi-white.png", companyId: "nahdi-mandi", companyName: "Nahdi Mandi Restaurant" },
-      { id: "brand-7", src: "images/NiceMobiles.png", companyId: "nice-mobiles", companyName: "Nice Mobiles" },
-      { id: "brand-8", src: "images/Soofimandi-white.png", companyId: "soofi-mandi", companyName: "Soofi Mandi" },
-      { id: "brand-9", src: "images/KeyFactory.png", companyId: "key-factory", companyName: "Key Factory" },
-      { id: "brand-10", src: "images/ENGO FINAL LOGO-01.png", companyId: "engo", companyName: "ENGO" },
-      { id: "brand-11", src: "images/Artboard 5.png", companyId: "educart", companyName: "EduCart" },
-      { id: "brand-12", src: "images/Picsart_25-09-24_21-31-47-226.png", companyId: "mylaban", companyName: "MyLaban" }
+      { id: "brand-1", src: "images/golden.png", companyId: "sa-adiya", companyName: "Sa-Adiya Golden Jubilee", visible: true, order: 1 },
+      { id: "brand-2", src: "images/celes.png", companyId: "celes", companyName: "Celes Lifestyle", visible: true, order: 2 },
+      { id: "brand-3", src: "images/toi.png", style: "width: 40%;", companyId: "toi-cafe", companyName: "Toi Cafe", visible: true, order: 3 },
+      { id: "brand-4", src: "images/AlainArchitecture.png", companyId: "alain-architecture", companyName: "Alain Architecture", visible: true, order: 4 },
+      { id: "brand-5", src: "images/Gurumitra.png", companyId: "gurumitra", companyName: "Gurumitra Foundation", visible: true, order: 5 },
+      { id: "brand-6", src: "images/Nahdimandi-white.png", companyId: "nahdi-mandi", companyName: "Nahdi Mandi Restaurant", visible: true, order: 6 },
+      { id: "brand-7", src: "images/NiceMobiles.png", companyId: "nice-mobiles", companyName: "Nice Mobiles", visible: true, order: 7 },
+      { id: "brand-8", src: "images/Soofimandi-white.png", companyId: "soofi-mandi", companyName: "Soofi Mandi", visible: true, order: 8 },
+      { id: "brand-9", src: "images/KeyFactory.png", companyId: "key-factory", companyName: "Key Factory", visible: true, order: 9 },
+      { id: "brand-10", src: "images/ENGO FINAL LOGO-01.png", companyId: "engo", companyName: "ENGO", visible: true, order: 10 },
+      { id: "brand-11", src: "images/Artboard 5.png", companyId: "educart", companyName: "EduCart", visible: true, order: 11 },
+      { id: "brand-12", src: "images/Picsart_25-09-24_21-31-47-226.png", companyId: "mylaban", companyName: "MyLaban", visible: true, order: 12 }
     ];
 
+    // Read permanently deleted IDs list so deleted logos NEVER reappear
+    let deletedIds = [];
+    try {
+      const rawDel = localStorage.getItem("betro_deleted_brand_ids");
+      if (rawDel) deletedIds = JSON.parse(rawDel);
+    } catch (e) { }
+
     const storedBrandsRaw = localStorage.getItem("betro_brands");
-    let activeBrands = defaultBrands;
-    if (storedBrandsRaw) {
+    let activeBrands = [];
+
+    if (storedBrandsRaw !== null) {
       try {
         const parsed = JSON.parse(storedBrandsRaw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          activeBrands = parsed.map(b => {
-            const matchedDef = defaultBrands.find(db => db.id === b.id || db.src === b.src);
-            return matchedDef ? { ...matchedDef, ...b } : {
-              id: b.id || "brand-" + Math.random(),
-              src: b.src,
-              companyId: b.companyId || "independent",
-              companyName: b.name || "Partner Brand"
-            };
-          });
+        if (Array.isArray(parsed)) {
+          activeBrands = parsed;
         }
       } catch (e) {
-        activeBrands = defaultBrands;
+        activeBrands = [...defaultBrands];
       }
+    } else {
+      activeBrands = [...defaultBrands];
+      try {
+        localStorage.setItem("betro_brands", JSON.stringify(activeBrands));
+      } catch (e) { }
     }
+
+    // Filter out permanently deleted IDs
+    if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+      activeBrands = activeBrands.filter(b => !deletedIds.includes(b.id));
+    }
+
+    // Filter only visible brands for live website
+    const visibleBrands = activeBrands.filter(b => b.visible !== false);
 
     const track = document.getElementById("brands-marquee-track");
     if (track) {
       track.innerHTML = "";
-      // Render active brands in static grid (no duplication)
-      const marqueeBrands = activeBrands;
 
-      marqueeBrands.forEach((b) => {
+      visibleBrands.forEach((b) => {
         const item = document.createElement("div");
         item.className = "brand-marquee-item";
         item.setAttribute("data-brand-id", b.id);
@@ -424,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const img = document.createElement("img");
         const webpSrc = (window.BetroDB && BetroDB.getOptimizedAssetUrl(b.src)) || b.src;
         img.src = webpSrc;
-        img.alt = b.companyName || "Brand Logo";
+        img.alt = b.name || b.companyName || "Brand Logo";
         img.className = "brand-logo-img";
         img.loading = "lazy";
         img.decoding = "async";
@@ -444,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // On click, navigate to dedicated Case Study page
         item.addEventListener("click", (e) => {
           e.preventDefault();
-          const companyId = b.companyId || "independent";
+          const companyId = b.companyId || b.company_id || "independent";
           window.location.href = `portfolio/${companyId}.html`;
         });
 
@@ -457,13 +468,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Real-time synchronization listeners across windows/tabs
   window.addEventListener("storage", (e) => {
-    if (e.key === "betro_brands") {
+    if (e.key === "betro_brands" || e.key === "betro_deleted_brand_ids") {
       loadDynamicBrands();
     }
   });
   window.addEventListener("betro_storage_updated", () => {
     loadDynamicBrands();
   });
+  window.addEventListener("betro_db_updated", () => {
+    loadDynamicBrands();
+  });
+  if ("BroadcastChannel" in window) {
+    try {
+      const channel = new BroadcastChannel("betro_portfolio_sync");
+      channel.onmessage = (msg) => {
+        if (msg && msg.data && (msg.data.type === "brands_updated" || msg.data.type === "brand_logos")) {
+          loadDynamicBrands();
+        }
+      };
+    } catch (e) { }
+  }
 });
 
 

@@ -15,18 +15,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Default brand logos
   const defaultBrands = [
-    { id: "brand-1", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png" },
-    { id: "brand-2", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png" },
-    { id: "brand-3", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;" },
-    { id: "brand-4", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png" },
-    { id: "brand-5", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png" },
-    { id: "brand-6", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png" },
-    { id: "brand-7", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png" },
-    { id: "brand-8", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png" },
-    { id: "brand-9", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png" },
-    { id: "brand-10", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png" },
-    { id: "brand-11", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png" },
-    { id: "brand-12", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png" }
+    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", visible: true, order: 1 },
+    { id: "brand-2", name: "Celes Lifestyle", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", visible: true, order: 2 },
+    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;", visible: true, order: 3 },
+    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png", visible: true, order: 4 },
+    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png", visible: true, order: 5 },
+    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png", visible: true, order: 6 },
+    { id: "brand-7", name: "Nice Mobiles", companyName: "Nice Mobiles", companyId: "nice-mobiles", src: "images/NiceMobiles.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", visible: true, order: 7 },
+    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png", visible: true, order: 8 },
+    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png", visible: true, order: 9 },
+    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png", visible: true, order: 10 },
+    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png", visible: true, order: 11 },
+    { id: "brand-12", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 }
   ];
 
   // Default portfolio projects
@@ -136,35 +136,747 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Gallery & Brands Content Management ---
-  const renderContentTab = () => {
-    // Load brands
-    let brands = [];
+
+  // Helper to load current brand logos with permanent deletion protection
+  const getAdminBrands = () => {
+    let deletedIds = [];
     try {
-      const stored = localStorage.getItem("betro_brands");
-      brands = stored ? JSON.parse(stored) : defaultBrands;
+      const rawDel = localStorage.getItem("betro_deleted_brand_ids");
+      if (rawDel) deletedIds = JSON.parse(rawDel);
+    } catch (e) { }
+
+    const stored = localStorage.getItem("betro_brands");
+    let list = [];
+    if (stored !== null) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) list = parsed;
+      } catch (e) {
+        list = [...defaultBrands];
+      }
+    } else {
+      list = [...defaultBrands];
+      try {
+        localStorage.setItem("betro_brands", JSON.stringify(list));
+      } catch (e) { }
+    }
+
+    // Filter out permanently deleted IDs so they NEVER reappear after refresh/deployment
+    if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+      list = list.filter(b => !deletedIds.includes(b.id));
+    }
+
+    return list;
+  };
+
+  // Helper to persist brands list & sync with BetroDB / Supabase / Live Website
+  const saveAdminBrands = (brandsList, deletedIds = null) => {
+    try {
+      localStorage.setItem("betro_brands", JSON.stringify(brandsList));
+      if (deletedIds && Array.isArray(deletedIds)) {
+        localStorage.setItem("betro_deleted_brand_ids", JSON.stringify(deletedIds));
+      }
     } catch (e) {
-      brands = defaultBrands;
+      console.warn("Storage write error:", e);
     }
 
-    // Render brands
+    // Authoritative Sync via BetroDB
+    if (window.BetroDB && typeof window.BetroDB.saveBrandLogos === "function") {
+      let currentDeleted = deletedIds;
+      if (!currentDeleted) {
+        try {
+          const raw = localStorage.getItem("betro_deleted_brand_ids");
+          if (raw) currentDeleted = JSON.parse(raw);
+        } catch (e) { }
+      }
+      window.BetroDB.saveBrandLogos(brandsList, currentDeleted || []);
+    } else {
+      // Event broadcast fallback
+      try {
+        window.dispatchEvent(new CustomEvent("betro_storage_updated", { detail: { key: "betro_brands" } }));
+        if ("BroadcastChannel" in window) {
+          const ch = new BroadcastChannel("betro_portfolio_sync");
+          ch.postMessage({ type: "brands_updated", count: brandsList.length, timestamp: Date.now() });
+        }
+      } catch (e) { }
+    }
+  };
+
+  // Render Brands in Admin Panel with Drag-and-Drop, Order, Visibility & Actions
+  const renderAdminBrands = () => {
+    const brands = getAdminBrands();
     const brandsGrid = document.getElementById("admin-brands-grid");
-    if (brandsGrid) {
-      brandsGrid.innerHTML = "";
-      brands.forEach(b => {
-        const item = document.createElement("div");
-        item.className = "gallery-item";
-        item.innerHTML = `
-          <img src="${b.src}" alt="Brand Logo">
-          <div class="delete-overlay">
-            <button class="btn-delete" type="button"><i class="ri-delete-bin-line"></i> Delete</button>
-          </div>
-        `;
-        item.querySelector(".btn-delete").addEventListener("click", () => deleteContentItem("brand", b.id));
-        brandsGrid.appendChild(item);
-      });
+    const countBadge = document.getElementById("brand-count-badge");
+
+    if (countBadge) {
+      const liveCount = brands.filter(b => b.visible !== false).length;
+      countBadge.textContent = `${brands.length} Logo${brands.length !== 1 ? 's' : ''} (${liveCount} Live)`;
     }
 
-    // Load projects
+    if (!brandsGrid) return;
+    brandsGrid.innerHTML = "";
+
+    if (brands.length === 0) {
+      brandsGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-secondary); background: rgba(255,255,255,0.02); border: 1px dashed var(--panel-border); border-radius: 12px;">
+          <i class="ri-gallery-line" style="font-size: 2.5rem; display: block; margin-bottom: 0.5rem; color: #4ab96c;"></i>
+          <h4 style="margin: 0; color: #fff;">No Brand Logos Available</h4>
+          <p style="font-size: 0.85rem; margin-top: 0.25rem;">Click "Add Brand Logo" or "Upload Multiple Logos" above to add client logos.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let draggedItemIndex = null;
+
+    brands.forEach((b, idx) => {
+      const isVisible = b.visible !== false;
+      const isFirst = idx === 0;
+      const card = document.createElement("div");
+      card.className = `brand-admin-card ${!isVisible ? "is-hidden" : ""}`;
+      card.setAttribute("draggable", "true");
+      card.setAttribute("data-id", b.id);
+      card.setAttribute("data-index", idx);
+
+      const brandTitle = b.name || b.companyName || "Brand Logo";
+      const brandSlug = b.companyId || b.id;
+
+      card.innerHTML = `
+        <div class="brand-card-top">
+          <span class="brand-order-badge ${isFirst ? 'first' : ''}" title="Display position">
+            #${idx + 1} ${isFirst ? '★ First' : ''}
+          </span>
+          <div class="brand-top-right">
+            <span class="brand-vis-badge ${isVisible ? 'visible' : 'hidden-badge'}">
+              ${isVisible ? 'Live' : 'Hidden'}
+            </span>
+            <span class="brand-drag-handle" title="Drag and drop to reorder"><i class="ri-draggable"></i></span>
+          </div>
+        </div>
+
+        <div class="brand-card-preview-area" title="Click to view full preview">
+          <img src="${b.src}" alt="${brandTitle}" class="brand-card-img" ${b.style ? `style="${b.style}"` : ''} onerror="this.src='images/logo.png'">
+        </div>
+
+        <div class="brand-card-info">
+          <h4 class="brand-card-title" title="${brandTitle}">${brandTitle}</h4>
+          <span class="brand-card-slug">${brandSlug}</span>
+        </div>
+
+        <div class="brand-card-actions">
+          ${!isFirst ? `<button type="button" class="brand-ctrl-btn first-btn make-first-btn" title="Set as First Logo (#1)"><i class="ri-arrow-up-line"></i> Top</button>` : `<span style="font-size: 0.72rem; color: #4ab96c; font-weight: 700; padding: 4px 6px;">#1 Hero</span>`}
+          <button type="button" class="brand-ctrl-btn vis-toggle-btn ${isVisible ? 'is-active' : 'is-inactive'}" title="${isVisible ? 'Hide logo from live website' : 'Make logo visible on live website'}">
+            <i class="${isVisible ? 'ri-eye-line' : 'ri-eye-off-line'}"></i>
+          </button>
+          <button type="button" class="brand-ctrl-btn edit-brand-btn" title="Edit name, replace image or custom style"><i class="ri-edit-line"></i> Edit</button>
+          <button type="button" class="brand-ctrl-btn preview-brand-btn" title="Preview on website background"><i class="ri-eye-2-line"></i></button>
+          <button type="button" class="brand-ctrl-btn del-btn delete-brand-btn" title="Delete logo permanently"><i class="ri-delete-bin-line"></i></button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; background: rgba(0,0,0,0.35); border-top: 1px solid rgba(255,255,255,0.03);">
+          <button type="button" class="brand-ctrl-btn shift-btn move-left-btn" ${idx === 0 ? 'disabled style="opacity:0.25;cursor:not-allowed;"' : ''} title="Move left / up"><i class="ri-arrow-left-s-line"></i></button>
+          <span style="font-size: 0.68rem; color: var(--text-secondary);">Sort Order</span>
+          <button type="button" class="brand-ctrl-btn shift-btn move-right-btn" ${idx === brands.length - 1 ? 'disabled style="opacity:0.25;cursor:not-allowed;"' : ''} title="Move right / down"><i class="ri-arrow-right-s-line"></i></button>
+        </div>
+      `;
+
+      // HTML5 Drag and drop event listeners
+      card.addEventListener("dragstart", (e) => {
+        draggedItemIndex = idx;
+        card.classList.add("is-dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", idx);
+      });
+
+      card.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        card.classList.add("drag-over");
+      });
+
+      card.addEventListener("dragleave", () => {
+        card.classList.remove("drag-over");
+      });
+
+      card.addEventListener("drop", (e) => {
+        e.preventDefault();
+        card.classList.remove("drag-over");
+        if (draggedItemIndex === null || draggedItemIndex === idx) return;
+
+        const currentBrands = getAdminBrands();
+        const [movedItem] = currentBrands.splice(draggedItemIndex, 1);
+        currentBrands.splice(idx, 0, movedItem);
+
+        currentBrands.forEach((item, i) => item.order = i + 1);
+
+        saveAdminBrands(currentBrands);
+        renderAdminBrands();
+        showAdminToast(`Reordered "${brandTitle}" to position #${idx + 1} and synced!`, "success");
+      });
+
+      card.addEventListener("dragend", () => {
+        card.classList.remove("is-dragging");
+        document.querySelectorAll(".brand-admin-card").forEach(c => c.classList.remove("drag-over"));
+        draggedItemIndex = null;
+      });
+
+      // Button listeners
+      const firstBtn = card.querySelector(".make-first-btn");
+      if (firstBtn) {
+        firstBtn.addEventListener("click", () => makeBrandFirst(b.id));
+      }
+
+      const visBtn = card.querySelector(".vis-toggle-btn");
+      if (visBtn) {
+        visBtn.addEventListener("click", () => toggleBrandVisibility(b.id));
+      }
+
+      const editBtn = card.querySelector(".edit-brand-btn");
+      if (editBtn) {
+        editBtn.addEventListener("click", () => openEditBrandModal(b.id));
+      }
+
+      const previewBtn = card.querySelector(".preview-brand-btn");
+      if (previewBtn) {
+        previewBtn.addEventListener("click", () => openPreviewBrandModal(b.id));
+      }
+
+      const previewArea = card.querySelector(".brand-card-preview-area");
+      if (previewArea) {
+        previewArea.addEventListener("click", () => openPreviewBrandModal(b.id));
+      }
+
+      const delBtn = card.querySelector(".delete-brand-btn");
+      if (delBtn) {
+        delBtn.addEventListener("click", () => deleteBrandPermanently(b.id));
+      }
+
+      const moveLeftBtn = card.querySelector(".move-left-btn");
+      if (moveLeftBtn && idx > 0) {
+        moveLeftBtn.addEventListener("click", () => swapBrands(idx, idx - 1));
+      }
+
+      const moveRightBtn = card.querySelector(".move-right-btn");
+      if (moveRightBtn && idx < brands.length - 1) {
+        moveRightBtn.addEventListener("click", () => swapBrands(idx, idx + 1));
+      }
+
+      brandsGrid.appendChild(card);
+    });
+  };
+
+  // Reorder: Make Brand First (#1 Hero Position)
+  const makeBrandFirst = (brandId) => {
+    const list = getAdminBrands();
+    const idx = list.findIndex(b => b.id === brandId);
+    if (idx <= 0) return;
+    const [item] = list.splice(idx, 1);
+    list.unshift(item);
+    list.forEach((b, i) => b.order = i + 1);
+    saveAdminBrands(list);
+    renderAdminBrands();
+    showAdminToast(`"${item.name || item.companyName}" is now the first logo (#1)!`, "success");
+  };
+
+  // Reorder: Shift positions Left / Right
+  const swapBrands = (i, j) => {
+    const list = getAdminBrands();
+    if (i < 0 || j < 0 || i >= list.length || j >= list.length) return;
+    const temp = list[i];
+    list[i] = list[j];
+    list[j] = temp;
+    list.forEach((b, idx) => b.order = idx + 1);
+    saveAdminBrands(list);
+    renderAdminBrands();
+    showAdminToast("Brand order updated and synced with live site!", "success");
+  };
+
+  // Visibility Toggle
+  const toggleBrandVisibility = (brandId) => {
+    const list = getAdminBrands();
+    const item = list.find(b => b.id === brandId);
+    if (!item) return;
+    item.visible = item.visible === false ? true : false;
+    saveAdminBrands(list);
+    renderAdminBrands();
+    const statusText = item.visible ? "Live on website" : "Hidden from website";
+    showAdminToast(`"${item.name || item.companyName}" is now ${statusText}.`, "info");
+  };
+
+  // Permanent Delete
+  const deleteBrandPermanently = (brandId) => {
+    const list = getAdminBrands();
+    const item = list.find(b => b.id === brandId);
+    const title = item ? (item.name || item.companyName || "this brand logo") : "this brand logo";
+
+    if (!confirm(`Are you sure you want to permanently delete "${title}"?\n\nThis will remove it from the database and website immediately. Deleted logos will NEVER reappear after refresh or deployment.`)) {
+      return;
+    }
+
+    // 1. Remove from active list
+    const updatedList = list.filter(b => b.id !== brandId);
+
+    // 2. Add to deleted IDs registry
+    let deletedIds = [];
+    try {
+      const raw = localStorage.getItem("betro_deleted_brand_ids");
+      if (raw) deletedIds = JSON.parse(raw);
+    } catch (e) { }
+    if (!deletedIds.includes(brandId)) {
+      deletedIds.push(brandId);
+    }
+
+    saveAdminBrands(updatedList, deletedIds);
+    renderAdminBrands();
+    showAdminToast(`"${title}" was permanently deleted and removed from website.`, "success");
+  };
+
+  // --- SINGLE BRAND ADD / EDIT MODAL CONTROLLER ---
+  const brandModal = document.getElementById("brand-manage-modal");
+  const brandForm = document.getElementById("brand-manage-form");
+  const brandModalTitle = document.getElementById("brand-modal-title");
+  const brandEditIdInput = document.getElementById("brand-edit-id");
+  const brandNameInput = document.getElementById("brand-name-input");
+  const brandSlugInput = document.getElementById("brand-slug-input");
+  const brandFileInput = document.getElementById("brand-file-input");
+  const brandUrlInput = document.getElementById("brand-url-input");
+  const brandFileGroup = document.getElementById("brand-file-group");
+  const brandUrlGroup = document.getElementById("brand-url-group");
+  const brandDropzone = document.getElementById("brand-dropzone");
+  const brandPreviewContainer = document.getElementById("brand-preview-container");
+  const brandImagePreview = document.getElementById("brand-image-preview");
+  const brandScaleStyle = document.getElementById("brand-scale-style");
+  const brandVisibleCheck = document.getElementById("brand-visible-check");
+  const brandMakeFirstCheck = document.getElementById("brand-make-first-check");
+  let brandPendingDataUrl = "";
+
+  const openAddBrandModal = () => {
+    if (!brandForm) return;
+    brandForm.reset();
+    brandEditIdInput.value = "";
+    brandPendingDataUrl = "";
+    brandModalTitle.innerHTML = '<i class="ri-add-circle-line" style="color: #4ab96c;"></i> Add Brand Logo';
+    brandFileGroup.classList.remove("hidden");
+    brandUrlGroup.classList.add("hidden");
+    brandPreviewContainer.style.display = "none";
+    brandImagePreview.src = "";
+    brandVisibleCheck.checked = true;
+    brandMakeFirstCheck.checked = false;
+    brandModal.classList.remove("hidden");
+  };
+
+  const openEditBrandModal = (brandId) => {
+    if (!brandModal) return;
+    const list = getAdminBrands();
+    const item = list.find(b => b.id === brandId);
+    if (!item) return;
+
+    brandForm.reset();
+    brandEditIdInput.value = item.id;
+    brandNameInput.value = item.name || item.companyName || "";
+    brandSlugInput.value = item.companyId || item.company_id || "";
+    brandScaleStyle.value = item.style || "";
+    brandVisibleCheck.checked = item.visible !== false;
+    brandMakeFirstCheck.checked = list.indexOf(item) === 0;
+
+    brandPendingDataUrl = item.src;
+    brandImagePreview.src = item.src;
+    brandPreviewContainer.style.display = "block";
+
+    if (item.src && (item.src.startsWith("http://") || item.src.startsWith("https://"))) {
+      const urlRadio = document.querySelector('input[name="brand-img-source"][value="url"]');
+      if (urlRadio) urlRadio.checked = true;
+      brandFileGroup.classList.add("hidden");
+      brandUrlGroup.classList.remove("hidden");
+      brandUrlInput.value = item.src;
+    } else {
+      const fileRadio = document.querySelector('input[name="brand-img-source"][value="file"]');
+      if (fileRadio) fileRadio.checked = true;
+      brandFileGroup.classList.remove("hidden");
+      brandUrlGroup.classList.add("hidden");
+    }
+
+    brandModalTitle.innerHTML = `<i class="ri-edit-line" style="color: #4ab96c;"></i> Edit Brand: ${item.name || item.companyName}`;
+    brandModal.classList.remove("hidden");
+  };
+
+  const handleBrandSingleFile = async (file) => {
+    if (!file) return;
+    try {
+      const opt = await optimizeImageFile(file);
+      brandPendingDataUrl = opt.dataUrl;
+      brandImagePreview.src = opt.dataUrl;
+      brandPreviewContainer.style.display = "block";
+      if (!brandNameInput.value.trim()) {
+        const rawName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+        brandNameInput.value = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+      }
+    } catch (e) {
+      showAdminToast("Failed to process image file", "error");
+    }
+  };
+
+  if (brandDropzone) {
+    brandDropzone.addEventListener("click", () => brandFileInput && brandFileInput.click());
+    brandDropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      brandDropzone.style.borderColor = "#4ab96c";
+      brandDropzone.style.background = "rgba(74, 185, 108, 0.1)";
+    });
+    brandDropzone.addEventListener("dragleave", () => {
+      brandDropzone.style.borderColor = "rgba(74, 185, 108, 0.35)";
+      brandDropzone.style.background = "rgba(74, 185, 108, 0.03)";
+    });
+    brandDropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      brandDropzone.style.borderColor = "rgba(74, 185, 108, 0.35)";
+      brandDropzone.style.background = "rgba(74, 185, 108, 0.03)";
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleBrandSingleFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  if (brandFileInput) {
+    brandFileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleBrandSingleFile(e.target.files[0]);
+      }
+    });
+  }
+
+  if (brandUrlInput) {
+    brandUrlInput.addEventListener("input", (e) => {
+      const val = e.target.value.trim();
+      if (val) {
+        brandPendingDataUrl = val;
+        brandImagePreview.src = val;
+        brandPreviewContainer.style.display = "block";
+      }
+    });
+  }
+
+  document.querySelectorAll('input[name="brand-img-source"]').forEach(radio => {
+    radio.addEventListener("change", (e) => {
+      if (e.target.value === "file") {
+        brandFileGroup.classList.remove("hidden");
+        brandUrlGroup.classList.add("hidden");
+      } else {
+        brandFileGroup.classList.add("hidden");
+        brandUrlGroup.classList.remove("hidden");
+      }
+    });
+  });
+
+  if (brandForm) {
+    brandForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = brandNameInput.value.trim();
+      if (!name) {
+        showAdminToast("Please enter a brand name.", "error");
+        return;
+      }
+
+      const sourceEl = document.querySelector('input[name="brand-img-source"]:checked');
+      const source = sourceEl ? sourceEl.value : "file";
+      let finalSrc = "";
+      if (source === "file") {
+        finalSrc = brandPendingDataUrl;
+        if (!finalSrc) {
+          showAdminToast("Please select or drop a logo image file.", "error");
+          return;
+        }
+      } else {
+        finalSrc = brandUrlInput.value.trim();
+        if (!finalSrc) {
+          showAdminToast("Please enter a valid image URL.", "error");
+          return;
+        }
+      }
+
+      const editId = brandEditIdInput.value.trim();
+      const slug = brandSlugInput.value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      const style = brandScaleStyle.value.trim();
+      const visible = brandVisibleCheck.checked;
+      const makeFirst = brandMakeFirstCheck.checked;
+
+      const list = getAdminBrands();
+
+      if (editId) {
+        // Edit existing brand
+        const idx = list.findIndex(b => b.id === editId);
+        if (idx !== -1) {
+          list[idx].name = name;
+          list[idx].companyName = name;
+          list[idx].companyId = slug;
+          list[idx].src = finalSrc;
+          list[idx].style = style;
+          list[idx].visible = visible;
+
+          if (makeFirst && idx !== 0) {
+            const [moved] = list.splice(idx, 1);
+            list.unshift(moved);
+          }
+        }
+        showAdminToast(`Updated brand "${name}" successfully!`, "success");
+      } else {
+        // Add new brand
+        const newBrand = {
+          id: "brand-" + Date.now(),
+          name,
+          companyName: name,
+          companyId: slug,
+          src: finalSrc,
+          style,
+          visible,
+          order: 1
+        };
+
+        if (makeFirst) {
+          list.unshift(newBrand);
+        } else {
+          list.push(newBrand);
+        }
+        showAdminToast(`Brand "${name}" added successfully and synced!`, "success");
+      }
+
+      list.forEach((b, i) => b.order = i + 1);
+
+      saveAdminBrands(list);
+      brandModal.classList.add("hidden");
+      renderAdminBrands();
+    });
+  }
+
+  // --- BATCH / MULTIPLE BRAND LOGOS UPLOAD CONTROLLER ---
+  const batchModal = document.getElementById("batch-brand-modal");
+  const batchDropzone = document.getElementById("batch-dropzone");
+  const batchFilesInput = document.getElementById("batch-files-input");
+  const batchSelectedSection = document.getElementById("batch-selected-section");
+  const batchPreviewList = document.getElementById("batch-preview-list");
+  const batchCountSpan = document.getElementById("batch-count");
+  const batchConfirmBtn = document.getElementById("batch-upload-confirm-btn");
+  const batchClearBtn = document.getElementById("batch-clear-all-btn");
+  const batchStatusText = document.getElementById("batch-status-text");
+
+  let batchSelectedFiles = [];
+
+  const openBatchUploadModal = () => {
+    batchSelectedFiles = [];
+    renderBatchList();
+    if (batchModal) batchModal.classList.remove("hidden");
+  };
+
+  const renderBatchList = () => {
+    if (!batchPreviewList) return;
+    batchPreviewList.innerHTML = "";
+    if (batchCountSpan) batchCountSpan.textContent = batchSelectedFiles.length;
+
+    if (batchSelectedFiles.length === 0) {
+      if (batchSelectedSection) batchSelectedSection.style.display = "none";
+      if (batchConfirmBtn) batchConfirmBtn.disabled = true;
+      if (batchStatusText) batchStatusText.textContent = "No logos selected yet.";
+      return;
+    }
+
+    if (batchSelectedSection) batchSelectedSection.style.display = "block";
+    if (batchConfirmBtn) batchConfirmBtn.disabled = false;
+    if (batchStatusText) batchStatusText.textContent = `${batchSelectedFiles.length} logo${batchSelectedFiles.length > 1 ? 's' : ''} ready to upload.`;
+
+    batchSelectedFiles.forEach((item, index) => {
+      const row = document.createElement("div");
+      row.className = "batch-preview-row";
+      row.innerHTML = `
+        <img src="${item.dataUrl}" alt="Thumb" class="batch-preview-thumb">
+        <div style="flex: 1;">
+          <input type="text" class="form-input batch-name-input" value="${item.name}" placeholder="Brand Name" style="padding: 6px 10px; font-size: 0.85rem;" data-index="${index}">
+        </div>
+        <button type="button" class="admin-btn secondary-btn batch-remove-btn" data-index="${index}" style="padding: 4px 8px; font-size: 0.75rem; color: #f87171;" title="Remove this file">
+          <i class="ri-close-line"></i>
+        </button>
+      `;
+
+      row.querySelector(".batch-name-input").addEventListener("input", (e) => {
+        batchSelectedFiles[index].name = e.target.value.trim();
+      });
+
+      row.querySelector(".batch-remove-btn").addEventListener("click", () => {
+        batchSelectedFiles.splice(index, 1);
+        renderBatchList();
+      });
+
+      batchPreviewList.appendChild(row);
+    });
+  };
+
+  const processBatchFiles = async (files) => {
+    if (!batchStatusText) return;
+    batchStatusText.textContent = "Processing and optimizing images...";
+    for (const f of files) {
+      if (!f.type.startsWith("image/")) continue;
+      try {
+        const opt = await optimizeImageFile(f);
+        const rawName = f.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+        const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        batchSelectedFiles.push({
+          file: f,
+          name: formattedName,
+          dataUrl: opt.dataUrl
+        });
+      } catch (err) { }
+    }
+    renderBatchList();
+  };
+
+  if (batchDropzone) {
+    batchDropzone.addEventListener("click", () => batchFilesInput && batchFilesInput.click());
+    batchDropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      batchDropzone.style.borderColor = "#4ab96c";
+      batchDropzone.style.background = "rgba(74, 185, 108, 0.1)";
+    });
+    batchDropzone.addEventListener("dragleave", () => {
+      batchDropzone.style.borderColor = "rgba(74, 185, 108, 0.4)";
+      batchDropzone.style.background = "rgba(74, 185, 108, 0.04)";
+    });
+    batchDropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      batchDropzone.style.borderColor = "rgba(74, 185, 108, 0.4)";
+      batchDropzone.style.background = "rgba(74, 185, 108, 0.04)";
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processBatchFiles(Array.from(e.dataTransfer.files));
+      }
+    });
+  }
+
+  if (batchFilesInput) {
+    batchFilesInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        processBatchFiles(Array.from(e.target.files));
+      }
+    });
+  }
+
+  if (batchClearBtn) {
+    batchClearBtn.addEventListener("click", () => {
+      batchSelectedFiles = [];
+      renderBatchList();
+    });
+  }
+
+  if (batchConfirmBtn) {
+    batchConfirmBtn.addEventListener("click", async () => {
+      if (batchSelectedFiles.length === 0) return;
+
+      batchConfirmBtn.disabled = true;
+      batchConfirmBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Uploading...';
+
+      const currentList = getAdminBrands();
+      const count = batchSelectedFiles.length;
+
+      batchSelectedFiles.forEach((item, i) => {
+        const brandName = item.name.trim() || `Partner Brand ${currentList.length + i + 1}`;
+        const slug = brandName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+        const newBrand = {
+          id: `brand-${Date.now()}-${i}-${Math.floor(Math.random() * 1000)}`,
+          name: brandName,
+          companyName: brandName,
+          companyId: slug,
+          src: item.dataUrl,
+          style: "",
+          visible: true,
+          order: currentList.length + i + 1
+        };
+        currentList.push(newBrand);
+      });
+
+      currentList.forEach((b, i) => b.order = i + 1);
+
+      saveAdminBrands(currentList);
+      batchConfirmBtn.disabled = false;
+      batchConfirmBtn.innerHTML = '<i class="ri-check-line"></i> Upload All Logos';
+      if (batchModal) batchModal.classList.add("hidden");
+      renderAdminBrands();
+      showAdminToast(`Successfully added ${count} new brand logo${count > 1 ? 's' : ''}!`, "success");
+    });
+  }
+
+  // --- BRAND PREVIEW MODAL CONTROLLER ---
+  const previewModal = document.getElementById("brand-preview-modal");
+  const previewDarkImg = document.getElementById("preview-modal-img-dark");
+  const previewLightImg = document.getElementById("preview-modal-img-light");
+  const previewTitle = document.getElementById("brand-preview-title");
+  const previewMeta = document.getElementById("preview-modal-meta");
+
+  const openPreviewBrandModal = (brandId) => {
+    if (!previewModal) return;
+    const list = getAdminBrands();
+    const item = list.find(b => b.id === brandId);
+    if (!item) return;
+
+    const brandName = item.name || item.companyName || "Brand Logo";
+    if (previewTitle) previewTitle.textContent = `Preview: ${brandName}`;
+    if (previewDarkImg) previewDarkImg.src = item.src;
+    if (previewLightImg) previewLightImg.src = item.src;
+
+    if (item.style) {
+      if (previewDarkImg) previewDarkImg.setAttribute("style", item.style);
+      if (previewLightImg) previewLightImg.setAttribute("style", item.style);
+    } else {
+      if (previewDarkImg) previewDarkImg.removeAttribute("style");
+      if (previewLightImg) previewLightImg.removeAttribute("style");
+    }
+
+    const orderIdx = list.indexOf(item) + 1;
+    const isLive = item.visible !== false;
+
+    if (previewMeta) {
+      previewMeta.innerHTML = `
+        <div><strong>Status:</strong> ${isLive ? '<span style="color:#34d399;font-weight:600;">● Live on Website</span>' : '<span style="color:#fbbf24;font-weight:600;">● Hidden from Website</span>'}</div>
+        <div><strong>Position:</strong> #${orderIdx} of ${list.length} logos</div>
+        <div><strong>Company ID:</strong> <code>${item.companyId || item.id}</code></div>
+      `;
+    }
+
+    previewModal.classList.remove("hidden");
+  };
+
+  // Close buttons for modals
+  document.getElementById("close-brand-modal-btn")?.addEventListener("click", () => brandModal && brandModal.classList.add("hidden"));
+  document.getElementById("cancel-brand-modal-btn")?.addEventListener("click", () => brandModal && brandModal.classList.add("hidden"));
+  document.getElementById("close-batch-modal-btn")?.addEventListener("click", () => batchModal && batchModal.classList.add("hidden"));
+  document.getElementById("cancel-batch-btn")?.addEventListener("click", () => batchModal && batchModal.classList.add("hidden"));
+  document.getElementById("close-preview-modal-btn")?.addEventListener("click", () => previewModal && previewModal.classList.add("hidden"));
+  document.getElementById("close-preview-modal-bottom-btn")?.addEventListener("click", () => previewModal && previewModal.classList.add("hidden"));
+
+  // Header trigger buttons
+  document.getElementById("add-brand-btn")?.addEventListener("click", openAddBrandModal);
+  document.getElementById("upload-multi-brands-btn")?.addEventListener("click", openBatchUploadModal);
+
+  // Reset default order button
+  document.getElementById("reset-brands-order-btn")?.addEventListener("click", () => {
+    if (!confirm("Reset all existing brand logos to their standard initial sequence? (Custom uploaded logos will remain following the defaults).")) return;
+    const currentList = getAdminBrands();
+    const sorted = [...currentList].sort((a, b) => {
+      const idxA = defaultBrands.findIndex(db => db.id === a.id);
+      const idxB = defaultBrands.findIndex(db => db.id === b.id);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return 0;
+    });
+    sorted.forEach((b, i) => b.order = i + 1);
+    saveAdminBrands(sorted);
+    renderAdminBrands();
+    showAdminToast("Reset brands to standard sequence!", "success");
+  });
+
+  // --- GALLERY CONTENT TAB CONTROLLER (Brands + Portfolio Projects) ---
+  const renderContentTab = () => {
+    // 1. Render Upgraded Brands
+    renderAdminBrands();
+
+    // 2. Render Projects (preserved from original)
     let projects = [];
     try {
       const stored = localStorage.getItem("betro_projects");
@@ -173,7 +885,6 @@ document.addEventListener("DOMContentLoaded", () => {
       projects = defaultProjects;
     }
 
-    // Render projects
     const projectsGrid = document.getElementById("admin-projects-grid");
     if (projectsGrid) {
       projectsGrid.innerHTML = "";
@@ -192,7 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // Add brand/project modal helpers
+  // Content Upload Modal for Projects (Preserved)
   const uploadModal = document.getElementById("content-upload-modal");
   const modalTitle = document.getElementById("content-modal-title");
   const uploadForm = document.getElementById("content-upload-form");
@@ -205,8 +916,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const uploadPreview = document.getElementById("upload-preview");
 
   const openUploadModal = (type) => {
+    if (type === "brand") {
+      openAddBrandModal();
+      return;
+    }
     contentTypeInput.value = type;
-    modalTitle.textContent = type === "brand" ? "Add Brand Logo" : "Add Project Image";
+    modalTitle.textContent = "Add Project Image";
     uploadForm.reset();
     fileInputGroup.classList.remove("hidden");
     urlInputGroup.classList.add("hidden");
@@ -215,17 +930,13 @@ document.addEventListener("DOMContentLoaded", () => {
     uploadModal.classList.remove("hidden");
   };
 
-  // Trigger modals
-  const addBrandBtn = document.getElementById("add-brand-btn");
-  if (addBrandBtn) addBrandBtn.addEventListener("click", () => openUploadModal("brand"));
-
   const addProjectBtn = document.getElementById("add-project-btn");
   if (addProjectBtn) addProjectBtn.addEventListener("click", () => openUploadModal("project"));
 
   const closeUploadBtn = document.getElementById("close-upload-btn");
-  if (closeUploadBtn) closeUploadBtn.addEventListener("click", () => uploadModal.classList.add("hidden"));
+  if (closeUploadBtn) closeUploadBtn.addEventListener("click", () => uploadModal && uploadModal.classList.add("hidden"));
 
-  // Toggle Source Type
+  // Toggle Source Type for Project Modal
   document.querySelectorAll('input[name="img-source"]').forEach(radio => {
     radio.addEventListener("change", (e) => {
       if (e.target.value === "file") {
@@ -240,7 +951,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Handle file preview
   if (contentFileInput) {
     contentFileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
@@ -255,7 +965,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Handle URL preview
   if (contentUrlInput) {
     contentUrlInput.addEventListener("input", (e) => {
       const val = e.target.value.trim();
@@ -269,63 +978,57 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Form Submit Action
   if (uploadForm) {
     uploadForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const type = contentTypeInput.value;
-      const source = uploadForm.querySelector('input[name="img-source"]:checked').value;
+      if (type === "brand") return;
+
+      const sourceEl = uploadForm.querySelector('input[name="img-source"]:checked');
+      const source = sourceEl ? sourceEl.value : "file";
 
       let imgSrc = "";
       if (source === "file") {
         imgSrc = uploadPreview.src;
         if (!imgSrc) {
-          alert("Please select an image file first.");
+          showAdminToast("Please select an image file first.", "error");
           return;
         }
       } else {
         imgSrc = contentUrlInput.value.trim();
         if (!imgSrc) {
-          alert("Please enter a valid remote image URL.");
+          showAdminToast("Please enter a valid remote image URL.", "error");
           return;
         }
       }
 
-      // Save to local storage
-      if (type === "brand") {
-        const stored = localStorage.getItem("betro_brands");
-        const list = stored ? JSON.parse(stored) : [...defaultBrands];
-        list.unshift({ id: "brand-" + Date.now(), src: imgSrc });
-        localStorage.setItem("betro_brands", JSON.stringify(list));
-      } else {
-        const stored = localStorage.getItem("betro_projects");
-        const list = stored ? JSON.parse(stored) : [...defaultProjects];
-        list.unshift({ id: "proj-" + Date.now(), src: imgSrc });
-        localStorage.setItem("betro_projects", JSON.stringify(list));
-      }
+      const stored = localStorage.getItem("betro_projects");
+      const list = stored ? JSON.parse(stored) : [...defaultProjects];
+      list.unshift({ id: "proj-" + Date.now(), src: imgSrc });
+      localStorage.setItem("betro_projects", JSON.stringify(list));
 
       uploadModal.classList.add("hidden");
       renderContentTab();
+      showAdminToast("Project image added successfully!", "success");
     });
   }
 
-  // Delete Content Item
+  // Delete Content Item (Projects)
   const deleteContentItem = (type, itemId) => {
-    if (!confirm(`Are you sure you want to remove this ${type === "brand" ? "brand logo" : "project image"}?`)) return;
-
     if (type === "brand") {
-      const stored = localStorage.getItem("betro_brands");
-      let list = stored ? JSON.parse(stored) : [...defaultBrands];
-      list = list.filter(item => item.id !== itemId);
-      localStorage.setItem("betro_brands", JSON.stringify(list));
-    } else {
-      const stored = localStorage.getItem("betro_projects");
-      let list = stored ? JSON.parse(stored) : [...defaultProjects];
-      list = list.filter(item => item.id !== itemId);
-      localStorage.setItem("betro_projects", JSON.stringify(list));
+      deleteBrandPermanently(itemId);
+      return;
     }
 
+    if (!confirm("Are you sure you want to remove this project image?")) return;
+
+    const stored = localStorage.getItem("betro_projects");
+    let list = stored ? JSON.parse(stored) : [...defaultProjects];
+    list = list.filter(item => item.id !== itemId);
+    localStorage.setItem("betro_projects", JSON.stringify(list));
+
     renderContentTab();
+    showAdminToast("Project image removed.", "info");
   };
 
   // --- CENTRAL MEDIA MANAGEMENT SYSTEM ---
@@ -594,7 +1297,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- REAL-TIME UPLOAD ENGINE & IMAGE OPTIMIZATION ---
 
   // Toast Notification System
-  const showAdminToast = (message, type = "success", duration = 4500) => {
+  function showAdminToast(message, type = "success", duration = 4500) {
     let container = document.getElementById("admin-toast-container");
     if (!container) {
       container = document.createElement("div");
@@ -636,7 +1339,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Image Optimizer Engine (Supports any aspect ratio, resizes max 1400px, 0.78 quality WebP compression)
-  const optimizeImageFile = (file) => {
+  function optimizeImageFile(file) {
     return new Promise((resolve) => {
       if (file.type === "image/svg+xml" || file.name.endsWith(".svg")) {
         const reader = new FileReader();
@@ -2372,9 +3075,9 @@ document.addEventListener("DOMContentLoaded", () => {
             </thead>
             <tbody>
               ${recentItems.map(item => {
-                const isPub = (item.status || "published") === "published";
-                const thumb = item.cardImage || item.heroImage || (item.media && item.media.gallery && item.media.gallery[0]) || item.companyLogo || 'https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png';
-                return `
+          const isPub = (item.status || "published") === "published";
+          const thumb = item.cardImage || item.heroImage || (item.media && item.media.gallery && item.media.gallery[0]) || item.companyLogo || 'https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png';
+          return `
                   <tr>
                     <td>
                       <div class="recent-cs-item-cell">
@@ -2405,7 +3108,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                   </tr>
                 `;
-              }).join("")}
+        }).join("")}
             </tbody>
           </table>
         `;

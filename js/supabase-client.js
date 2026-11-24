@@ -45,7 +45,7 @@
       }
     },
     remove(key) {
-      try { localStorage.removeItem(key); } catch (e) {}
+      try { localStorage.removeItem(key); } catch (e) { }
     }
   };
 
@@ -145,7 +145,7 @@
           bucket = cleanUrl(parsed.storageBucket) || DEFAULT_BUCKET;
           source = "localStorage";
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // 3. If still empty, check Vercel Serverless endpoint (/api/config)
@@ -438,7 +438,7 @@
               if (!includeDrafts) return parsed.filter(cs => cs.status === "published");
               return parsed;
             }
-          } catch (e) {}
+          } catch (e) { }
         }
       }
 
@@ -497,7 +497,7 @@
             if (!includeDrafts) return parsed.filter(cs => cs.status === "published");
             return parsed;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       // Fallback to legacy window seed if available
@@ -528,7 +528,7 @@
                 return found;
               }
             }
-          } catch (e) {}
+          } catch (e) { }
         }
       }
 
@@ -691,7 +691,7 @@
               if (existingRecords && existingRecords.length > 0) {
                 targetId = existingRecords[0].id;
               }
-            } catch (findErr) {}
+            } catch (findErr) { }
 
             const assetRow = {
               id: targetId || `media-${savedCS.id}-${a.type || 'image'}-${i}`,
@@ -1035,7 +1035,7 @@
     },
 
     /**
-     * Fetch Brand Logos
+     * Fetch Brand Logos with offline and cloud sync
      */
     async getBrandLogos() {
       const client = await this.ensureInit();
@@ -1047,11 +1047,64 @@
             .order("display_order", { ascending: true });
 
           if (!error && Array.isArray(data) && data.length > 0) {
+            safeStorage.set("betro_brands", data);
             return data;
           }
-        } catch (e) {}
+        } catch (e) { }
+      }
+
+      // Safe local storage fallback
+      const stored = safeStorage.get("betro_brands");
+      if (stored !== null) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) { }
       }
       return null;
+    },
+
+    /**
+     * Save Brand Logos permanently and broadcast live sync
+     */
+    async saveBrandLogos(brandList, deletedIds = []) {
+      if (!Array.isArray(brandList)) return false;
+
+      // 1. Authoritative local storage write
+      safeStorage.set("betro_brands", brandList);
+      if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+        safeStorage.set("betro_deleted_brand_ids", deletedIds);
+      }
+
+      // 2. Broadcast change event across all open windows & tabs
+      this.broadcastChange("brands_updated", { count: brandList.length, timestamp: Date.now() });
+      try {
+        window.dispatchEvent(new CustomEvent("betro_storage_updated", { detail: { key: "betro_brands" } }));
+      } catch (e) { }
+
+      // 3. Cloud Database Sync (Supabase) if online
+      const client = await this.ensureInit();
+      if (client) {
+        try {
+          if (deletedIds && deletedIds.length > 0) {
+            await client.from("brand_logos").delete().in("id", deletedIds);
+          }
+          const upsertRows = brandList.map((b, idx) => ({
+            id: b.id,
+            company_id: b.companyId || b.company_id || "brand",
+            company_name: b.name || b.companyName || b.company_name || "Partner Brand",
+            src: b.src,
+            style: b.style || "",
+            visible: b.visible !== false,
+            display_order: idx + 1,
+            updated_at: new Date().toISOString()
+          }));
+          await client.from("brand_logos").upsert(upsertRows, { onConflict: "id" });
+        } catch (e) {
+          console.warn("[BetroDB] Cloud sync note for brands:", e);
+        }
+      }
+      return true;
     },
 
     /**
@@ -1063,7 +1116,7 @@
           const channel = new BroadcastChannel("betro_portfolio_sync");
           channel.postMessage({ type, data, timestamp: Date.now() });
         }
-      } catch (e) {}
+      } catch (e) { }
       window.dispatchEvent(new CustomEvent("betro_db_updated", { detail: { type, data } }));
     },
 

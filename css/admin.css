@@ -3032,3 +3032,277 @@ body.light-mode .dark-icon { display: none; }
   color: #fff;
 }
 
+/* ==========================================================================
+   ENHANCED BRANDS MANAGEMENT & DRAG-AND-DROP GRID
+   ========================================================================== */
+.admin-brands-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.brand-admin-card {
+  background: rgba(18, 22, 31, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  backdrop-filter: blur(10px);
+}
+
+.brand-admin-card:active {
+  cursor: grabbing;
+}
+
+.brand-admin-card:hover {
+  border-color: rgba(74, 185, 108, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.brand-admin-card.is-dragging {
+  opacity: 0.4;
+  border: 2px dashed #4ab96c !important;
+  transform: scale(0.96);
+}
+
+.brand-admin-card.drag-over {
+  border-color: #4ab96c !important;
+  background: rgba(74, 185, 108, 0.08) !important;
+  box-shadow: 0 0 0 2px #4ab96c, 0 8px 24px rgba(74, 185, 108, 0.2) !important;
+}
+
+.brand-admin-card.is-hidden {
+  opacity: 0.6;
+  border-color: rgba(234, 179, 8, 0.3);
+  background: rgba(18, 22, 31, 0.4);
+}
+
+.brand-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.brand-order-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(74, 185, 108, 0.15);
+  color: #4ab96c;
+  border: 1px solid rgba(74, 185, 108, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.brand-order-badge.first {
+  background: #4ab96c;
+  color: #000;
+  font-weight: 800;
+}
+
+.brand-top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand-vis-badge {
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.brand-vis-badge.visible {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.brand-vis-badge.hidden-badge {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fbbf24;
+}
+
+.brand-drag-handle {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.1rem;
+  cursor: grab;
+  padding: 2px;
+  line-height: 1;
+}
+
+.brand-drag-handle:hover {
+  color: #4ab96c;
+}
+
+.brand-card-preview-area {
+  height: 95px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-card-img {
+  max-height: 65px;
+  max-width: 85%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.brand-card-info {
+  padding: 10px 12px 6px;
+  background: rgba(13, 16, 23, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brand-card-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.brand-card-slug {
+  font-size: 0.72rem;
+  color: var(--text-secondary, #94a3b8);
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(13, 16, 23, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 4px;
+}
+
+.brand-ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 7px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.brand-ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.brand-ctrl-btn.first-btn {
+  color: #4ab96c;
+  border-color: rgba(74, 185, 108, 0.3);
+  background: rgba(74, 185, 108, 0.08);
+}
+
+.brand-ctrl-btn.first-btn:hover {
+  background: #4ab96c;
+  color: #000;
+}
+
+.brand-ctrl-btn.vis-toggle-btn.is-active {
+  color: #34d399;
+}
+
+.brand-ctrl-btn.vis-toggle-btn.is-inactive {
+  color: #fbbf24;
+  background: rgba(234, 179, 8, 0.1);
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.brand-ctrl-btn.del-btn {
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.2);
+  margin-left: auto;
+}
+
+.brand-ctrl-btn.del-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fff;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.brand-ctrl-btn.shift-btn {
+  padding: 4px 5px;
+}
+
+/* Batch preview items */
+.batch-preview-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.batch-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.batch-preview-thumb {
+  width: 50px;
+  height: 40px;
+  object-fit: contain;
+  background: #000;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+@media (max-width: 768px) {
+  .admin-brands-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-brands-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+

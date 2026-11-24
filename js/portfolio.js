@@ -572,40 +572,43 @@ const initPortfolio = () => {
       }
     ];
 
+    // Read permanently deleted IDs list so deleted logos NEVER reappear
+    let deletedIds = [];
+    try {
+      const rawDel = localStorage.getItem("betro_deleted_brand_ids");
+      if (rawDel) deletedIds = JSON.parse(rawDel);
+    } catch (e) {}
+
     const storedBrandsRaw = localStorage.getItem("betro_brands");
-    let activeBrands = defaultBrandsList;
-    if (storedBrandsRaw) {
+    let activeBrands = [];
+
+    if (storedBrandsRaw !== null) {
       try {
         const parsed = JSON.parse(storedBrandsRaw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          activeBrands = parsed.map(b => {
-            const matchedDef = defaultBrandsList.find(db => db.id === b.id || db.src === b.src);
-            return matchedDef ? { ...matchedDef, ...b } : {
-              id: b.id || "brand-" + Math.random(),
-              src: b.src,
-              companyId: b.companyId || "brand-partner",
-              companyName: b.name || "Partner Brand",
-              category: "Client Branding",
-              shortDesc: "Partner brand collaboration with Betroverse.",
-              companyDesc: "A valued brand partner collaborating with Betroverse for visual excellence and digital campaigns.",
-              services: ["Branding", "Creative Design"],
-              previewImg: "images/p1.jpg"
-            };
-          });
+        if (Array.isArray(parsed)) {
+          activeBrands = parsed;
         }
       } catch (e) {
-        activeBrands = defaultBrandsList;
+        activeBrands = [...defaultBrandsList];
       }
+    } else {
+      activeBrands = [...defaultBrandsList];
     }
+
+    // Filter out permanently deleted IDs
+    if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+      activeBrands = activeBrands.filter(b => !deletedIds.includes(b.id));
+    }
+
+    // Filter only visible brands
+    const visibleBrands = activeBrands.filter(b => b.visible !== false);
 
     const track = document.getElementById("brands-marquee-track");
     if (!track) return;
     track.innerHTML = "";
 
     // Render active brands in static grid (no duplication)
-    const marqueeBrands = activeBrands;
-
-    marqueeBrands.forEach((b) => {
+    visibleBrands.forEach((b) => {
       const item = document.createElement("div");
       item.className = "brand-marquee-item";
       item.setAttribute("data-brand-id", b.id);
