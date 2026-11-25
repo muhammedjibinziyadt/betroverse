@@ -153,6 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 1. Sticky Header Background Transition ---
   const header = document.querySelector(".site-header");
   const handleScroll = () => {
+    if (!header) return;
     if (window.scrollY > 50) {
       header.classList.add("scrolled");
     } else {
@@ -310,13 +311,15 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
 
       const submitBtn = homeForm.querySelector("button[type='submit']");
-      const name = document.getElementById("home-contact-name").value.trim();
-      const email = document.getElementById("home-contact-email").value.trim();
-      const message = document.getElementById("home-contact-message").value.trim();
+      const name = document.getElementById("home-contact-name")?.value.trim() || "";
+      const email = document.getElementById("home-contact-email")?.value.trim() || "";
+      const message = document.getElementById("home-contact-message")?.value.trim() || "";
 
-      const originalText = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Sending...";
+      const originalText = submitBtn ? submitBtn.textContent : "Send Message";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+      }
 
       // Parse first name and last name
       const nameParts = name.split(" ");

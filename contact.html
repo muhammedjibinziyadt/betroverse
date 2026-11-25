@@ -125,15 +125,19 @@
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Preloader logic
-            window.addEventListener("load", function () {
-                setTimeout(() => {
-                    const preloader = document.getElementById("preloader");
-                    if (preloader) preloader.classList.add("hide");
-                    const content = document.getElementById("content");
-                    if (content) content.style.display = "block";
-                }, 900);
-            });
+            // Snappy Preloader logic
+            const dismissPreloader = () => {
+                const preloader = document.getElementById("preloader");
+                if (preloader && !preloader.classList.contains("hide")) {
+                    preloader.classList.add("hide");
+                }
+                const content = document.getElementById("content");
+                if (content && content.style.display !== "block") {
+                    content.style.display = "block";
+                }
+            };
+            dismissPreloader();
+            window.addEventListener("load", dismissPreloader);
 
             const form = document.getElementById('gform');
             if (form) {
@@ -207,7 +211,10 @@
 
                             alert("Form submitted successfully!");
                             form.reset();
-                            window.location.reload();
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.textContent = originalBtnText;
+                            }
                         },
                         error: function (err) {
                             console.error("Submission error:", err);

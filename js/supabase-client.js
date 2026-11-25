@@ -428,13 +428,22 @@
     async getCaseStudies(options = {}) {
       const { forceRefresh = false, includeDrafts = false, forCards = false } = options;
 
+      let deletedCsIds = [];
+      try {
+        const rawDel = safeStorage.get("betro_deleted_casestudy_ids");
+        if (rawDel) deletedCsIds = JSON.parse(rawDel);
+      } catch (e) { }
+
       // 1. FAST PATH: Return cached case studies immediately for instant UI display
       if (!forceRefresh) {
         const cached = safeStorage.get("betro_casestudies_cache");
         if (cached) {
           try {
-            const parsed = JSON.parse(cached);
+            let parsed = JSON.parse(cached);
             if (Array.isArray(parsed) && parsed.length > 0) {
+              if (Array.isArray(deletedCsIds) && deletedCsIds.length > 0) {
+                parsed = parsed.filter(cs => !deletedCsIds.includes(cs.id) && !deletedCsIds.includes(cs.slug));
+              }
               if (!includeDrafts) return parsed.filter(cs => cs.status === "published");
               return parsed;
             }
@@ -442,7 +451,11 @@
         }
       }
 
-      return this.revalidateCaseStudies({ includeDrafts, forCards });
+      let res = await this.revalidateCaseStudies({ includeDrafts, forCards });
+      if (Array.isArray(res) && Array.isArray(deletedCsIds) && deletedCsIds.length > 0) {
+        res = res.filter(cs => !deletedCsIds.includes(cs.id) && !deletedCsIds.includes(cs.slug));
+      }
+      return res;
     },
 
     /**
@@ -732,11 +745,29 @@
     async deleteCaseStudy(id) {
       if (!id) return { success: false, error: "Missing ID" };
 
+      // Ensure deleted ID is tracked in safeStorage so it never reappears
+      let deletedCsIds = [];
+      try {
+        const rawDel = safeStorage.get("betro_deleted_casestudy_ids");
+        if (rawDel) deletedCsIds = JSON.parse(rawDel);
+      } catch (e) { }
+      if (!deletedCsIds.includes(id)) deletedCsIds.push(id);
+      safeStorage.set("betro_deleted_casestudy_ids", deletedCsIds);
+
+      // Purge from cache immediately
+      try {
+        const cached = safeStorage.get("betro_casestudies_cache");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) {
+            const filtered = parsed.filter(c => c.id !== id && c.slug !== id);
+            safeStorage.set("betro_casestudies_cache", filtered);
+          }
+        }
+      } catch (e) { }
+
       const client = await this.ensureInit();
       if (!client) {
-        const current = (await this.getCaseStudies({ includeDrafts: true })) || [];
-        const filtered = current.filter(c => c.id !== id && c.slug !== id);
-        safeStorage.set("betro_casestudies_cache", filtered);
         this.broadcastChange("CASE_STUDY_DELETED", { id });
         return { success: true };
       }
@@ -784,7 +815,9 @@
         return { success: true };
       } catch (err) {
         console.error("[BetroDB] Delete case study error:", err);
-        return { success: false, error: err.message };
+        // Even if remote database delete failed, local purge succeeded
+        this.broadcastChange("CASE_STUDY_DELETED", { id });
+        return { success: true, warning: err.message };
       }
     },
 

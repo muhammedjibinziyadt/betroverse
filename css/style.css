@@ -3,25 +3,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Whisper&display=swap');
 
 
-@font-face {
-  font-family: 'GT-Eesti';
-  src: url("../fonts/AppleGaramond-BoldItalic.ttf") format("woff2");
-  src: url("../fonts/AppleGaramond-Italic.ttf") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'GT-Eestitt';
-  src: url("../fonts/AppleGaramond-Italic.ttf") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
-  --background-image: url("../images/Frame\ 1.png");
+  --background-image: url("../images/Frame 1.png");
 
   --primary-color: #4ab96c;
   --primary-color-dark: #6132b4;
