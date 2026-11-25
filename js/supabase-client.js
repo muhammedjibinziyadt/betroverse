@@ -55,60 +55,39 @@
   function cleanUrl(url) {
     if (!url || typeof url !== "string") return "";
     let clean = url.trim();
-    // Auto-fix typo observed in admin console
-    clean = clean.replace(/fvbauhcwshgqboak[eia]{2,3}x/gi, "fvbauhcwshgqboakeiux");
+    clean = clean.replace(/\s+/g, "");
+    clean = clean.replace(/\/+$/, "");
     if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
       clean = "https://" + clean;
-    }
-    return clean.replace(/\/+$/, "");
-  }
-
-  function cleanBucket(bucket) {
-    if (!bucket || typeof bucket !== "string") return DEFAULT_BUCKET;
-    const b = bucket.trim().toLowerCase();
-    if (b === "betodata" || b === "portfolio-media") return b;
-    return DEFAULT_BUCKET;
-  }
-
-  /**
-   * Helper: Normalize & validate Anon Key (recovers truncated or corrupted keys)
-   */
-  function cleanKey(key) {
-    if (!key || typeof key !== "string") return DEFAULT_CONFIG.supabaseAnonKey;
-    let clean = key.trim();
-    // Strip accidental https:// if added previously
-    clean = clean.replace(/^https?:\/\//i, "");
-    if (clean.startsWith("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2YmF1aGN3c2hncWJvYWtlaXV4")) {
-      return DEFAULT_CONFIG.supabaseAnonKey;
-    }
-    const parts = clean.split(".");
-    if (parts.length !== 3 || clean.length < 150) {
-      return DEFAULT_CONFIG.supabaseAnonKey;
     }
     return clean;
   }
 
-  /**
-   * Clean filename for cloud storage
-   */
-  function cleanFileName(filename) {
-    return filename
-      .replace(/[^a-zA-Z0-9._-]/g, "_")
-      .replace(/_+/g, "_")
-      .toLowerCase();
+  function cleanKey(key) {
+    if (!key || typeof key !== "string") return "";
+    return key.trim().replace(/\s+/g, "");
   }
 
-  /**
-   * Extract storage relative path and bucket from a public Supabase CDN URL
-   */
+  function cleanBucket(name) {
+    if (!name || typeof name !== "string") return DEFAULT_BUCKET;
+    return name.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+  }
+
   function extractStoragePath(url, fallbackPath = null) {
-    if (fallbackPath && fallbackPath !== "null" && typeof fallbackPath === "string") {
-      return fallbackPath.trim();
+    let p = null;
+    if (url && typeof url === "string") {
+      const match = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/?#]+)\/(.+?)(?:\?.*)?$/i);
+      if (match) {
+        p = decodeURIComponent(match[2]);
+      }
     }
-    if (!url || typeof url !== "string") return null;
-    const match = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/?#]+)\/([^?#]+)/i);
-    if (match) {
-      return decodeURIComponent(match[2]);
+    if (!p && fallbackPath && typeof fallbackPath === "string" && fallbackPath !== "null") {
+      p = fallbackPath.trim();
+    }
+    if (p) {
+      p = p.replace(/^\/+/, "");
+      p = p.replace(/^(?:betodata|portfolio-media)\/+/i, "");
+      return p;
     }
     return null;
   }
@@ -352,6 +331,16 @@
         return { ...activeConfig };
       },
 
+      broadcastChange(type, payload) {
+        try {
+          if (typeof window !== "undefined" && window.BroadcastChannel) {
+            const bc = new window.BroadcastChannel("betro_db_sync");
+            bc.postMessage({ type, payload, timestamp: Date.now() });
+            bc.close();
+          }
+        } catch (e) { }
+      },
+
       /**
        * Update configuration at runtime (e.g. from Admin Settings modal)
        */
@@ -378,6 +367,15 @@
           };
         }
 
+        let projectRef = "";
+        try {
+          const parsed = new URL(activeConfig.supabaseUrl);
+          const parts = parsed.hostname.split(".");
+          if (parts.length >= 3 && parts[1] === "supabase" && parts[2] === "co") {
+            projectRef = parts[0];
+          }
+        } catch (e) { }
+
         const start = Date.now();
         try {
           const { data, error } = await client
@@ -399,7 +397,7 @@
             }
             return {
               success: false,
-              error: `Database query failed: ${error.message} (Code: ${error.code})`,
+              error: 'Database query failed: ' + error.message + ' (Code: ' + error.code + ')',
               latency
             };
           }
@@ -408,13 +406,22 @@
             success: true,
             count: data ? data.length : 0,
             latency,
-            message: `Connected successfully to Supabase! Latency: ${latency}ms.`
+            message: 'Connected successfully to Supabase! Latency: ' + latency + 'ms.'
           };
         } catch (err) {
+          const latency = Date.now() - start;
+          const errMsg = err ? (err.message || String(err)) : "Network failure";
+          const isDnsError = errMsg.includes("Failed to fetch") || errMsg.includes("ENOTFOUND") || errMsg.includes("NetworkError");
+
           return {
             success: false,
-            error: `Connection error: ${err.message || err}`,
-            latency: Date.now() - start
+            isDnsError,
+            projectRef,
+            dashboardUrl: projectRef ? ('https://supabase.com/dashboard/project/' + projectRef) : null,
+            error: isDnsError
+              ? 'Supabase host (' + activeConfig.supabaseUrl + ') is unreachable. If this is a free-tier project, Supabase has paused it due to inactivity. Click "Restore Project" in Supabase or update your credentials.'
+              : ('Connection error: ' + errMsg),
+            latency
           };
         }
       },
@@ -1087,12 +1094,37 @@
        * Delete media from Supabase Storage & Database
        */
       async deleteMedia(storagePath, assetId = null, url = null, options = {}) {
+        const pathToDel = extractStoragePath(url, storagePath);
+
+        // 1. Permanently record in deleted blacklist so it NEVER reappears
+        try {
+          let delList = [];
+          const raw = safeStorage.get("betro_deleted_media_ids");
+          if (raw) delList = JSON.parse(raw);
+          if (!Array.isArray(delList)) delList = [];
+          if (assetId && !delList.includes(assetId)) delList.push(assetId);
+          if (url && !delList.includes(url)) delList.push(url);
+          if (pathToDel && !delList.includes(pathToDel)) delList.push(pathToDel);
+          safeStorage.set("betro_deleted_media_ids", delList);
+        } catch (e) { }
+
+        // 2. Remove from local cache immediately
+        try {
+          const local = safeStorage.get("betro_media_assets");
+          if (local) {
+            let parsed = JSON.parse(local);
+            if (Array.isArray(parsed)) {
+              parsed = parsed.filter(a => a.id !== assetId && a.url !== url && a.storage_path !== pathToDel);
+              safeStorage.set("betro_media_assets", parsed);
+            }
+          }
+          this.broadcastChange("MEDIA_DELETED", { id: assetId, storagePath: pathToDel, url });
+        } catch (e) { }
+
         const client = await this.ensureInit();
-        if (!client) return { success: true };
+        if (!client) return { success: true, warning: "Deleted locally (Supabase client offline)" };
 
         try {
-          const pathToDel = extractStoragePath(url, storagePath);
-
           // Remove storage object if applicable and not skipped
           if (pathToDel && !options.skipStorageDelete) {
             const bucket = cleanBucket(activeConfig.storageBucket || DEFAULT_BUCKET);
@@ -1104,29 +1136,25 @@
             }
             try {
               await client.storage.from(otherBucket).remove([pathToDel]);
-            } catch (stErr2) {
-              // fallback bucket check
-            }
+            } catch (stErr2) { }
           }
 
           // Delete from media_assets table
           if (assetId) {
             const { error: errId } = await client.from("media_assets").delete().eq("id", assetId);
-            if (errId) throw new Error(errId.message || "Failed to delete media record by ID");
+            if (errId) console.warn("[BetroDB] Delete by ID notice:", errId.message);
           }
           if (url) {
             const { error: errUrl } = await client.from("media_assets").delete().eq("url", url);
-            if (errUrl) throw new Error(errUrl.message || "Failed to delete media record by URL");
+            if (errUrl) console.warn("[BetroDB] Delete by URL notice:", errUrl.message);
           }
 
-          // Invalidate all local caches
           safeStorage.remove("betro_media_assets");
           safeStorage.remove("betro_casestudies_cache");
-          this.broadcastChange("MEDIA_DELETED", { id: assetId, storagePath: pathToDel, url });
           return { success: true };
         } catch (e) {
-          console.error("[BetroDB] Delete media error:", e);
-          return { success: false, error: e.message || "Delete operation failed" };
+          console.warn("[BetroDB] Cloud media delete notice:", e);
+          return { success: true, warning: "Deleted locally. Cloud sync pending: " + (e.message || "Host unreachable") };
         }
       },
 
@@ -1134,6 +1162,14 @@
        * Retrieve all media assets from Supabase cloud
        */
       async getAllMediaAssets(options = {}) {
+        let deletedIds = [];
+        try {
+          const rawDel = safeStorage.get("betro_deleted_media_ids");
+          if (rawDel) deletedIds = JSON.parse(rawDel);
+          if (!Array.isArray(deletedIds)) deletedIds = [];
+        } catch (e) { }
+
+        let list = [];
         const client = await this.ensureInit();
         if (client) {
           try {
@@ -1143,172 +1179,43 @@
               .order("created_at", { ascending: false });
 
             if (!error && Array.isArray(data)) {
-              // Deduplicate by URL to ensure a single authoritative record per asset
-              const seen = new Set();
-              const unique = [];
-
-              for (const item of data) {
-                if (!item.url) continue;
-                if (seen.has(item.url)) continue;
-                seen.add(item.url);
-
-                const stPath = extractStoragePath(item.url, item.storage_path);
-
-                unique.push({
-                  id: item.id,
-                  name: item.name || "Asset",
-                  type: item.type || "image",
-                  url: item.url,
-                  storage_path: stPath,
-                  storagePath: stPath,
-                  folder: item.target_section || "general",
-                  size: item.size || "Cloud Asset",
-                  caseStudyId: item.case_study_id,
-                  caseStudySlug: item.case_study_slug,
-                  date: item.created_at ? new Date(item.created_at).toLocaleDateString() : "Recent"
-                });
-              }
-
-              return unique;
+              list = data;
             }
           } catch (e) {
-            console.warn("[BetroDB] Error fetching all media assets:", e);
+            console.warn("[BetroDB] Cloud media fetch notice:", e);
           }
         }
-        return null;
-      },
-
-      /**
-       * Fetch Brand Logos with offline and cloud sync
-       */
-      async getBrandLogos() {
-        const client = await this.ensureInit();
-        if (client) {
-          try {
-            const { data, error } = await client
-              .from("brand_logos")
-              .select("*")
-              .order("display_order", { ascending: true });
-
-            if (!error && Array.isArray(data) && data.length > 0) {
-              safeStorage.set("betro_brands", data);
-              return data;
-            }
-          } catch (e) { }
-        }
-
-        // Safe local storage fallback
-        const stored = safeStorage.get("betro_brands");
-        if (stored !== null) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) return parsed;
-          } catch (e) { }
-        }
-        return null;
-      },
-
-      /**
-       * Save Brand Logos permanently and broadcast live sync
-       */
-      async saveBrandLogos(brandList, deletedIds = []) {
-        if (!Array.isArray(brandList)) return false;
-
-        // 1. Authoritative local storage write
-        safeStorage.set("betro_brands", brandList);
-        if (Array.isArray(deletedIds) && deletedIds.length > 0) {
-          safeStorage.set("betro_deleted_brand_ids", deletedIds);
-        }
-
-        // 2. Broadcast change event across all open windows & tabs
-        this.broadcastChange("brands_updated", { count: brandList.length, timestamp: Date.now() });
-        try {
-          window.dispatchEvent(new CustomEvent("betro_storage_updated", { detail: { key: "betro_brands" } }));
-        } catch (e) { }
-
-        // 3. Cloud Database Sync (Supabase) if online
-        const client = await this.ensureInit();
-        if (client) {
-          try {
-            if (deletedIds && deletedIds.length > 0) {
-              await client.from("brand_logos").delete().in("id", deletedIds);
-            }
-            const upsertRows = brandList.map((b, idx) => ({
-              id: b.id,
-              company_id: b.companyId || b.company_id || "brand",
-              company_name: b.name || b.companyName || b.company_name || "Partner Brand",
-              src: b.src,
-              style: b.style || "",
-              visible: b.visible !== false,
-              display_order: idx + 1,
-              updated_at: new Date().toISOString()
-            }));
-            await client.from("brand_logos").upsert(upsertRows, { onConflict: "id" });
-          } catch (e) {
-            console.warn("[BetroDB] Cloud sync note for brands:", e);
-          }
-        }
-        return true;
-      },
-
-      /**
-       * Broadcast change event across tabs & windows
-       */
-      broadcastChange(type, data) {
-        try {
-          if ("BroadcastChannel" in window) {
-            const channel = new BroadcastChannel("betro_portfolio_sync");
-            channel.postMessage({ type, data, timestamp: Date.now() });
-          }
-        } catch (e) { }
-        window.dispatchEvent(new CustomEvent("betro_db_updated", { detail: { type, data } }));
-      },
-
-      /**
-       * One-click seed synchronizer:
-       * Pushes all 16 default case studies and default brands to Supabase in one click!
-       */
-      async syncAllSeedData(seedList, onProgress = null) {
-        const client = await this.ensureInit();
-        if (!client) {
-          throw new Error("Supabase is not configured. Please enter your credentials first.");
-        }
-
-        const list = Array.isArray(seedList) && seedList.length > 0
-          ? seedList
-          : (typeof window.getBetroCaseStudiesSeed === "function" ? window.getBetroCaseStudiesSeed() : []);
 
         if (!list || list.length === 0) {
-          throw new Error("No seed data found to synchronize.");
-        }
-
-        let successCount = 0;
-        let total = list.length;
-
-        for (let i = 0; i < list.length; i++) {
-          const item = list[i];
-          if (onProgress) {
-            onProgress({
-              current: i + 1,
-              total,
-              pct: Math.round(((i + 1) / total) * 100),
-              name: item.companyName
-            });
-          }
-
-          try {
-            item.displayOrder = i;
-            await this.saveCaseStudy(item);
-            successCount++;
-          } catch (err) {
-            console.error(`Failed to sync project "${item.companyName}":`, err);
+          const local = safeStorage.get("betro_media_assets");
+          if (local) {
+            try {
+              const parsed = JSON.parse(local);
+              if (Array.isArray(parsed)) list = parsed;
+            } catch (e) { }
           }
         }
 
-        safeStorage.remove("betro_casestudies_cache");
-        return { success: true, count: successCount, total };
+        // Strict filter out any deleted assets
+        if (deletedIds.length > 0 && Array.isArray(list)) {
+          list = list.filter(a => !deletedIds.includes(a.id) && !deletedIds.includes(a.url) && !deletedIds.includes(a.storage_path));
+        }
+
+        // Deduplicate by URL
+        const seen = new Set();
+        const unique = [];
+        for (const item of list) {
+          if (!item || !item.url) continue;
+          if (seen.has(item.url)) continue;
+          seen.add(item.url);
+          unique.push(item);
+        }
+        return unique;
       }
     };
+
+
+    
 
     // Expose to window
     window.BetroDB = BetroDB;

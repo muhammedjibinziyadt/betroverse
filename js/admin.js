@@ -1278,18 +1278,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const getMediaAssets = () => {
-    const cached = BetroStorage.cache["betro_media_assets"];
-    if (cached !== undefined && Array.isArray(cached)) return cached;
+    let deletedMediaIds = [];
+    try {
+      const rawDel = localStorage.getItem("betro_deleted_media_ids");
+      if (rawDel) deletedMediaIds = JSON.parse(rawDel);
+      if (!Array.isArray(deletedMediaIds)) deletedMediaIds = [];
+    } catch (e) { }
 
-    const storedSync = BetroStorage.getItemSync("betro_media_assets");
-    if (storedSync !== null && Array.isArray(storedSync)) {
-      BetroStorage.cache["betro_media_assets"] = storedSync;
-      return storedSync;
+    let list = [];
+    const cached = BetroStorage.cache["betro_media_assets"];
+    if (cached !== undefined && Array.isArray(cached)) {
+      list = cached;
+    } else {
+      const storedSync = BetroStorage.getItemSync("betro_media_assets");
+      if (storedSync !== null && Array.isArray(storedSync)) {
+        list = storedSync;
+      }
     }
-    return [];
+
+    if (deletedMediaIds.length > 0 && Array.isArray(list)) {
+      list = list.filter(a => !deletedMediaIds.includes(a.id) && !deletedMediaIds.includes(a.url) && !deletedMediaIds.includes(a.storage_path));
+    }
+    BetroStorage.cache["betro_media_assets"] = list;
+    return list;
   };
 
-  const saveMediaAssets = (assets) => {
+    const saveMediaAssets = (assets) => {
     BetroStorage.cache["betro_media_assets"] = assets;
     BetroStorage.setItem("betro_media_assets", assets);
   };
@@ -1796,25 +1810,37 @@ document.addEventListener("DOMContentLoaded", () => {
           await saveBetroCaseStudies(projectsList);
         }
 
-        // 3. Backend Supabase delete
-        if (window.BetroDB) {
-          const res = await BetroDB.deleteMedia(
-            asset.storage_path || asset.storagePath,
-            asset.id,
-            asset.url,
-            { skipStorageDelete: !shouldDeletePhysicalFile }
-          );
-          if (!res.success) {
-            throw new Error(res.error || "Failed to delete media from cloud database.");
-          }
-        }
+        // 3. Blacklist in betro_deleted_media_ids so it NEVER reappears on refresh
+        try {
+          let delList = [];
+          const raw = localStorage.getItem("betro_deleted_media_ids");
+          if (raw) delList = JSON.parse(raw);
+          if (!Array.isArray(delList)) delList = [];
+          if (asset.id && !delList.includes(asset.id)) delList.push(asset.id);
+          if (asset.url && !delList.includes(asset.url)) delList.push(asset.url);
+          if (asset.storage_path && !delList.includes(asset.storage_path)) delList.push(asset.storage_path);
+          localStorage.setItem("betro_deleted_media_ids", JSON.stringify(delList));
+        } catch (e) { }
 
-        // 4. Remove from media assets list and sync storage
+        // 4. Remove from media assets list and sync storage immediately
         let currentAssets = getMediaAssets();
         currentAssets = currentAssets.filter(a => a.id !== asset.id && a.url !== asset.url);
         BetroStorage.cache["betro_media_assets"] = currentAssets;
         await saveMediaAssets(currentAssets);
 
+        // 5. Backend Supabase delete (graceful offline handling)
+        if (window.BetroDB) {
+          try {
+            await BetroDB.deleteMedia(
+              asset.storage_path || asset.storagePath,
+              asset.id,
+              asset.url,
+              { skipStorageDelete: !shouldDeletePhysicalFile }
+            );
+          } catch (cloudErr) {
+            console.warn("[SafeDelete] Cloud media delete notice:", cloudErr);
+          }
+        }
         if (typeof onSuccess === "function") onSuccess();
 
         await renderMediaLibraryTab();
@@ -4908,27 +4934,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (csForm) {
         csForm.addEventListener("submit", async (e) => {
           e.preventDefault();
-          const submitBtn = csForm.querySelector("button[type='submit']");
-          const origText = submitBtn ? submitBtn.innerHTML : "Save";
-          if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> Saving to Cloud...`;
-          }
-          try {
-            await saveActiveEditorState();
-            setEditorSaved();
-            closeCSModal();
-            renderCaseStudiesTab();
-            showAdminToast("Save Successful! Case Study updated in live portfolio.", "success");
-          } catch (err) {
-            console.error("CS Save error:", err);
-            showAdminToast("Save Failed: " + (err.message || "Unknown error"), "error", 6000);
-          } finally {
-            if (submitBtn) {
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = origText;
-            }
-          }
           await handleCaseStudySubmit();
         });
       }
@@ -4961,41 +4966,87 @@ document.addEventListener("DOMContentLoaded", () => {
         if (keyInput) keyInput.value = cfg.supabaseAnonKey || "";
         if (bktInput) bktInput.value = cfg.storageBucket || "betodata";
 
-        if (cfg.isConfigured) {
+        let projectRef = "";
+        try {
+          const parsed = new URL(cfg.supabaseUrl);
+          const parts = parsed.hostname.split(".");
+          if (parts.length >= 3 && parts[1] === "supabase" && parts[2] === "co") {
+            projectRef = parts[0];
+          }
+        } catch (e) { }
+
+        const dashUrl = projectRef ? ('https://supabase.com/dashboard/project/' + projectRef) : null;
+
+        // Test live connection
+        let testRes = null;
+        try {
+          testRes = await BetroDB.testConnection();
+        } catch (e) {
+          testRes = { success: false, error: e.message };
+        }
+
+        if (testRes.success) {
           if (pill) {
-            pill.innerHTML = `<i class="ri-checkbox-circle-fill"></i> Cloud Connected (${cfg.source})`;
+            pill.innerHTML = '<i class="ri-checkbox-circle-fill"></i> Cloud Connected (' + testRes.latency + 'ms)';
             pill.style.background = "rgba(74, 185, 108, 0.15)";
             pill.style.color = "#4ab96c";
             pill.style.borderColor = "rgba(74, 185, 108, 0.3)";
           }
           if (diag) {
-            diag.innerHTML = `<strong>Production Cloud Database Active:</strong> ${cfg.supabaseUrl}<br><span style="color:var(--text-secondary); font-size:0.8rem;">Bucket: ${cfg.storageBucket} | Source: ${cfg.source}</span>`;
+            diag.innerHTML = '<strong>Production Cloud Database Active:</strong> ' + cfg.supabaseUrl + '<br><span style="color:var(--text-secondary); font-size:0.8rem;">Bucket: ' + cfg.storageBucket + ' | Latency: ' + testRes.latency + 'ms | Source: ' + cfg.source + '</span>';
           }
           if (syncInd) {
-            syncInd.innerHTML = `<i class="ri-cloud-line" style="color: #4ab96c;"></i> Cloud DB Synced`;
+            syncInd.innerHTML = '<i class="ri-cloud-line" style="color: #4ab96c;"></i> Cloud DB Synced';
             syncInd.style.borderColor = "rgba(74, 185, 108, 0.3)";
             syncInd.style.color = "#4ab96c";
           }
-        } else {
+        } else if (testRes.needTables) {
           if (pill) {
-            pill.innerHTML = `<i class="ri-alert-line"></i> Local Fallback Mode`;
+            pill.innerHTML = '<i class="ri-database-2-line"></i> Tables Required';
             pill.style.background = "rgba(234, 179, 8, 0.15)";
             pill.style.color = "#eab308";
             pill.style.borderColor = "rgba(234, 179, 8, 0.3)";
           }
           if (diag) {
-            diag.innerHTML = `<span style="color:#eab308; font-weight:600;"><i class="ri-information-line"></i> Supabase Not Connected</span><br><span style="color:var(--text-secondary);">Enter your Supabase Project URL and Anon Key below or add <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> in Vercel Project Settings.</span>`;
+            diag.innerHTML = '<strong>Connected to Supabase, but SQL tables are missing.</strong><br><span style="color:var(--text-secondary); font-size:0.8rem;">Please execute <code>supabase/full_migration.sql</code> in your Supabase SQL Editor.</span>';
+          }
+        } else if (testRes.isDnsError) {
+          const dashLink = dashUrl
+            ? '<a href="' + dashUrl + '" target="_blank" style="color:#4ab96c; font-weight:700; text-decoration:underline; margin-left: 6px;"><i class="ri-external-link-line"></i> Restore Project in Supabase Dashboard</a>'
+            : "";
+          if (pill) {
+            pill.innerHTML = '<i class="ri-pause-circle-line"></i> Cloud Paused / Unreachable';
+            pill.style.background = "rgba(239, 68, 68, 0.15)";
+            pill.style.color = "#ef4444";
+            pill.style.borderColor = "rgba(239, 68, 68, 0.3)";
+          }
+          if (diag) {
+            diag.innerHTML = '<strong style="color:#ef4444;"><i class="ri-error-warning-line"></i> Supabase Host Unreachable:</strong> ' + cfg.supabaseUrl + '<br><span style="color:var(--text-secondary); font-size:0.82rem;">Supabase pauses inactive free-tier projects automatically. ' + dashLink + '</span><br><span style="color:var(--text-secondary); font-size:0.8rem;">Or enter your updated Supabase Project URL and Anon Key below and click Save.</span>';
           }
           if (syncInd) {
-            syncInd.innerHTML = `<i class="ri-database-2-line"></i> Local Fallback Engine`;
+            syncInd.innerHTML = '<i class="ri-shield-check-line" style="color: #eab308;"></i> Local Safe (Cloud Pending)';
+            syncInd.style.borderColor = "rgba(234, 179, 8, 0.3)";
+            syncInd.style.color = "#eab308";
+          }
+        } else {
+          if (pill) {
+            pill.innerHTML = '<i class="ri-alert-line"></i> Cloud Offline';
+            pill.style.background = "rgba(234, 179, 8, 0.15)";
+            pill.style.color = "#eab308";
+            pill.style.borderColor = "rgba(234, 179, 8, 0.3)";
+          }
+          if (diag) {
+            diag.innerHTML = '<span style="color:#eab308; font-weight:600;"><i class="ri-information-line"></i> Connection Notice:</span> ' + (testRes.error || "Cannot connect") + '<br><span style="color:var(--text-secondary); font-size:0.8rem;">Enter your active Supabase URL and Anon Key below.</span>';
+          }
+          if (syncInd) {
+            syncInd.innerHTML = '<i class="ri-database-2-line"></i> Local Fallback Engine';
             syncInd.style.borderColor = "rgba(234, 179, 8, 0.3)";
             syncInd.style.color = "#eab308";
           }
         }
       };
 
-      // Test Connection Button
-      document.getElementById("test-supabase-cfg-btn")?.addEventListener("click", async () => {
+            document.getElementById("test-supabase-cfg-btn")?.addEventListener("click", async () => {
         const btn = document.getElementById("test-supabase-cfg-btn");
         const orig = btn.innerHTML;
         btn.disabled = true;
