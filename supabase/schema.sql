@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.portfolio_projects (
     section_visibility JSONB DEFAULT '{}'::jsonb,
     section_order JSONB DEFAULT '[]'::jsonb,
     display_order INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS public.media_assets (
     name TEXT,
     size TEXT,
     display_order INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0,
     status TEXT DEFAULT 'published' CHECK (status IN ('published', 'deleted', 'archived')),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -62,6 +64,7 @@ CREATE TABLE IF NOT EXISTS public.brand_logos (
     name TEXT,
     style TEXT,
     display_order INTEGER DEFAULT 0,
+    sort_order INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

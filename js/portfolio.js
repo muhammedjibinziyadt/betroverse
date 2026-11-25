@@ -172,8 +172,31 @@ const initPortfolio = () => {
     const activeStudies = filtered.filter(cs => (cs.status || "published") === "published");
     const targetList = activeStudies.length > 0 ? activeStudies : filtered;
 
-    projects = targetList.map(cs => {
-      const cardImg = cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || "images/p1.jpg";
+    // Strict sort by sort_order / sortOrder / displayOrder / display_order
+    targetList.sort((a, b) => {
+      const orderA = (typeof a.sort_order === "number") ? a.sort_order : ((typeof a.sortOrder === "number") ? a.sortOrder : ((typeof a.displayOrder === "number") ? a.displayOrder : ((typeof a.display_order === "number") ? a.display_order : 9999)));
+      const orderB = (typeof b.sort_order === "number") ? b.sort_order : ((typeof b.sortOrder === "number") ? b.sortOrder : ((typeof b.displayOrder === "number") ? b.displayOrder : ((typeof b.display_order === "number") ? b.display_order : 9999)));
+      return orderA - orderB;
+    });
+
+    projects = targetList.map((cs, idx) => {
+      let cardImg = cs.cardImage || cs.heroImage || (cs.media && cs.media.gallery && cs.media.gallery[0]) || ("images/p" + ((idx % 8) + 1) + ".jpg");
+
+      // Resilient local mapping if URL points to remote Supabase storage that is unreachable
+      if (cardImg && typeof cardImg === "string") {
+        const lower = cardImg.toLowerCase();
+        for (let i = 1; i <= 8; i++) {
+          if (lower.includes("/p" + i + ".") || lower.endsWith("p" + i + ".jpg")) {
+            cardImg = "images/p" + i + ".jpg";
+            break;
+          }
+          if (lower.includes("/s" + i + ".") || lower.endsWith("s" + i + ".jpg")) {
+            cardImg = "images/s" + i + ".jpg";
+            break;
+          }
+        }
+      }
+
       const thumb = cs.cardImageThumb || (window.BetroDB && BetroDB.getOptimizedAssetUrl(cardImg, { preferThumb: true })) || cardImg;
       return {
         id: cs.id,
@@ -190,7 +213,7 @@ const initPortfolio = () => {
     });
   };
 
-  const loadDynamicProjects = async () => {
+    const loadDynamicProjects = async () => {
     // 1. Authoritative Cloud Database fetch from Supabase (with forCards: true)
     if (window.BetroDB) {
       try {
@@ -268,27 +291,25 @@ const initPortfolio = () => {
         </div>
       `;
 
-      // Resilient image error handling: if WebP fails, try original JPG/PNG; if both fail, show fallback
+      // Resilient image error handling: fallback smoothly without red error texts
       const cardImgElem = card.querySelector(".portfolio-card-image");
       if (cardImgElem) {
         cardImgElem.onerror = function () {
+          // If webp or remote failed, try fallback attribute
           const fallback = this.getAttribute("data-fallback");
           if (fallback && this.src !== fallback && !this.dataset.triedFallback) {
             this.dataset.triedFallback = "true";
             this.src = fallback;
             return;
           }
-          this.onerror = null;
-          this.style.display = "none";
-          const wrapper = card.querySelector(".portfolio-card-image-wrapper");
-          if (wrapper) {
-            wrapper.innerHTML = `
-              <div class="img-error-fallback" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(30,41,59,0.8); color: #ef4444; font-size: 0.85rem; gap: 6px; padding: 12px; text-align: center;">
-                <i class="ri-image-warning-line" style="font-size: 1.5rem;"></i>
-                <span>Image failed to load</span>
-              </div>
-            `;
+          // If still failing, fallback to local image based on card index
+          if (!this.dataset.triedDefault) {
+            this.dataset.triedDefault = "true";
+            const fallbackNum = (idx % 8) + 1;
+            this.src = "images/p" + fallbackNum + ".jpg";
+            return;
           }
+          this.onerror = null;
         };
       }
 

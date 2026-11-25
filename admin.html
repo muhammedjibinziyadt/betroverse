@@ -398,6 +398,19 @@
                   </div>
                 </div>
 
+                <!-- Project Ordering Guide & Live Sync Toolbar -->
+                <div class="cs-ordering-toolbar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; margin-bottom: 1.25rem; padding: 0.75rem 1rem; background: rgba(74, 185, 108, 0.05); border: 1px solid rgba(74, 185, 108, 0.2); border-radius: var(--radius-md);">
+                  <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-primary);">
+                    <i class="ri-drag-move-2-line" style="color: #4ab96c; font-size: 1.1rem;"></i>
+                    <span><strong>Project Ordering:</strong> Drag cards, click <strong>Top</strong> for #1 Hero, use <strong>Move Up / Down</strong> arrows, or pick any position (1st, 2nd, 3rd...).</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="cs-order-sync-badge" style="font-size: 0.75rem; color: #4ab96c; background: rgba(74, 185, 108, 0.15); border: 1px solid rgba(74, 185, 108, 0.3); border-radius: 20px; padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px;">
+                      <i class="ri-check-line"></i> Order Synced Live
+                    </span>
+                  </div>
+                </div>
+
                 <!-- Case Study List Grid -->
                 <div id="admin-casestudies-list" class="casestudies-grid">
                   <!-- JS Inject -->

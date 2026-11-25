@@ -1301,6 +1301,137 @@ body.light-mode .dark-icon { display: none; }
   font-size: 0.8rem;
 }
 
+/* Case Study Ordering & Card Top Bar Controls */
+.cs-card-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+}
+.cs-order-pos-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-order-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(74, 185, 108, 0.15);
+  color: #4ab96c;
+  border: 1px solid rgba(74, 185, 108, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.cs-order-badge.first {
+  background: #4ab96c;
+  color: #000;
+  font-weight: 800;
+  border-color: #4ab96c;
+}
+.cs-pos-select {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.cs-pos-select:focus,
+.cs-pos-select:hover {
+  border-color: #4ab96c;
+  background: rgba(74, 185, 108, 0.12);
+}
+.cs-pos-select option {
+  background: #191d28;
+  color: #fff;
+  padding: 4px;
+}
+.cs-top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cs-status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.cs-status-badge.published {
+  background: rgba(74, 185, 108, 0.15);
+  color: #4ab96c;
+  border: 1px solid rgba(74, 185, 108, 0.3);
+}
+.cs-status-badge.draft {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+.cs-drag-handle {
+  color: var(--text-secondary);
+  cursor: grab;
+  font-size: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  transition: color 0.2s;
+}
+.cs-drag-handle:hover {
+  color: #4ab96c;
+}
+.cs-project-card {
+  cursor: grab;
+  user-select: none;
+}
+.cs-project-card:active {
+  cursor: grabbing;
+}
+.cs-project-card.is-dragging {
+  opacity: 0.35;
+  border: 2px dashed #4ab96c !important;
+  transform: scale(0.96);
+}
+.cs-project-card.drag-over {
+  border-color: #4ab96c !important;
+  background: rgba(74, 185, 108, 0.08) !important;
+  box-shadow: 0 0 0 2px #4ab96c, 0 12px 28px rgba(74, 185, 108, 0.25) !important;
+}
+.cs-btn-make-first {
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4ab96c;
+  border-color: rgba(74, 185, 108, 0.4);
+}
+.cs-btn-make-first:hover {
+  background: rgba(74, 185, 108, 0.15);
+  border-color: #4ab96c;
+}
+.cs-hero-pos-pill {
+  font-size: 0.72rem;
+  color: #4ab96c;
+  font-weight: 800;
+  padding: 4px 8px;
+  background: rgba(74, 185, 108, 0.15);
+  border-radius: 6px;
+  border: 1px solid rgba(74, 185, 108, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* ==========================================================================
    7. MEDIA LIBRARY TAB & MODAL
    ========================================================================== */
