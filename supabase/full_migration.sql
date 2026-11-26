@@ -815,40 +815,59 @@ INSERT INTO public.media_assets (id, case_study_id, case_study_slug, type, targe
 VALUES ('media-cs-independent-gal-0', 'cs-independent', 'independent', 'image', 'creative_showcase', 'images/s8.jpg', 's8.jpg', 0, 'published')
 ON CONFLICT (id) DO UPDATE SET url = EXCLUDED.url, display_order = EXCLUDED.display_order;
 
--- Seed Brand Logos
+-- Seed All 18 Authoritative Brand Logos
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-1', 'images/golden.png', 'Sa-Adiya Golden Jubilee', '', 0)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-6', 'images/Nahdimandi-white.png', 'Nahdi Mandi Restaurant', '', 0)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-2', 'images/celes.png', 'Celes Lifestyle', '', 1)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-8', 'images/Soofimandi-white.png', 'Soofi Mandi', '', 1)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-3', 'images/toi.png', 'Toi Cafe', 'width: 40%;', 2)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-mylaban', 'images/mylaban-logo.svg', 'MyLaban', '', 2)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-4', 'images/AlainArchitecture.png', 'Alain Architecture', '', 3)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-haihyrah', 'images/haihyrah.svg', 'Haihyrah', '', 3)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-5', 'images/Gurumitra.png', 'Gurumitra Foundation', '', 4)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-jamia-nadwiya', 'images/jamia-nadwiya.svg', 'Jamia Nadwiya Edavanna', '', 4)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-6', 'images/Nahdimandi-white.png', 'Nahdi Mandi', '', 5)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-convex-fitness', 'images/convex-fitness.svg', 'Convex Fitness', '', 5)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
 VALUES ('brand-7', 'images/NiceMobiles.png', 'Nice Mobiles', '', 6)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-8', 'images/Soofimandi-white.png', 'Soofi Mandi', '', 7)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-4', 'images/AlainArchitecture.png', 'Alain Architecture', '', 7)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-9', 'images/KeyFactory.png', 'Key Factory', '', 8)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-gourmet-cloud', 'images/gourmet-cloud.svg', 'Gourmet Cloud Kitchen', '', 8)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-10', 'images/ENGO FINAL LOGO-01.png', 'Engo', '', 9)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-2', 'images/celes.png', 'CelesteHive', '', 9)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-11', 'images/Artboard 5.png', 'Educart', '', 10)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-3', 'images/toi.png', 'Toi Cafe', 'width: 40%;', 10)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
 INSERT INTO public.brand_logos (id, src, name, style, display_order)
-VALUES ('brand-12', 'images/Picsart_25-09-24_21-31-47-226.png', 'MyLaban', '', 11)
-ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, display_order = EXCLUDED.display_order;
+VALUES ('brand-12', 'images/Picsart_25-09-24_21-31-47-226.png', 'Al-Khaleej Tours & Travels', '', 11)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
+INSERT INTO public.brand_logos (id, src, name, style, display_order)
+VALUES ('brand-zufra', 'images/zufra.svg', 'Zufra Restaurant', '', 12)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
+INSERT INTO public.brand_logos (id, src, name, style, display_order)
+VALUES ('brand-1', 'images/golden.png', 'Sa-Adiya Golden Jubilee', '', 13)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
+INSERT INTO public.brand_logos (id, src, name, style, display_order)
+VALUES ('brand-5', 'images/Gurumitra.png', 'Gurumitra Foundation', '', 14)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
+INSERT INTO public.brand_logos (id, src, name, style, display_order)
+VALUES ('brand-9', 'images/KeyFactory.png', 'Key Factory', '', 15)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
+INSERT INTO public.brand_logos (id, src, name, style, display_order)
+VALUES ('brand-10', 'images/ENGO FINAL LOGO-01.png', 'ENGO', '', 16)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
+INSERT INTO public.brand_logos (id, src, name, style, display_order)
+VALUES ('brand-11', 'images/Artboard 5.png', 'EduCart', '', 17)
+ON CONFLICT (id) DO UPDATE SET src = EXCLUDED.src, name = EXCLUDED.name, style = EXCLUDED.style, display_order = EXCLUDED.display_order;
+

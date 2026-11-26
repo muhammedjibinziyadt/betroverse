@@ -15,18 +15,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Default brand logos
   const defaultBrands = [
-    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", visible: true, order: 1 },
-    { id: "brand-2", name: "Celes Lifestyle", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", visible: true, order: 2 },
-    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;", visible: true, order: 3 },
-    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png", visible: true, order: 4 },
-    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png", visible: true, order: 5 },
-    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png", visible: true, order: 6 },
+    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png", visible: true, order: 1 },
+    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png", visible: true, order: 2 },
+    { id: "brand-mylaban", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/mylaban-logo.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/mylaban-logo.svg", visible: true, order: 3 },
+    { id: "brand-haihyrah", name: "Haihyrah", companyName: "Haihyrah", companyId: "haihyrah", src: "images/haihyrah.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/haihyrah.svg", visible: true, order: 4 },
+    { id: "brand-jamia-nadwiya", name: "Jamia Nadwiya Edavanna", companyName: "Jamia Nadwiya Edavanna", companyId: "jamia-nadwiya-edavanna", src: "images/jamia-nadwiya.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/jamia-nadwiya.svg", visible: true, order: 5 },
+    { id: "brand-convex-fitness", name: "Convex Fitness", companyName: "Convex Fitness", companyId: "convex-fitness", src: "images/convex-fitness.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/convex-fitness.svg", visible: true, order: 6 },
     { id: "brand-7", name: "Nice Mobiles", companyName: "Nice Mobiles", companyId: "nice-mobiles", src: "images/NiceMobiles.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", visible: true, order: 7 },
-    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png", visible: true, order: 8 },
-    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png", visible: true, order: 9 },
-    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png", visible: true, order: 10 },
-    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png", visible: true, order: 11 },
-    { id: "brand-12", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 }
+    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png", visible: true, order: 8 },
+    { id: "brand-gourmet-cloud", name: "Gourmet Cloud Kitchen", companyName: "Gourmet Cloud Kitchen", companyId: "gourmet-cloud-kitchen", src: "images/gourmet-cloud.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/gourmet-cloud.svg", visible: true, order: 9 },
+    { id: "brand-2", name: "CelesteHive", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", visible: true, order: 10 },
+    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;", visible: true, order: 11 },
+    { id: "brand-12", name: "Al-Khaleej Tours & Travels", companyName: "Al-Khaleej Tours & Travels", companyId: "al-khaleej", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 },
+    { id: "brand-zufra", name: "Zufra Restaurant", companyName: "Zufra Restaurant", companyId: "zufra-restauren", src: "images/zufra.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/zufra.svg", visible: true, order: 13 },
+    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", visible: true, order: 14 },
+    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png", visible: true, order: 15 },
+    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png", visible: true, order: 16 },
+    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png", visible: true, order: 17 },
+    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png", visible: true, order: 18 }
   ];
 
   // Default portfolio projects
@@ -78,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof renderDashboardOverview === "function") {
         renderDashboardOverview();
       }
+      syncAdminBrandsFromCloud();
       if (typeof renderCaseStudiesTab === "function") {
         renderCaseStudiesTab();
       } else {
@@ -150,7 +157,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (stored !== null) {
       try {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) list = parsed;
+        if (Array.isArray(parsed) && parsed.length >= 18) {
+          list = parsed;
+        } else if (Array.isArray(parsed) && (!deletedIds || deletedIds.length === 0)) {
+          // Auto-upgrade stale 12-item cache to complete shared 18-brand dataset
+          list = [...defaultBrands];
+          localStorage.setItem("betro_brands", JSON.stringify(list));
+        } else if (Array.isArray(parsed)) {
+          list = parsed;
+        } else {
+          list = [...defaultBrands];
+        }
       } catch (e) {
         list = [...defaultBrands];
       }
@@ -169,7 +186,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return list;
   };
 
-  // Helper to persist brands list & sync with BetroDB / Supabase / Live Website
+  // Asynchronous cloud fetch & live sync for all authorised admin accounts
+  const syncAdminBrandsFromCloud = async () => {
+    if (!window.BetroDB || typeof window.BetroDB.getBrandLogos !== "function") return;
+    try {
+      const cloudBrands = await BetroDB.getBrandLogos();
+      if (Array.isArray(cloudBrands) && cloudBrands.length > 0) {
+        localStorage.setItem("betro_brands", JSON.stringify(cloudBrands));
+        renderAdminBrands();
+      }
+    } catch (e) {
+      console.warn("[Admin] Cloud brands fetch notice:", e);
+    }
+  };
+
+    // Helper to persist brands list & sync with BetroDB / Supabase / Live Website
   const saveAdminBrands = (brandsList, deletedIds = null) => {
     try {
       localStorage.setItem("betro_brands", JSON.stringify(brandsList));
@@ -875,6 +906,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderContentTab = () => {
     // 1. Render Upgraded Brands
     renderAdminBrands();
+    syncAdminBrandsFromCloud();
 
     // 2. Render Projects (preserved from original)
     let projects = [];
@@ -5267,3 +5299,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
+
+  // Cross-tab and multi-account real-time synchronization
+  if (typeof window !== "undefined" && window.BroadcastChannel) {
+    try {
+      const brandChannel = new window.BroadcastChannel("betro_portfolio_sync");
+      brandChannel.onmessage = (e) => {
+        if (e.data && e.data.type === "brands_updated") {
+          renderAdminBrands();
+        }
+      };
+    } catch (e) { }
+  }

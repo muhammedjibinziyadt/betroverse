@@ -378,19 +378,25 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- 7. Dynamic Brands Rendering from LocalStorage & Admin Panel ---
   const loadDynamicBrands = () => {
     const defaultBrands = [
-      { id: "brand-1", src: "images/golden.png", companyId: "sa-adiya", companyName: "Sa-Adiya Golden Jubilee", visible: true, order: 1 },
-      { id: "brand-2", src: "images/celes.png", companyId: "celes", companyName: "Celes Lifestyle", visible: true, order: 2 },
-      { id: "brand-3", src: "images/toi.png", style: "width: 40%;", companyId: "toi-cafe", companyName: "Toi Cafe", visible: true, order: 3 },
-      { id: "brand-4", src: "images/AlainArchitecture.png", companyId: "alain-architecture", companyName: "Alain Architecture", visible: true, order: 4 },
-      { id: "brand-5", src: "images/Gurumitra.png", companyId: "gurumitra", companyName: "Gurumitra Foundation", visible: true, order: 5 },
-      { id: "brand-6", src: "images/Nahdimandi-white.png", companyId: "nahdi-mandi", companyName: "Nahdi Mandi Restaurant", visible: true, order: 6 },
-      { id: "brand-7", src: "images/NiceMobiles.png", companyId: "nice-mobiles", companyName: "Nice Mobiles", visible: true, order: 7 },
-      { id: "brand-8", src: "images/Soofimandi-white.png", companyId: "soofi-mandi", companyName: "Soofi Mandi", visible: true, order: 8 },
-      { id: "brand-9", src: "images/KeyFactory.png", companyId: "key-factory", companyName: "Key Factory", visible: true, order: 9 },
-      { id: "brand-10", src: "images/ENGO FINAL LOGO-01.png", companyId: "engo", companyName: "ENGO", visible: true, order: 10 },
-      { id: "brand-11", src: "images/Artboard 5.png", companyId: "educart", companyName: "EduCart", visible: true, order: 11 },
-      { id: "brand-12", src: "images/Picsart_25-09-24_21-31-47-226.png", companyId: "mylaban", companyName: "MyLaban", visible: true, order: 12 }
-    ];
+    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png", visible: true, order: 1 },
+    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png", visible: true, order: 2 },
+    { id: "brand-mylaban", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/mylaban-logo.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/mylaban-logo.svg", visible: true, order: 3 },
+    { id: "brand-haihyrah", name: "Haihyrah", companyName: "Haihyrah", companyId: "haihyrah", src: "images/haihyrah.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/haihyrah.svg", visible: true, order: 4 },
+    { id: "brand-jamia-nadwiya", name: "Jamia Nadwiya Edavanna", companyName: "Jamia Nadwiya Edavanna", companyId: "jamia-nadwiya-edavanna", src: "images/jamia-nadwiya.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/jamia-nadwiya.svg", visible: true, order: 5 },
+    { id: "brand-convex-fitness", name: "Convex Fitness", companyName: "Convex Fitness", companyId: "convex-fitness", src: "images/convex-fitness.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/convex-fitness.svg", visible: true, order: 6 },
+    { id: "brand-7", name: "Nice Mobiles", companyName: "Nice Mobiles", companyId: "nice-mobiles", src: "images/NiceMobiles.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", visible: true, order: 7 },
+    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png", visible: true, order: 8 },
+    { id: "brand-gourmet-cloud", name: "Gourmet Cloud Kitchen", companyName: "Gourmet Cloud Kitchen", companyId: "gourmet-cloud-kitchen", src: "images/gourmet-cloud.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/gourmet-cloud.svg", visible: true, order: 9 },
+    { id: "brand-2", name: "CelesteHive", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", visible: true, order: 10 },
+    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;", visible: true, order: 11 },
+    { id: "brand-12", name: "Al-Khaleej Tours & Travels", companyName: "Al-Khaleej Tours & Travels", companyId: "al-khaleej", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 },
+    { id: "brand-zufra", name: "Zufra Restaurant", companyName: "Zufra Restaurant", companyId: "zufra-restauren", src: "images/zufra.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/zufra.svg", visible: true, order: 13 },
+    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", visible: true, order: 14 },
+    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png", visible: true, order: 15 },
+    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png", visible: true, order: 16 },
+    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png", visible: true, order: 17 },
+    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png", visible: true, order: 18 }
+  ];
 
     // Read permanently deleted IDs list so deleted logos NEVER reappear
     let deletedIds = [];
@@ -426,7 +432,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // Filter only visible brands for live website
     const visibleBrands = activeBrands.filter(b => b.visible !== false);
 
-    const track = document.getElementById("brands-marquee-track");
+
+    // Asynchronously update with live Supabase database if available
+    if (window.BetroDB && typeof window.BetroDB.getBrandLogos === "function") {
+      BetroDB.getBrandLogos().then(cloudList => {
+        if (Array.isArray(cloudList) && cloudList.length > 0 && cloudList.length !== activeBrands.length) {
+          try {
+            localStorage.setItem("betro_brands", JSON.stringify(cloudList));
+            loadDynamicBrands();
+          } catch (e) { }
+        }
+      }).catch(() => {});
+    }
+      const track = document.getElementById("brands-marquee-track");
     if (track) {
       track.innerHTML = "";
 

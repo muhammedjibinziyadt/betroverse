@@ -480,140 +480,25 @@ const initPortfolio = () => {
     // --- 5. Brand Logo Carousel ("Brands Who Believe in Us") ---
     const initBrandsCarousel = () => {
       const defaultBrandsList = [
-        {
-          id: "brand-1",
-          src: "images/golden.png",
-          companyId: "sa-adiya",
-          companyName: "Sa-Adiya Golden Jubilee",
-          category: "Event Branding",
-          shortDesc: "Flyers and layouts for Sa-Adiya's grand Golden Jubilee celebrations.",
-          companyDesc: "We designed promotional flyers, registration guidelines, and social media announcements for Sa-Adiya's grand Golden Jubilee celebrations.",
-          services: ["Creative Design", "Social Media Management"],
-          previewImg: "images/p2.jpg"
-        },
-        {
-          id: "brand-2",
-          src: "images/celes.png",
-          companyId: "celes",
-          companyName: "Celes Lifestyle",
-          category: "Luxury Campaign",
-          shortDesc: "Minimalist marketing assets and aesthetic Instagram layout grids.",
-          companyDesc: "Celes is an exclusive lifestyle brand. We created elegant, minimalist marketing materials, aesthetic Instagram grid layout posts, and event announcements.",
-          services: ["Creative Design", "Social Media Management"],
-          previewImg: "images/s3.jpg"
-        },
-        {
-          id: "brand-3",
-          src: "images/toi.png",
-          style: "width: 40%;",
-          companyId: "toi-cafe",
-          companyName: "Toi Cafe",
-          category: "Specialty Cafe",
-          shortDesc: "Aesthetic social media campaign and custom menu layouts.",
-          companyDesc: "Toi Cafe is a specialty coffee shop and dessert lounge. We designed a series of aesthetic social media posts, promotional campaigns, and menus to highlight their unique sweet and savory offerings.",
-          services: ["Creative Design", "Social Media Management", "Photography"],
-          previewImg: "images/p3.jpg"
-        },
-        {
-          id: "brand-4",
-          src: "images/AlainArchitecture.png",
-          companyId: "alain-architecture",
-          companyName: "Alain Architecture",
-          category: "Architectural Design",
-          shortDesc: "Luxury architectural presentations and digital portfolio showcases.",
-          companyDesc: "Alain Architecture specializes in luxury architectural design, structural engineering, and modern interior concepts. We created their brand presentation, project showcases, and digital marketing materials.",
-          services: ["Architectural Branding", "Visual Design", "Digital Marketing"],
-          previewImg: "images/p2.jpg"
-        },
-        {
-          id: "brand-5",
-          src: "images/Gurumitra.png",
-          companyId: "gurumitra",
-          companyName: "Gurumitra Foundation",
-          category: "Educational Design",
-          shortDesc: "Clean print brochures and notice layouts for academic outreach.",
-          companyDesc: "Gurumitra Foundation is an educational support center. We developed clean, informative promotional brochures, registration notices, and print layouts to connect them with parents and students.",
-          services: ["Creative Design", "Print Layout"],
-          previewImg: "images/p7.jpg"
-        },
-        {
-          id: "brand-6",
-          src: "images/Nahdimandi-white.png",
-          companyId: "nahdi-mandi",
-          companyName: "Nahdi Mandi Restaurant",
-          category: "Social Media Ads",
-          shortDesc: "Arabic dining flyers and promotional visual banners.",
-          companyDesc: "Nahdi Mandi serves authentic traditional mandi and grilled food. We crafted visual social media advertisements, new dish announcements, and restaurant branding layouts.",
-          services: ["Creative Design", "Social Media Management"],
-          previewImg: "images/s2.jpg"
-        },
-        {
-          id: "brand-7",
-          src: "images/NiceMobiles.png",
-          companyId: "nice-mobiles",
-          companyName: "Nice Mobiles",
-          category: "Promo Campaigns",
-          shortDesc: "Holiday promotional graphics and discount visual flyers.",
-          companyDesc: "Nice Mobiles is a top smartphone retailer. We designed highly engaging discount flyers, trade-in program advertisements, and holiday promo campaigns to drive retail store foot traffic.",
-          services: ["Creative Design", "Social Media Management"],
-          previewImg: "images/p8.jpg"
-        },
-        {
-          id: "brand-8",
-          src: "images/Soofimandi-white.png",
-          companyId: "soofi-mandi",
-          companyName: "Soofi Mandi",
-          category: "Yemeni Culinary Branding",
-          shortDesc: "Authentic restaurant visual identity and promotional dining media.",
-          companyDesc: "Soofi Mandi is a premier Yemeni cuisine restaurant known for authentic culinary experiences. We managed their visual identity, promotional campaigns, and brand marketing.",
-          services: ["Creative Design", "Social Media Management", "Video Production"],
-          previewImg: "images/s2.jpg"
-        },
-        {
-          id: "brand-9",
-          src: "images/KeyFactory.png",
-          companyId: "key-factory",
-          companyName: "Key Factory",
-          category: "Commercial Marketing",
-          shortDesc: "High-end security and locking solutions digital branding.",
-          companyDesc: "Key Factory provides high-end security and locking solutions. We delivered their digital promotional content, visual flyers, and social media assets.",
-          services: ["Creative Design", "Promotional Campaigns"],
-          previewImg: "images/s5.jpg"
-        },
-        {
-          id: "brand-10",
-          src: "images/ENGO FINAL LOGO-01.png",
-          companyId: "engo",
-          companyName: "ENGO",
-          category: "Tech & Lifestyle",
-          shortDesc: "Digital campaign assets and innovative graphic design.",
-          companyDesc: "ENGO is an innovative technology & lifestyle brand. We developed their digital campaign materials, graphic design assets, and promotional media.",
-          services: ["Branding Design", "Digital Content Creation"],
-          previewImg: "images/p1.jpg"
-        },
-        {
-          id: "brand-11",
-          src: "images/Artboard 5.png",
-          companyId: "educart",
-          companyName: "EduCart",
-          category: "Publishing & EdTech",
-          shortDesc: "Custom publishing layouts and digital learning marketing.",
-          companyDesc: "EduCart is an educational publishing and learning materials platform. We designed custom book layouts, promotional collateral, and digital marketing creatives.",
-          services: ["Print Layout", "Educational Design", "Social Media Management"],
-          previewImg: "images/p7.jpg"
-        },
-        {
-          id: "brand-12",
-          src: "images/Picsart_25-09-24_21-31-47-226.png",
-          companyId: "mylaban",
-          companyName: "MyLaban",
-          category: "Creative Branding",
-          shortDesc: "Specialty dessert branding and social media campaign in Kochi.",
-          companyDesc: "MyLaban is a popular dessert shop in Kochi specializing in authentic Egyptian desserts and premium sweet treats. The brand is known for its rich flavors, high-quality ingredients, and beautifully crafted desserts that offer a unique experience for every customer.\n\nWith a focus on creativity and customer satisfaction, MyLaban continues to delight dessert lovers through innovative offerings and an engaging digital presence that showcases its signature products.",
-          services: ["Creative Design", "Social Media Management", "Video Production", "AI Video Creation", "Video Content Creation"],
-          previewImg: "images/p1.jpg"
-        }
-      ];
+    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png", visible: true, order: 1 },
+    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png", visible: true, order: 2 },
+    { id: "brand-mylaban", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/mylaban-logo.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/mylaban-logo.svg", visible: true, order: 3 },
+    { id: "brand-haihyrah", name: "Haihyrah", companyName: "Haihyrah", companyId: "haihyrah", src: "images/haihyrah.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/haihyrah.svg", visible: true, order: 4 },
+    { id: "brand-jamia-nadwiya", name: "Jamia Nadwiya Edavanna", companyName: "Jamia Nadwiya Edavanna", companyId: "jamia-nadwiya-edavanna", src: "images/jamia-nadwiya.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/jamia-nadwiya.svg", visible: true, order: 5 },
+    { id: "brand-convex-fitness", name: "Convex Fitness", companyName: "Convex Fitness", companyId: "convex-fitness", src: "images/convex-fitness.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/convex-fitness.svg", visible: true, order: 6 },
+    { id: "brand-7", name: "Nice Mobiles", companyName: "Nice Mobiles", companyId: "nice-mobiles", src: "images/NiceMobiles.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", visible: true, order: 7 },
+    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png", visible: true, order: 8 },
+    { id: "brand-gourmet-cloud", name: "Gourmet Cloud Kitchen", companyName: "Gourmet Cloud Kitchen", companyId: "gourmet-cloud-kitchen", src: "images/gourmet-cloud.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/gourmet-cloud.svg", visible: true, order: 9 },
+    { id: "brand-2", name: "CelesteHive", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", visible: true, order: 10 },
+    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;", visible: true, order: 11 },
+    { id: "brand-12", name: "Al-Khaleej Tours & Travels", companyName: "Al-Khaleej Tours & Travels", companyId: "al-khaleej", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 },
+    { id: "brand-zufra", name: "Zufra Restaurant", companyName: "Zufra Restaurant", companyId: "zufra-restauren", src: "images/zufra.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/zufra.svg", visible: true, order: 13 },
+    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", visible: true, order: 14 },
+    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png", visible: true, order: 15 },
+    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png", visible: true, order: 16 },
+    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png", visible: true, order: 17 },
+    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png", visible: true, order: 18 }
+  ];
 
       // Read permanently deleted IDs list so deleted logos NEVER reappear
       let deletedIds = [];

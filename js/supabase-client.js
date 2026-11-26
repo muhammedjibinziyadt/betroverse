@@ -1211,7 +1211,144 @@
           unique.push(item);
         }
         return unique;
-      }
+      },
+      /**
+       * Fetch authoritative brand logos from Supabase with offline fallback
+       */
+      async getBrandLogos(options = {}) {
+        let deletedIds = [];
+        try {
+          const rawDel = safeStorage.get("betro_deleted_brand_ids");
+          if (rawDel) deletedIds = JSON.parse(rawDel);
+          if (!Array.isArray(deletedIds)) deletedIds = [];
+        } catch (e) { }
+
+        let list = null;
+        const client = await this.ensureInit();
+        if (client) {
+          try {
+            const { data, error } = await client
+              .from("brand_logos")
+              .select("*")
+              .order("display_order", { ascending: true });
+
+            if (!error && Array.isArray(data) && data.length > 0) {
+              list = data.map((row, idx) => ({
+                id: row.id,
+                name: row.name || row.company_name || "Brand Logo",
+                companyName: row.company_name || row.name || "Brand Logo",
+                companyId: row.company_id || row.id,
+                src: row.src,
+                style: row.style || "",
+                visible: row.visible !== false,
+                order: typeof row.display_order === "number" ? row.display_order : (typeof row.sort_order === "number" ? row.sort_order : idx + 1)
+              }));
+              safeStorage.set("betro_brands", list);
+            }
+          } catch (e) {
+            console.warn("[BetroDB] Cloud brand fetch notice:", e);
+          }
+        }
+
+        if (!list || list.length === 0) {
+          const stored = safeStorage.get("betro_brands");
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                list = parsed;
+              }
+            } catch (e) { }
+          }
+        }
+
+        if (!list || list.length === 0) {
+          list = [
+    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png", visible: true, order: 1 },
+    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png", visible: true, order: 2 },
+    { id: "brand-mylaban", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/mylaban-logo.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/mylaban-logo.svg", visible: true, order: 3 },
+    { id: "brand-haihyrah", name: "Haihyrah", companyName: "Haihyrah", companyId: "haihyrah", src: "images/haihyrah.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/haihyrah.svg", visible: true, order: 4 },
+    { id: "brand-jamia-nadwiya", name: "Jamia Nadwiya Edavanna", companyName: "Jamia Nadwiya Edavanna", companyId: "jamia-nadwiya-edavanna", src: "images/jamia-nadwiya.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/jamia-nadwiya.svg", visible: true, order: 5 },
+    { id: "brand-convex-fitness", name: "Convex Fitness", companyName: "Convex Fitness", companyId: "convex-fitness", src: "images/convex-fitness.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/convex-fitness.svg", visible: true, order: 6 },
+    { id: "brand-7", name: "Nice Mobiles", companyName: "Nice Mobiles", companyId: "nice-mobiles", src: "images/NiceMobiles.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", visible: true, order: 7 },
+    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png", visible: true, order: 8 },
+    { id: "brand-gourmet-cloud", name: "Gourmet Cloud Kitchen", companyName: "Gourmet Cloud Kitchen", companyId: "gourmet-cloud-kitchen", src: "images/gourmet-cloud.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/gourmet-cloud.svg", visible: true, order: 9 },
+    { id: "brand-2", name: "CelesteHive", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", visible: true, order: 10 },
+    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;", visible: true, order: 11 },
+    { id: "brand-12", name: "Al-Khaleej Tours & Travels", companyName: "Al-Khaleej Tours & Travels", companyId: "al-khaleej", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 },
+    { id: "brand-zufra", name: "Zufra Restaurant", companyName: "Zufra Restaurant", companyId: "zufra-restauren", src: "images/zufra.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/zufra.svg", visible: true, order: 13 },
+    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", visible: true, order: 14 },
+    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png", visible: true, order: 15 },
+    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png", visible: true, order: 16 },
+    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png", visible: true, order: 17 },
+    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png", visible: true, order: 18 }
+  ];
+          safeStorage.set("betro_brands", list);
+        }
+
+        if (deletedIds.length > 0 && Array.isArray(list)) {
+          list = list.filter(b => !deletedIds.includes(b.id));
+        }
+
+        list.sort((a, b) => (a.order || 0) - (b.order || 0));
+        return list;
+      },
+
+      /**
+       * Save brand logos permanently in Supabase & broadcast live sync
+       */
+      async saveBrandLogos(brandList, deletedIds = []) {
+        if (!Array.isArray(brandList)) return { success: false, error: "Invalid brands list" };
+
+        // 1. Immediately persist to shared local storage cache
+        safeStorage.set("betro_brands", brandList);
+        if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+          safeStorage.set("betro_deleted_brand_ids", deletedIds);
+        }
+
+        // 2. Broadcast change across all open windows & tabs
+        this.broadcastChange("brands_updated", { count: brandList.length, timestamp: Date.now() });
+        try {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("betro_storage_updated", { detail: { key: "betro_brands" } }));
+          }
+        } catch (e) { }
+
+        // 3. Authoritative Cloud Database Sync (Supabase)
+        const client = await this.ensureInit();
+        if (!client) {
+          return { success: true, warning: "Saved locally (Supabase offline)" };
+        }
+
+        try {
+          if (Array.isArray(deletedIds) && deletedIds.length > 0) {
+            await client.from("brand_logos").delete().in("id", deletedIds);
+          }
+
+          const upsertRows = brandList.map((b, idx) => ({
+            id: b.id,
+            name: b.name || b.companyName || "Brand Logo",
+            company_name: b.companyName || b.name || "Brand Logo",
+            company_id: b.companyId || b.id || "brand",
+            src: b.src,
+            style: b.style || "",
+            visible: b.visible !== false,
+            display_order: idx + 1,
+            sort_order: idx + 1,
+            updated_at: new Date().toISOString()
+          }));
+
+          const { error } = await client.from("brand_logos").upsert(upsertRows, { onConflict: "id" });
+          if (error) {
+            console.warn("[BetroDB] Brand logos upsert warning:", error);
+            return { success: true, warning: "Saved locally (" + error.message + ")" };
+          }
+          return { success: true };
+        } catch (e) {
+          console.warn("[BetroDB] Cloud brand logos save notice:", e);
+          return { success: true, warning: "Saved locally. Cloud sync pending: " + (e.message || "Host unreachable") };
+        }
+      },
     };
 
 
