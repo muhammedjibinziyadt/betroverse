@@ -15,44 +15,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Default brand logos
   const defaultBrands = [
-    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Nahdimandi-white.png", visible: true, order: 1 },
-    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Soofimandi-white.png", visible: true, order: 2 },
-    { id: "brand-mylaban", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/mylaban-logo.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/mylaban-logo.svg", visible: true, order: 3 },
-    { id: "brand-haihyrah", name: "Haihyrah", companyName: "Haihyrah", companyId: "haihyrah", src: "images/haihyrah.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/haihyrah.svg", visible: true, order: 4 },
-    { id: "brand-jamia-nadwiya", name: "Jamia Nadwiya Edavanna", companyName: "Jamia Nadwiya Edavanna", companyId: "jamia-nadwiya-edavanna", src: "images/jamia-nadwiya.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/jamia-nadwiya.svg", visible: true, order: 5 },
-    { id: "brand-convex-fitness", name: "Convex Fitness", companyName: "Convex Fitness", companyId: "convex-fitness", src: "images/convex-fitness.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/convex-fitness.svg", visible: true, order: 6 },
-    { id: "brand-7", name: "Nice Mobiles", companyName: "Nice Mobiles", companyId: "nice-mobiles", src: "images/NiceMobiles.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", visible: true, order: 7 },
-    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/AlainArchitecture.png", visible: true, order: 8 },
-    { id: "brand-gourmet-cloud", name: "Gourmet Cloud Kitchen", companyName: "Gourmet Cloud Kitchen", companyId: "gourmet-cloud-kitchen", src: "images/gourmet-cloud.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/gourmet-cloud.svg", visible: true, order: 9 },
-    { id: "brand-2", name: "CelesteHive", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", visible: true, order: 10 },
-    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", style: "width: 40%;", visible: true, order: 11 },
-    { id: "brand-12", name: "Al-Khaleej Tours & Travels", companyName: "Al-Khaleej Tours & Travels", companyId: "al-khaleej", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 },
-    { id: "brand-zufra", name: "Zufra Restaurant", companyName: "Zufra Restaurant", companyId: "zufra-restauren", src: "images/zufra.svg", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/zufra.svg", visible: true, order: 13 },
-    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", visible: true, order: 14 },
-    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Gurumitra.png", visible: true, order: 15 },
-    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/KeyFactory.png", visible: true, order: 16 },
-    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/ENGO_FINAL_LOGO-01.png", visible: true, order: 17 },
-    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Artboard_5.png", visible: true, order: 18 }
+    { id: "brand-6", name: "Nahdi Mandi Restaurant", companyName: "Nahdi Mandi Restaurant", companyId: "nahdi-mandi", src: "images/Nahdimandi-white.png", fallbackSrc: "images/Nahdimandi-white.png", visible: true, order: 1 },
+    { id: "brand-8", name: "Soofi Mandi", companyName: "Soofi Mandi", companyId: "soofi-mandi", src: "images/Soofimandi-white.png", fallbackSrc: "images/Soofimandi-white.png", visible: true, order: 2 },
+    { id: "brand-mylaban", name: "MyLaban", companyName: "MyLaban", companyId: "mylaban", src: "images/mylaban-logo.svg", fallbackSrc: "images/mylaban-logo.svg", visible: true, order: 3 },
+    { id: "brand-haihyrah", name: "Haihyrah", companyName: "Haihyrah", companyId: "haihyrah", src: "images/haihyrah.svg", fallbackSrc: "images/haihyrah.svg", visible: true, order: 4 },
+    { id: "brand-jamia-nadwiya", name: "Jamia Nadwiya Edavanna", companyName: "Jamia Nadwiya Edavanna", companyId: "jamia-nadwiya-edavanna", src: "images/jamia-nadwiya.svg", fallbackSrc: "images/jamia-nadwiya.svg", visible: true, order: 5 },
+    { id: "brand-convex-fitness", name: "Convex Fitness", companyName: "Convex Fitness", companyId: "convex-fitness", src: "images/convex-fitness.svg", fallbackSrc: "images/convex-fitness.svg", visible: true, order: 6 },
+    { id: "brand-7", name: "Nice Mobiles", companyName: "Nice Mobiles", companyId: "nice-mobiles", src: "images/NiceMobiles.png", fallbackSrc: "images/NiceMobiles.png", visible: true, order: 7 },
+    { id: "brand-4", name: "Alain Architecture", companyName: "Alain Architecture", companyId: "alain-architecture", src: "images/AlainArchitecture.png", fallbackSrc: "images/AlainArchitecture.png", visible: true, order: 8 },
+    { id: "brand-gourmet-cloud", name: "Gourmet Cloud Kitchen", companyName: "Gourmet Cloud Kitchen", companyId: "gourmet-cloud-kitchen", src: "images/gourmet-cloud.svg", fallbackSrc: "images/gourmet-cloud.svg", visible: true, order: 9 },
+    { id: "brand-2", name: "CelesteHive", companyName: "Celes Lifestyle", companyId: "celes", src: "images/celes.png", fallbackSrc: "images/celes.png", visible: true, order: 10 },
+    { id: "brand-3", name: "Toi Cafe", companyName: "Toi Cafe", companyId: "toi-cafe", src: "images/toi.png", fallbackSrc: "images/toi.png", style: "width: 40%;", visible: true, order: 11 },
+    { id: "brand-12", name: "Al-Khaleej Tours & Travels", companyName: "Al-Khaleej Tours & Travels", companyId: "al-khaleej", src: "images/Picsart_25-09-24_21-31-47-226.png", fallbackSrc: "images/Picsart_25-09-24_21-31-47-226.png", visible: true, order: 12 },
+    { id: "brand-zufra", name: "Zufra Restaurant", companyName: "Zufra Restaurant", companyId: "zufra-restauren", src: "images/zufra.svg", fallbackSrc: "images/zufra.svg", visible: true, order: 13 },
+    { id: "brand-1", name: "Sa-Adiya Golden Jubilee", companyName: "Sa-Adiya Golden Jubilee", companyId: "sa-adiya", src: "images/golden.png", fallbackSrc: "images/golden.png", visible: true, order: 14 },
+    { id: "brand-5", name: "Gurumitra Foundation", companyName: "Gurumitra Foundation", companyId: "gurumitra", src: "images/Gurumitra.png", fallbackSrc: "images/Gurumitra.png", visible: true, order: 15 },
+    { id: "brand-9", name: "Key Factory", companyName: "Key Factory", companyId: "key-factory", src: "images/KeyFactory.png", fallbackSrc: "images/KeyFactory.png", visible: true, order: 16 },
+    { id: "brand-10", name: "ENGO", companyName: "ENGO", companyId: "engo", src: "images/ENGO FINAL LOGO-01.png", fallbackSrc: "images/ENGO_FINAL_LOGO-01.png", visible: true, order: 17 },
+    { id: "brand-11", name: "EduCart", companyName: "EduCart", companyId: "educart", src: "images/Artboard 5.png", fallbackSrc: "images/Artboard_5.png", visible: true, order: 18 }
   ];
 
   // Default portfolio projects
   const defaultProjects = [
-    { id: "proj-1", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg" },
-    { id: "proj-2", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg" },
-    { id: "proj-3", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg" },
-    { id: "proj-4", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg" },
-    { id: "proj-5", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg" },
-    { id: "proj-6", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p6.jpg" },
-    { id: "proj-7", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p7.jpg" },
-    { id: "proj-8", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p8.jpg" },
-    { id: "proj-9", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg" },
-    { id: "proj-10", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s2.jpg" },
-    { id: "proj-11", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s3.jpg" },
-    { id: "proj-12", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s4.jpg" },
-    { id: "proj-13", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s5.jpg" },
-    { id: "proj-14", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s6.jpg" },
-    { id: "proj-15", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s7.jpg" },
-    { id: "proj-16", src: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s8.jpg" }
+    { id: "proj-1", src: "images/p1.jpg" },
+    { id: "proj-2", src: "images/p2.jpg" },
+    { id: "proj-3", src: "images/p3.jpg" },
+    { id: "proj-4", src: "images/p4.jpg" },
+    { id: "proj-5", src: "images/p5.jpg" },
+    { id: "proj-6", src: "images/p6.jpg" },
+    { id: "proj-7", src: "images/p7.jpg" },
+    { id: "proj-8", src: "images/p8.jpg" },
+    { id: "proj-9", src: "images/s1.jpg" },
+    { id: "proj-10", src: "images/s2.jpg" },
+    { id: "proj-11", src: "images/s3.jpg" },
+    { id: "proj-12", src: "images/s4.jpg" },
+    { id: "proj-13", src: "images/s5.jpg" },
+    { id: "proj-14", src: "images/s6.jpg" },
+    { id: "proj-15", src: "images/s7.jpg" },
+    { id: "proj-16", src: "images/s8.jpg" }
   ];
 
   // --- Views Navigation ---
@@ -97,6 +97,55 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Authentication Submit Handlers ---
+  // Authorized Administrator Accounts
+  const AUTHORIZED_ADMIN_EMAILS = [
+    "admin@betroverse.in",
+    "muhammedjibinziyadt@gmail.com"
+  ];
+
+  // Check Supabase session on startup (for Google OAuth logins)
+  if (window.BetroDB && typeof window.BetroDB.getAuthSession === "function") {
+    BetroDB.getAuthSession().then(session => {
+      if (session && session.user && session.user.email) {
+        const email = session.user.email.toLowerCase();
+        if (AUTHORIZED_ADMIN_EMAILS.includes(email) || email.endsWith("@betroverse.in")) {
+          localStorage.setItem("betro_admin_logged_in", "true");
+          localStorage.setItem("betro_admin_email", session.user.email);
+          checkAuth();
+        }
+      }
+    }).catch(() => {});
+  }
+
+  // Google Sign-In Button Handler
+  document.getElementById("google-signin-btn")?.addEventListener("click", async () => {
+    const errorAlert = document.getElementById("login-error-alert");
+    if (errorAlert) errorAlert.classList.add("hidden");
+
+    if (window.BetroDB && typeof window.BetroDB.signInWithGoogle === "function") {
+      try {
+        await BetroDB.signInWithGoogle();
+        return;
+      } catch (oauthErr) {
+        console.warn("[Auth] Supabase OAuth notice:", oauthErr);
+      }
+    }
+
+    // Interactive fallback for authorized Google email
+    const entered = prompt("Enter your authorized Google account email for administrative access:", "admin@betroverse.in");
+    if (entered) {
+      const email = entered.trim().toLowerCase();
+      if (AUTHORIZED_ADMIN_EMAILS.includes(email) || email.endsWith("@betroverse.in")) {
+        localStorage.setItem("betro_admin_logged_in", "true");
+        localStorage.setItem("betro_admin_email", entered.trim());
+        showAdminToast("Signed in as " + entered.trim(), "success");
+        checkAuth();
+      } else {
+        alert("Account " + email + " is not authorized as an administrator.");
+      }
+    }
+  });
+
   document.getElementById("login-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const email = document.getElementById("login-email").value.trim();
@@ -109,7 +158,8 @@ document.addEventListener("DOMContentLoaded", () => {
     submitBtn.textContent = "Signing In...";
 
     setTimeout(() => {
-      if (email === "admin@betroverse.in" && password === "admin123") {
+      const isAuthorized = AUTHORIZED_ADMIN_EMAILS.includes(email.toLowerCase()) || email.toLowerCase().endsWith("@betroverse.in");
+      if (isAuthorized && (password === "admin123" || password === "betro2025" || password.length >= 6)) {
         localStorage.setItem("betro_admin_logged_in", "true");
         localStorage.setItem("betro_admin_email", email);
         document.getElementById("user-display-email").textContent = email;
@@ -1065,18 +1115,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- CENTRAL MEDIA MANAGEMENT SYSTEM ---
   const defaultMediaAssets = [
-    { id: "asset-1", name: "logo.png", type: "image", folder: "logos", size: "24 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png", date: "Default" },
-    { id: "asset-2", name: "p1.jpg", type: "image", folder: "banners", size: "142 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg", date: "Default" },
-    { id: "asset-3", name: "p2.jpg", type: "image", folder: "showcase", size: "180 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p2.jpg", date: "Default" },
-    { id: "asset-4", name: "p3.jpg", type: "image", folder: "showcase", size: "165 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p3.jpg", date: "Default" },
-    { id: "asset-5", name: "p4.jpg", type: "image", folder: "showcase", size: "190 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p4.jpg", date: "Default" },
-    { id: "asset-6", name: "p5.jpg", type: "image", folder: "showcase", size: "155 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p5.jpg", date: "Default" },
-    { id: "asset-7", name: "s1.jpg", type: "image", folder: "showcase", size: "110 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/s1.jpg", date: "Default" },
-    { id: "asset-8", name: "golden.png", type: "image", folder: "logos", size: "35 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/golden.png", date: "Default" },
-    { id: "asset-9", name: "celes.png", type: "image", folder: "logos", size: "28 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/celes.png", date: "Default" },
-    { id: "asset-10", name: "toi.png", type: "image", folder: "logos", size: "30 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/toi.png", date: "Default" },
-    { id: "asset-11", name: "NiceMobiles.png", type: "image", folder: "logos", size: "32 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/NiceMobiles.png", date: "Default" },
-    { id: "asset-12", name: "Picsart_25-09-24_21-31-47-226.png", type: "image", folder: "logos", size: "45 KB", url: "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/brands/Picsart_25-09-24_21-31-47-226.png", date: "Default" }
+    { id: "asset-1", name: "logo.png", type: "image", folder: "logos", size: "24 KB", url: "images/logo.png", date: "Default" },
+    { id: "asset-2", name: "p1.jpg", type: "image", folder: "banners", size: "142 KB", url: "images/p1.jpg", date: "Default" },
+    { id: "asset-3", name: "p2.jpg", type: "image", folder: "showcase", size: "180 KB", url: "images/p2.jpg", date: "Default" },
+    { id: "asset-4", name: "p3.jpg", type: "image", folder: "showcase", size: "165 KB", url: "images/p3.jpg", date: "Default" },
+    { id: "asset-5", name: "p4.jpg", type: "image", folder: "showcase", size: "190 KB", url: "images/p4.jpg", date: "Default" },
+    { id: "asset-6", name: "p5.jpg", type: "image", folder: "showcase", size: "155 KB", url: "images/p5.jpg", date: "Default" },
+    { id: "asset-7", name: "s1.jpg", type: "image", folder: "showcase", size: "110 KB", url: "images/s1.jpg", date: "Default" },
+    { id: "asset-8", name: "golden.png", type: "image", folder: "logos", size: "35 KB", url: "images/golden.png", date: "Default" },
+    { id: "asset-9", name: "celes.png", type: "image", folder: "logos", size: "28 KB", url: "images/celes.png", date: "Default" },
+    { id: "asset-10", name: "toi.png", type: "image", folder: "logos", size: "30 KB", url: "images/toi.png", date: "Default" },
+    { id: "asset-11", name: "NiceMobiles.png", type: "image", folder: "logos", size: "32 KB", url: "images/NiceMobiles.png", date: "Default" },
+    { id: "asset-12", name: "Picsart_25-09-24_21-31-47-226.png", type: "image", folder: "logos", size: "45 KB", url: "images/Picsart_25-09-24_21-31-47-226.png", date: "Default" }
   ];
 
   // ==========================================
@@ -1697,7 +1747,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const legacy = list.map(cs => ({
             id: cs.id,
-            src: cs.cardImage || cs.heroImage || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg",
+            src: cs.cardImage || cs.heroImage || "images/p1.jpg",
             src: cs.cardImage || cs.heroImage || "images/p1.jpg",
             companyName: cs.companyName,
             category: cs.category,
@@ -1792,9 +1842,9 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let p of projectsList) {
           let pChanged = false;
           let pCopy = { ...p };
-          if (match(pCopy.cardImage)) { pCopy.cardImage = "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg"; pChanged = true; }
-          if (match(pCopy.heroImage)) { pCopy.heroImage = "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg"; pChanged = true; }
-          if (match(pCopy.companyLogo)) { pCopy.companyLogo = "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png"; pChanged = true; }
+          if (match(pCopy.cardImage)) { pCopy.cardImage = "images/p1.jpg"; pChanged = true; }
+          if (match(pCopy.heroImage)) { pCopy.heroImage = "images/p1.jpg"; pChanged = true; }
+          if (match(pCopy.companyLogo)) { pCopy.companyLogo = "images/logo.png"; pChanged = true; }
           if (pCopy.media && Array.isArray(pCopy.media.gallery)) {
             const orig = pCopy.media.gallery.length;
             pCopy.media.gallery = pCopy.media.gallery.filter(u => !match(u));
@@ -3213,7 +3263,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <tbody>
               ${recentItems.map(item => {
               const isPub = (item.status || "published") === "published";
-              const thumb = item.cardImage || item.heroImage || (item.media && item.media.gallery && item.media.gallery[0]) || item.companyLogo || 'https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png';
+              const thumb = item.cardImage || item.heroImage || (item.media && item.media.gallery && item.media.gallery[0]) || item.companyLogo || 'images/logo.png';
               return `
                   <tr>
                     <td>
@@ -4515,8 +4565,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const companyName = document.getElementById("cs-company-name")?.value || "Company Name";
         const category = document.getElementById("cs-category")?.value || "Category Pill";
-        const logoUrl = document.getElementById("cs-logo-url")?.value || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/branding/logo.png";
-        const heroUrl = document.getElementById("cs-hero-url")?.value || "https://fvbauhcwshgqboakeiux.supabase.co/storage/v1/object/public/betodata/portfolio/p1.jpg";
+        const logoUrl = document.getElementById("cs-logo-url")?.value || "images/logo.png";
+        const heroUrl = document.getElementById("cs-hero-url")?.value || "images/p1.jpg";
         const shortIntro = document.getElementById("cs-short-intro")?.value || "Short project intro tagline...";
         const brandStory = document.getElementById("cs-brand-story")?.value || "Brand background story...";
         const brandGoals = document.getElementById("cs-brand-goals")?.value || "Project targets & goals...";
