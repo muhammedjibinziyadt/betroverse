@@ -43,45 +43,45 @@ module.exports = async function handler(req, res) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4000);
 
-    const testRes = await fetch(`${supabaseUrl}/rest/v1/portfolio_projects?limit=1`, {
-      method: "GET",
-      headers: {
-        "apikey": supabaseAnonKey,
-        "Authorization": `Bearer ${supabaseAnonKey}`
-      },
-      signal: controller.signal
-    });
-    clearTimeout(timer);
+      const testRes = await fetch(`${supabaseUrl}/rest/v1/portfolio_projects?limit=1`, {
+        method: "GET",
+        headers: {
+          "apikey": supabaseAnonKey,
+          "Authorization": `Bearer ${supabaseAnonKey}`
+        },
+        signal: controller.signal
+      });
+      clearTimeout(timer);
 
     const latency = Date.now() - start;
-    return res.status(200).json({
-      reachable: true,
-      httpStatus: testRes.status,
-      host,
-      projectRef,
-      dashboardUrl: projectRef ? `https://supabase.com/dashboard/project/${projectRef}` : null,
-      latency,
-      environment: process.env.VERCEL_ENV || "development",
-      timestamp: Date.now()
-    });
-  } catch (err) {
-    const latency = Date.now() - start;
-    const isDnsError = err.code === "ENOTFOUND" || 
-      (err.cause && err.cause.code === "ENOTFOUND") || 
-      (err.message && (err.message.includes("fetch failed") || err.message.includes("ENOTFOUND")));
+      return res.status(200).json({
+        reachable: true,
+        httpStatus: testRes.status,
+        host,
+        projectRef,
+        dashboardUrl: projectRef ? `https://supabase.com/dashboard/project/${projectRef}` : null,
+        latency,
+        environment: process.env.VERCEL_ENV || "development",
+        timestamp: Date.now()
+      });
+    } catch (err) {
+      const latency = Date.now() - start;
+      const isDnsError = err.code === "ENOTFOUND" ||
+        (err.cause && err.cause.code === "ENOTFOUND") ||
+        (err.message && (err.message.includes("fetch failed") || err.message.includes("ENOTFOUND")));
 
-    return res.status(200).json({
-      reachable: false,
-      isDnsError: Boolean(isDnsError),
-      host,
-      projectRef,
-      dashboardUrl: projectRef ? `https://supabase.com/dashboard/project/${projectRef}` : null,
-      latency,
-      error: isDnsError 
-        ? `DNS hostname "${host}" not found. If this is a free-tier project, Supabase has paused it due to inactivity.`
-        : (err.message || "Connection failed"),
-      environment: process.env.VERCEL_ENV || "development",
-      timestamp: Date.now()
-    });
-  }
-};
+      return res.status(200).json({
+        reachable: false,
+        isDnsError: Boolean(isDnsError),
+        host,
+        projectRef,
+        dashboardUrl: projectRef ? `https://supabase.com/dashboard/project/${projectRef}` : null,
+        latency,
+        error: isDnsError
+          ? `DNS hostname "${host}" not found. If this is a free-tier project, Supabase has paused it due to inactivity.`
+          : (err.message || "Connection failed"),
+        environment: process.env.VERCEL_ENV || "development",
+        timestamp: Date.now()
+      });
+    }
+  };
