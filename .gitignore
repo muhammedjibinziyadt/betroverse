@@ -20,16 +20,12 @@ pnpm-debug.log*
 .env.production.local
 
 # ==============================
-# Supabase
-# ==============================
-.supabase/
-
-# ==============================
 # Build / Cache
 # ==============================
 dist/
 build/
 .next/
+.betro-store/
 out/
 .cache/
 .parcel-cache/
@@ -75,3 +71,4 @@ coverage/
 uploads/
 temp/
 tmp/
+.betro-store/

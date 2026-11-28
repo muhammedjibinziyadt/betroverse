@@ -1,0 +1,183 @@
+[
+  {
+    "id": "brand-6",
+    "name": "Nahdi Mandi Restaurant",
+    "companyName": "Nahdi Mandi Restaurant",
+    "companyId": "nahdi-mandi",
+    "src": "/images/Nahdimandi-white.png",
+    "fallbackSrc": "/images/Nahdimandi-white.png",
+    "visible": true,
+    "order": 1
+  },
+  {
+    "id": "brand-8",
+    "name": "Soofi Mandi",
+    "companyName": "Soofi Mandi",
+    "companyId": "soofi-mandi",
+    "src": "/images/Soofimandi-white.png",
+    "fallbackSrc": "/images/Soofimandi-white.png",
+    "visible": true,
+    "order": 2
+  },
+  {
+    "id": "brand-mylaban",
+    "name": "MyLaban",
+    "companyName": "MyLaban",
+    "companyId": "mylaban",
+    "src": "/images/mylaban-logo.svg",
+    "fallbackSrc": "/images/mylaban-logo.svg",
+    "visible": true,
+    "order": 3
+  },
+  {
+    "id": "brand-haihyrah",
+    "name": "Haihyrah",
+    "companyName": "Haihyrah",
+    "companyId": "haihyrah",
+    "src": "/images/haihyrah.svg",
+    "fallbackSrc": "/images/haihyrah.svg",
+    "visible": true,
+    "order": 4
+  },
+  {
+    "id": "brand-jamia-nadwiya",
+    "name": "Jamia Nadwiya Edavanna",
+    "companyName": "Jamia Nadwiya Edavanna",
+    "companyId": "jamia-nadwiya-edavanna",
+    "src": "/images/jamia-nadwiya.svg",
+    "fallbackSrc": "/images/jamia-nadwiya.svg",
+    "visible": true,
+    "order": 5
+  },
+  {
+    "id": "brand-convex-fitness",
+    "name": "Convex Fitness",
+    "companyName": "Convex Fitness",
+    "companyId": "convex-fitness",
+    "src": "/images/convex-fitness.svg",
+    "fallbackSrc": "/images/convex-fitness.svg",
+    "visible": true,
+    "order": 6
+  },
+  {
+    "id": "brand-7",
+    "name": "Nice Mobiles",
+    "companyName": "Nice Mobiles",
+    "companyId": "nice-mobiles",
+    "src": "/images/NiceMobiles.png",
+    "fallbackSrc": "/images/NiceMobiles.png",
+    "visible": true,
+    "order": 7
+  },
+  {
+    "id": "brand-4",
+    "name": "Alain Architecture",
+    "companyName": "Alain Architecture",
+    "companyId": "alain-architecture",
+    "src": "/images/AlainArchitecture.png",
+    "fallbackSrc": "/images/AlainArchitecture.png",
+    "visible": true,
+    "order": 8
+  },
+  {
+    "id": "brand-gourmet-cloud",
+    "name": "Gourmet Cloud Kitchen",
+    "companyName": "Gourmet Cloud Kitchen",
+    "companyId": "gourmet-cloud-kitchen",
+    "src": "/images/gourmet-cloud.svg",
+    "fallbackSrc": "/images/gourmet-cloud.svg",
+    "visible": true,
+    "order": 9
+  },
+  {
+    "id": "brand-2",
+    "name": "CelesteHive",
+    "companyName": "Celes Lifestyle",
+    "companyId": "celes",
+    "src": "/images/celes.png",
+    "fallbackSrc": "/images/celes.png",
+    "visible": true,
+    "order": 10
+  },
+  {
+    "id": "brand-3",
+    "name": "Toi Cafe",
+    "companyName": "Toi Cafe",
+    "companyId": "toi-cafe",
+    "src": "/images/toi.png",
+    "fallbackSrc": "/images/toi.png",
+    "style": "width: 40%;",
+    "visible": true,
+    "order": 11
+  },
+  {
+    "id": "brand-12",
+    "name": "Al-Khaleej Tours & Travels",
+    "companyName": "Al-Khaleej Tours & Travels",
+    "companyId": "al-khaleej",
+    "src": "/images/Picsart_25-09-24_21-31-47-226.png",
+    "fallbackSrc": "/images/Picsart_25-09-24_21-31-47-226.png",
+    "visible": true,
+    "order": 12
+  },
+  {
+    "id": "brand-zufra",
+    "name": "Zufra Restaurant",
+    "companyName": "Zufra Restaurant",
+    "companyId": "zufra-restauren",
+    "src": "/images/zufra.svg",
+    "fallbackSrc": "/images/zufra.svg",
+    "visible": true,
+    "order": 13
+  },
+  {
+    "id": "brand-1",
+    "name": "Sa-Adiya Golden Jubilee",
+    "companyName": "Sa-Adiya Golden Jubilee",
+    "companyId": "sa-adiya",
+    "src": "/images/golden.png",
+    "fallbackSrc": "/images/golden.png",
+    "visible": true,
+    "order": 14
+  },
+  {
+    "id": "brand-5",
+    "name": "Gurumitra Foundation",
+    "companyName": "Gurumitra Foundation",
+    "companyId": "gurumitra",
+    "src": "/images/Gurumitra.png",
+    "fallbackSrc": "/images/Gurumitra.png",
+    "visible": true,
+    "order": 15
+  },
+  {
+    "id": "brand-9",
+    "name": "Key Factory",
+    "companyName": "Key Factory",
+    "companyId": "key-factory",
+    "src": "/images/KeyFactory.png",
+    "fallbackSrc": "/images/KeyFactory.png",
+    "visible": true,
+    "order": 16
+  },
+  {
+    "id": "brand-10",
+    "name": "ENGO",
+    "companyName": "ENGO",
+    "companyId": "engo",
+    "src": "/images/ENGO FINAL LOGO-01.png",
+    "fallbackSrc": "/images/ENGO FINAL LOGO-01.png",
+    "visible": true,
+    "order": 17
+  },
+  {
+    "id": "brand-11",
+    "name": "EduCart",
+    "companyName": "EduCart",
+    "companyId": "educart",
+    "src": "/images/Artboard 5.png",
+    "fallbackSrc": "/images/Artboard 5.png",
+    "visible": true,
+    "order": 18
+  }
+]

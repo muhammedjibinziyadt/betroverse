@@ -1,17 +1,5 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    {
-      "source": "/portfolio/case-study",
-      "destination": "/portfolio/case-study.html"
-    },
-    {
-      "source": "/portfolio/:slug((?!.*\\.html$).*)",
-      "destination": "/portfolio/case-study.html?id=:slug"
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",
