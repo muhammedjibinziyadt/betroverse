@@ -1928,6 +1928,195 @@ document.addEventListener("DOMContentLoaded", () => {
         await renderMediaLibraryTab();
         await renderDashboardOverview();
       };
+    } else if (type === "media_all" || type === "media_selected") {
+      const isAll = type === "media_all";
+      const targetAssets = options.assets || [];
+      const count = targetAssets.length;
+
+      if (titleEl) titleEl.textContent = isAll ? "Delete All Media Assets" : "Delete Selected Media";
+      if (subtitleEl) {
+        subtitleEl.textContent = isAll
+          ? `Are you sure you want to permanently delete all ${count} media asset(s)?`
+          : `Are you sure you want to permanently delete ${count} selected media asset(s)?`;
+      }
+
+      // Check how many are referenced in projects
+      let usedCount = 0;
+      const referencingProjectsMap = new Map();
+      targetAssets.forEach(a => {
+        const u = getMediaUsage(a.url);
+        if (u && u.isUsed) {
+          usedCount++;
+          u.references.forEach(r => {
+            if (!referencingProjectsMap.has(r.project)) {
+              referencingProjectsMap.set(r.project, []);
+            }
+            referencingProjectsMap.get(r.project).push(r.role);
+          });
+        }
+      });
+
+      if (previewEl) {
+        const sampleThumbs = targetAssets.slice(0, 5).map(a => {
+          if (a.type === "image") {
+            return `<img src="${a.url}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid var(--panel-border);">`;
+          }
+          return `<div style="width: 38px; height: 38px; background: rgba(255,255,255,0.06); border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--accent-color);"><i class="${a.type === 'video' ? 'ri-video-line' : 'ri-file-line'}"></i></div>`;
+        }).join("");
+
+        previewEl.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="safe-delete-item-row" style="align-items: flex-start;">
+              <div class="safe-delete-icon-box" style="width: 44px; height: 44px; min-width: 44px; background: rgba(239, 68, 68, 0.2);">
+                <i class="ri-delete-bin-2-line" style="font-size: 1.4rem;"></i>
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <strong style="color: #fff; font-size: 1rem;">${isAll ? "All Central Media" : "Selected Assets"} (${count} items)</strong>
+                <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                  This will permanently delete ${count} file${count !== 1 ? "s" : ""} from Supabase Cloud Storage and the database.
+                </span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding-top: 6px; border-top: 1px solid var(--panel-border);">
+              ${sampleThumbs}
+              ${count > 5 ? `<span style="font-size: 0.75rem; color: var(--text-muted); padding: 4px 8px; background: rgba(255,255,255,0.04); border-radius: 4px;">+${count - 5} more</span>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      if (usedCount > 0 && warningBox && warningText) {
+        warningBox.classList.remove("hidden");
+        const projNames = Array.from(referencingProjectsMap.keys()).slice(0, 4);
+        const extraProjs = referencingProjectsMap.size - projNames.length;
+        warningText.innerHTML = `
+          <strong>Notice: ${usedCount} of ${count} asset(s) are referenced in ${referencingProjectsMap.size} project(s):</strong>
+          <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.8rem; line-height: 1.45;">
+            ${projNames.map(p => `<li><strong>${p}</strong></li>`).join("")}
+            ${extraProjs > 0 ? `<li>...and ${extraProjs} more projects</li>` : ""}
+          </ul>
+          <span style="display: block; margin-top: 6px; font-size: 0.75rem; color: #fde68a;">
+            These references will be unlinked so projects continue working without broken links.
+          </span>
+        `;
+      }
+
+      if (confirmBtn) {
+        confirmBtn.innerHTML = `<i class="ri-delete-bin-2-line"></i> DELETE ${isAll ? "ALL" : "SELECTED"} (${count})`;
+      }
+
+      pendingDeleteAction = async () => {
+        const targetUrls = new Set(targetAssets.map(a => a.url).filter(Boolean));
+
+        const isMatch = (u) => {
+          if (!u || typeof u !== "string") return false;
+          if (targetUrls.has(u)) return true;
+          try {
+            const path = new URL(u).pathname.toLowerCase();
+            for (let tUrl of targetUrls) {
+              if (new URL(tUrl).pathname.toLowerCase() === path) return true;
+            }
+          } catch (e) { }
+          return false;
+        };
+
+        // 1. Clean references across case studies
+        let projectsList = await getFreshBetroCaseStudies();
+        let modified = false;
+        for (let p of projectsList) {
+          let pChanged = false;
+          let pCopy = { ...p };
+          if (isMatch(pCopy.cardImage)) { pCopy.cardImage = "images/p1.jpg"; pChanged = true; }
+          if (isMatch(pCopy.heroImage)) { pCopy.heroImage = "images/p1.jpg"; pChanged = true; }
+          if (isMatch(pCopy.companyLogo)) { pCopy.companyLogo = "images/logo.png"; pChanged = true; }
+          if (pCopy.media && Array.isArray(pCopy.media.gallery)) {
+            const orig = pCopy.media.gallery.length;
+            pCopy.media.gallery = pCopy.media.gallery.filter(u => !isMatch(u));
+            if (pCopy.media.gallery.length !== orig) pChanged = true;
+          }
+          if (pCopy.media && Array.isArray(pCopy.media.videos)) {
+            const orig = pCopy.media.videos.length;
+            pCopy.media.videos = pCopy.media.videos.filter(u => !isMatch(u));
+            if (pCopy.media.videos.length !== orig) pChanged = true;
+          }
+          if (pCopy.media && Array.isArray(pCopy.media.assets)) {
+            const orig = pCopy.media.assets.length;
+            pCopy.media.assets = pCopy.media.assets.filter(a => !isMatch(typeof a === 'string' ? a : a?.url));
+            if (pCopy.media.assets.length !== orig) pChanged = true;
+          }
+          if (Array.isArray(pCopy.gallerySections)) {
+            pCopy.gallerySections.forEach(sec => {
+              if (Array.isArray(sec.images)) {
+                const orig = sec.images.length;
+                sec.images = sec.images.filter(img => !isMatch(typeof img === 'string' ? img : img?.url));
+                if (sec.images.length !== orig) pChanged = true;
+              }
+            });
+          }
+          if (Array.isArray(pCopy.blocks)) {
+            pCopy.blocks.forEach(b => {
+              if (b) {
+                if (isMatch(b.imageUrl)) { b.imageUrl = ""; pChanged = true; }
+                if (isMatch(b.mediaUrl)) { b.mediaUrl = ""; pChanged = true; }
+                if (isMatch(b.url)) { b.url = ""; pChanged = true; }
+              }
+            });
+          }
+
+          if (pChanged) {
+            modified = true;
+            if (window.BetroDB) {
+              await BetroDB.saveCaseStudy(pCopy);
+            }
+          }
+        }
+
+        if (modified) {
+          projectsList = await getFreshBetroCaseStudies();
+          await saveBetroCaseStudies(projectsList);
+        }
+
+        // 2. Blacklist all deleted assets in localStorage so they never reappear
+        try {
+          let delList = [];
+          const raw = localStorage.getItem("betro_deleted_media_ids");
+          if (raw) delList = JSON.parse(raw);
+          if (!Array.isArray(delList)) delList = [];
+          targetAssets.forEach(a => {
+            if (a.id && !delList.includes(a.id)) delList.push(a.id);
+            if (a.url && !delList.includes(a.url)) delList.push(a.url);
+            if (a.storage_path && !delList.includes(a.storage_path)) delList.push(a.storage_path);
+          });
+          localStorage.setItem("betro_deleted_media_ids", JSON.stringify(delList));
+        } catch (e) { }
+
+        // 3. Remove from local cache
+        let currentAssets = getMediaAssets();
+        if (isAll) {
+          currentAssets = [];
+        } else {
+          currentAssets = currentAssets.filter(a => !targetUrls.has(a.url));
+        }
+        BetroStorage.cache["betro_media_assets"] = currentAssets;
+        await saveMediaAssets(currentAssets);
+
+        // 4. Cloud batch deletion
+        if (window.BetroDB) {
+          try {
+            if (isAll) {
+              await BetroDB.deleteAllMedia(targetAssets);
+            } else {
+              await BetroDB.deleteMultipleMedia(targetAssets);
+            }
+          } catch (cloudErr) {
+            console.warn("[SafeDelete] Cloud batch delete notice:", cloudErr);
+          }
+        }
+
+        if (typeof onSuccess === "function") onSuccess();
+        await renderMediaLibraryTab();
+        await renderDashboardOverview();
+      };
     }
 
     modal.classList.remove("hidden");
@@ -1960,7 +2149,10 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await pendingDeleteAction();
       closeSafeDeleteModal();
-      const successMsg = pendingDeleteType === "casestudy" ? "Case study deleted successfully." : "Media deleted successfully.";
+      let successMsg = "Media deleted successfully.";
+      if (pendingDeleteType === "casestudy") successMsg = "Case study deleted successfully.";
+      else if (pendingDeleteType === "media_all") successMsg = "All media assets deleted successfully.";
+      else if (pendingDeleteType === "media_selected") successMsg = "Selected media assets deleted successfully.";
       showAdminToast(successMsg, "success");
     } catch (err) {
       console.error("[SafeDelete] Operation failed:", err);
@@ -1969,7 +2161,10 @@ document.addEventListener("DOMContentLoaded", () => {
       safeDeleteConfirmBtn.innerHTML = `<i class="ri-delete-bin-line"></i> DELETE`;
       if (errorMsg) errorMsg.textContent = "Delete failed: " + (err.message || "Please try again.");
       if (errorBox) errorBox.classList.remove("hidden");
-      const failMsg = pendingDeleteType === "casestudy" ? "Failed to delete case study. Please try again." : "Failed to delete media. Please try again.";
+      let failMsg = "Failed to delete media. Please try again.";
+      if (pendingDeleteType === "casestudy") failMsg = "Failed to delete case study. Please try again.";
+      else if (pendingDeleteType === "media_all") failMsg = "Failed to delete all media. Please try again.";
+      else if (pendingDeleteType === "media_selected") failMsg = "Failed to delete selected media. Please try again.";
       showAdminToast(failMsg, "error");
     }
   });
@@ -2129,6 +2324,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Render Central Media Library Tab Panel
   let currentMediaTypeFilter = "all";
+
+  const updateSelectedMediaState = () => {
+    const checked = Array.from(document.querySelectorAll(".media-select-checkbox:checked"));
+    const count = checked.length;
+    const countEl = document.getElementById("media-selected-count");
+    const delBtn = document.getElementById("media-delete-selected-btn");
+    const selectAllBtn = document.getElementById("media-select-all-btn");
+    if (countEl) countEl.textContent = count;
+    if (delBtn) {
+      if (count > 0) delBtn.classList.remove("hidden");
+      else delBtn.classList.add("hidden");
+    }
+    if (selectAllBtn) {
+      const allBoxes = document.querySelectorAll(".media-select-checkbox");
+      if (allBoxes.length > 0 && count === allBoxes.length) {
+        selectAllBtn.innerHTML = `<i class="ri-checkbox-indeterminate-line"></i> Deselect All`;
+      } else {
+        selectAllBtn.innerHTML = `<i class="ri-checkbox-line"></i> Select All`;
+      }
+    }
+  };
+
   const renderMediaLibraryTab = async () => {
     const grid = document.getElementById("media-library-grid");
     if (!grid) return;
@@ -2145,7 +2362,23 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    let assets = getMediaAssets();
+    const allTotalAssets = getMediaAssets();
+    const countBadge = document.getElementById("media-library-count-badge");
+    if (countBadge) {
+      countBadge.textContent = `${allTotalAssets.length} Asset${allTotalAssets.length !== 1 ? "s" : ""}`;
+    }
+    const deleteAllBtn = document.getElementById("delete-all-media-btn");
+    if (deleteAllBtn) {
+      if (allTotalAssets.length === 0) {
+        deleteAllBtn.style.opacity = "0.5";
+        deleteAllBtn.style.pointerEvents = "none";
+      } else {
+        deleteAllBtn.style.opacity = "1";
+        deleteAllBtn.style.pointerEvents = "auto";
+      }
+    }
+
+    let assets = allTotalAssets;
     const searchVal = (document.getElementById("media-library-search")?.value || "").toLowerCase().trim();
     const folderVal = document.getElementById("media-folder-filter")?.value || "all";
 
@@ -2169,6 +2402,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <h4 style="color: var(--text-primary); font-size: 1.1rem; margin-bottom: 4px;">No Media Assets Found</h4>
         <p style="font-size: 0.85rem; max-width: 360px; margin: 0 auto 1.25rem auto;">Upload images or videos via the button above or drag and drop files onto the upload zone.</p>
       </div>`;
+      updateSelectedMediaState();
       return;
     }
 
@@ -2193,7 +2427,10 @@ document.addEventListener("DOMContentLoaded", () => {
         : `<span class="media-usage-pill unused" title="Not referenced in any project"><i class="ri-link-unlink"></i> UNUSED</span>`;
 
       card.innerHTML = `
-        <span class="media-type-badge">${(asset.type || "IMG")}</span>
+        <label class="media-select-wrap" style="position: absolute; top: 8px; left: 8px; z-index: 10; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: rgba(0,0,0,0.65); border-radius: 4px; border: 1px solid rgba(255,255,255,0.25);" title="Select asset">
+          <input type="checkbox" class="media-select-checkbox" data-id="${asset.id || ''}" data-url="${asset.url || ''}" style="cursor: pointer; width: 14px; height: 14px; margin: 0; accent-color: #ef4444;">
+        </label>
+        <span class="media-type-badge" style="left: 36px;">${(asset.type || "IMG")}</span>
         ${usageBadgeHtml}
         <div class="media-asset-thumb" title="Click to view full details">
           ${thumbHtml}
@@ -2221,6 +2458,14 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
+      card.querySelector(".media-select-checkbox")?.addEventListener("change", (e) => {
+        e.stopPropagation();
+        updateSelectedMediaState();
+      });
+      card.querySelector(".media-select-wrap")?.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+
       card.querySelector(".media-asset-thumb")?.addEventListener("click", () => openMediaDetailsModal(asset));
       card.querySelector(".info-asset-btn")?.addEventListener("click", () => openMediaDetailsModal(asset));
       card.querySelector(".replace-asset-btn")?.addEventListener("click", () => replaceMediaAssetQuick(asset));
@@ -2238,6 +2483,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       grid.appendChild(card);
     });
+
+    updateSelectedMediaState();
   };
 
   // Media Library Tab Events
@@ -2320,6 +2567,53 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.add("active");
       currentMediaTypeFilter = btn.getAttribute("data-type");
       renderMediaLibraryTab();
+    });
+  });
+
+  // Select All button toggle
+  document.getElementById("media-select-all-btn")?.addEventListener("click", () => {
+    const allBoxes = Array.from(document.querySelectorAll(".media-select-checkbox"));
+    if (allBoxes.length === 0) return;
+    const allChecked = allBoxes.every(cb => cb.checked);
+    allBoxes.forEach(cb => { cb.checked = !allChecked; });
+    updateSelectedMediaState();
+  });
+
+  // Delete Selected button
+  document.getElementById("media-delete-selected-btn")?.addEventListener("click", () => {
+    const checked = Array.from(document.querySelectorAll(".media-select-checkbox:checked"));
+    if (checked.length === 0) {
+      showAdminToast("Please select at least one media asset to delete.", "info");
+      return;
+    }
+    const selectedUrls = new Set(checked.map(cb => cb.getAttribute("data-url")).filter(Boolean));
+    const all = getMediaAssets();
+    const targets = all.filter(a => selectedUrls.has(a.url));
+    if (targets.length === 0) return;
+    openSafeDeleteModal({
+      type: "media_selected",
+      assets: targets,
+      onSuccess: async () => {
+        await renderMediaLibraryTab();
+        await renderDashboardOverview();
+      }
+    });
+  });
+
+  // Delete All Media button
+  document.getElementById("delete-all-media-btn")?.addEventListener("click", () => {
+    const all = getMediaAssets();
+    if (!all || all.length === 0) {
+      showAdminToast("No media assets to delete.", "info");
+      return;
+    }
+    openSafeDeleteModal({
+      type: "media_all",
+      assets: all,
+      onSuccess: async () => {
+        await renderMediaLibraryTab();
+        await renderDashboardOverview();
+      }
     });
   });
 

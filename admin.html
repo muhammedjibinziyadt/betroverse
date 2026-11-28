@@ -436,11 +436,19 @@
               <div class="card-header"
                 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--panel-border); padding-bottom: 1rem;">
                 <div>
-                  <h3>Central Media Library</h3>
-                  <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem;">Manage all images,
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <h3 style="margin: 0;">Central Media Library</h3>
+                    <span id="media-library-count-badge"
+                      style="background: rgba(74, 185, 108, 0.15); color: #4ab96c; border: 1px solid rgba(74, 185, 108, 0.3); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">0 Assets</span>
+                  </div>
+                  <p class="subtitle" style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">Manage all images,
                     videos, and document assets across case studies.</p>
                 </div>
-                <div style="display: flex; gap: 0.75rem;">
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                  <button type="button" class="admin-btn danger-btn" id="delete-all-media-btn"
+                    style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="ri-delete-bin-2-line"></i> Delete All Media
+                  </button>
                   <label class="admin-btn primary-btn" style="cursor: pointer; margin: 0;">
                     <i class="ri-upload-cloud-2-line"></i> Upload New Media
                     <input type="file" id="media-library-upload-input" multiple accept="image/*,video/*,.pdf"
@@ -450,7 +458,7 @@
               </div>
 
               <!-- Media Filters & Search -->
-              <div class="media-controls-bar">
+              <div class="media-controls-bar" style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                 <div class="media-search-wrap">
                   <i class="ri-search-line"></i>
                   <input type="text" id="media-library-search" placeholder="Search media assets..." class="form-input">
@@ -472,6 +480,14 @@
                   <option value="videos">Videos</option>
                   <option value="documents">Documents</option>
                 </select>
+                <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto;">
+                  <button type="button" class="admin-btn secondary-btn" id="media-select-all-btn" style="padding: 7px 12px; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 5px;">
+                    <i class="ri-checkbox-line"></i> Select All
+                  </button>
+                  <button type="button" class="admin-btn danger-btn hidden" id="media-delete-selected-btn" style="background: #ef4444; color: #fff; padding: 7px 14px; font-size: 0.82rem; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="ri-delete-bin-line"></i> Delete Selected (<span id="media-selected-count">0</span>)
+                  </button>
+                </div>
               </div>
 
               <!-- Drag & Drop Upload Zone -->

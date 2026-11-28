@@ -1201,6 +1201,135 @@
     },
 
     /**
+     * Helper to extract storage path
+     */
+    extractStoragePath(url, fallbackPath = null) {
+      return { storagePath: extractStoragePath(url, fallbackPath) };
+    },
+
+    /**
+     * Delete multiple media assets from Supabase Storage & Database
+     */
+    async deleteMultipleMedia(assets, options = {}) {
+      if (!Array.isArray(assets) || assets.length === 0) {
+        return { success: true, count: 0 };
+      }
+
+      // 1. Permanently record in deleted blacklist so they NEVER reappear
+      try {
+        let delList = [];
+        const raw = safeStorage.get("betro_deleted_media_ids");
+        if (raw) delList = JSON.parse(raw);
+        if (!Array.isArray(delList)) delList = [];
+        assets.forEach(a => {
+          if (!a) return;
+          const pathToDel = extractStoragePath(a.url, a.storage_path || a.storagePath);
+          if (a.id && !delList.includes(a.id)) delList.push(a.id);
+          if (a.url && !delList.includes(a.url)) delList.push(a.url);
+          if (pathToDel && !delList.includes(pathToDel)) delList.push(pathToDel);
+        });
+        safeStorage.set("betro_deleted_media_ids", delList);
+      } catch (e) { }
+
+      // 2. Remove from local cache immediately
+      try {
+        const local = safeStorage.get("betro_media_assets");
+        if (local) {
+          let parsed = JSON.parse(local);
+          if (Array.isArray(parsed)) {
+            const delIds = new Set(assets.map(a => a?.id).filter(Boolean));
+            const delUrls = new Set(assets.map(a => a?.url).filter(Boolean));
+            parsed = parsed.filter(a => !delIds.has(a.id) && !delUrls.has(a.url));
+            safeStorage.set("betro_media_assets", parsed);
+          }
+        }
+        this.broadcastChange("MEDIA_BATCH_DELETED", { count: assets.length });
+      } catch (e) { }
+
+      const client = await this.ensureInit();
+      if (!client) return { success: true, count: assets.length, warning: "Deleted locally (Supabase client offline)" };
+
+      try {
+        const bucket = cleanBucket(activeConfig.storageBucket || DEFAULT_BUCKET);
+        const otherBucket = bucket === "betodata" ? "portfolio-media" : "betodata";
+
+        // Remove storage files in chunks of 25
+        if (!options.skipStorageDelete) {
+          const paths = assets
+            .map(a => extractStoragePath(a.url, a.storage_path || a.storagePath))
+            .filter(Boolean);
+
+          for (let i = 0; i < paths.length; i += 25) {
+            const chunk = paths.slice(i, i + 25);
+            try {
+              await client.storage.from(bucket).remove(chunk);
+            } catch (stErr) {
+              console.warn("[BetroDB] Batch storage remove notice (bucket):", stErr);
+            }
+            try {
+              await client.storage.from(otherBucket).remove(chunk);
+            } catch (stErr2) { }
+          }
+        }
+
+        // Delete from media_assets table in chunks of 50
+        const ids = assets.map(a => a.id).filter(Boolean);
+        for (let i = 0; i < ids.length; i += 50) {
+          const chunk = ids.slice(i, i + 50);
+          const { error: errIds } = await client.from("media_assets").delete().in("id", chunk);
+          if (errIds) console.warn("[BetroDB] Batch delete by ID notice:", errIds.message);
+        }
+
+        const urls = assets.map(a => a.url).filter(Boolean);
+        for (let i = 0; i < urls.length; i += 50) {
+          const chunk = urls.slice(i, i + 50);
+          const { error: errUrls } = await client.from("media_assets").delete().in("url", chunk);
+          if (errUrls) console.warn("[BetroDB] Batch delete by URL notice:", errUrls.message);
+        }
+
+        safeStorage.remove("betro_media_assets");
+        safeStorage.remove("betro_casestudies_cache");
+        return { success: true, count: assets.length };
+      } catch (e) {
+        console.warn("[BetroDB] Cloud media batch delete notice:", e);
+        return { success: true, count: assets.length, warning: "Deleted locally. Cloud sync pending: " + (e.message || "Host unreachable") };
+      }
+    },
+
+    /**
+     * Delete ALL media assets from Supabase Storage & Database
+     */
+    async deleteAllMedia(allAssets = null, options = {}) {
+      let targets = allAssets;
+      if (!Array.isArray(targets) || targets.length === 0) {
+        targets = await this.getAllMediaAssets({ forceRefresh: true });
+      }
+
+      if (!Array.isArray(targets) || targets.length === 0) {
+        const client = await this.ensureInit();
+        if (client) {
+          try {
+            await client.from("media_assets").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+          } catch (e) { }
+        }
+        safeStorage.remove("betro_media_assets");
+        return { success: true, count: 0 };
+      }
+
+      const res = await this.deleteMultipleMedia(targets, options);
+
+      // Extra guarantee: ensure media_assets table has no lingering records
+      const client = await this.ensureInit();
+      if (client) {
+        try {
+          await client.from("media_assets").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        } catch (e) { }
+      }
+      safeStorage.remove("betro_media_assets");
+      return res;
+    },
+
+    /**
      * Retrieve all media assets from Supabase cloud
      */
     async getAllMediaAssets(options = {}) {
