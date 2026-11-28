@@ -5531,6 +5531,47 @@ const __initAdminApp = () => {
 
   // Check initial Auth state
   checkAuth();
+
+  // Admin-Only Light/Dark Mode Toggle (never affects public user pages)
+  const ADMIN_THEME_KEY = "betro_admin_theme";
+  const applyAdminTheme = (mode) => {
+    const isLight = mode === "light";
+    document.body.classList.toggle("admin-light-mode", isLight);
+    try {
+      localStorage.setItem(ADMIN_THEME_KEY, isLight ? "light" : "dark");
+    } catch {}
+    const sidebarLabel = document.querySelector("#theme-toggle span");
+    if (sidebarLabel) {
+      sidebarLabel.textContent = isLight ? "Light Mode" : "Dark Mode";
+    }
+    const settingsThemeBtn = document.getElementById("theme-toggle-settings");
+    if (settingsThemeBtn) {
+      settingsThemeBtn.innerHTML = isLight
+        ? '<i class="ri-moon-line"></i> Switch to Dark Mode'
+        : '<i class="ri-sun-line"></i> Switch to Light Mode';
+    }
+  };
+  applyAdminTheme(
+    (() => {
+      try {
+        return localStorage.getItem(ADMIN_THEME_KEY) === "light" ? "light" : "dark";
+      } catch {
+        return "dark";
+      }
+    })()
+  );
+
+  const toggleAdminTheme = () => {
+    const next = document.body.classList.contains("admin-light-mode") ? "dark" : "light";
+    applyAdminTheme(next);
+    showAdminToast(
+      next === "light" ? "Admin Dashboard switched to Light Mode" : "Admin Dashboard switched to Dark Mode",
+      "info",
+      2200
+    );
+  };
+  document.getElementById("theme-toggle")?.addEventListener("click", toggleAdminTheme);
+  document.getElementById("theme-toggle-settings")?.addEventListener("click", toggleAdminTheme);
 };
 window.__initAdminApp = __initAdminApp;
 if (document.readyState === "loading") {

@@ -1,5 +1,3 @@
-import Script from "next/script";
-
 export const metadata = {
   title: "Betroverse | The Solution for Professional Teams",
   description:
@@ -30,10 +28,7 @@ export default function RootLayout({ children }) {
           href="/images/favicon-32x32.png"
         />
       </head>
-      <body suppressHydrationWarning>
-        {children}
-        <Script src="/js/darkmod.js" strategy="afterInteractive" />
-      </body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

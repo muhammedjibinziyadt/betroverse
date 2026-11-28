@@ -37,7 +37,7 @@ export default function AdminClient({ initialUser }) {
         if (cancelled) return;
 
         if (typeof window.__initAdminApp !== "function") {
-          await loadScript("/js/admin.js?v=2");
+          await loadScript("/js/admin.js?v=3");
         }
         if (cancelled) return;
 
@@ -60,6 +60,7 @@ export default function AdminClient({ initialUser }) {
     return () => {
       cancelled = true;
       window.__betroAdminInitialized = false;
+      document.body.classList.remove("admin-light-mode", "light-mode");
     };
   }, [initialUser]);
 
