@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
+import {
+  trackContactClick,
+  trackEmailClick,
+  trackEnquirySubmit,
+  trackWhatsAppClick,
+} from "@/lib/gtag";
 
 export default function HomeClient({ initialBrands = [] }) {
   const router = useRouter();
@@ -41,7 +47,7 @@ export default function HomeClient({ initialBrands = [] }) {
           setBrands(data.brands.filter((b) => b.visible !== false));
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     // ScrollSpy observer
     const sections = document.querySelectorAll("section[id], header[id]");
@@ -79,7 +85,7 @@ export default function HomeClient({ initialBrands = [] }) {
               });
           }
         };
-      } catch {}
+      } catch { }
     }
 
     return () => {
@@ -131,7 +137,7 @@ export default function HomeClient({ initialBrands = [] }) {
 
     try {
       // Save to MongoDB via Next.js API
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -143,6 +149,9 @@ export default function HomeClient({ initialBrands = [] }) {
           message: contactMessage.trim(),
         }),
       });
+      if (res.ok) {
+        trackEnquirySubmit("home_contact_form", "General Inquiry");
+      }
 
       // Also forward to Google Apps Script (matching legacy behavior)
       const params = new URLSearchParams();
@@ -159,7 +168,7 @@ export default function HomeClient({ initialBrands = [] }) {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: params.toString(),
         }
-      ).catch(() => {});
+      ).catch(() => { });
 
       alert("Thank you! Your message has been sent successfully.");
       setContactName("");
@@ -174,6 +183,7 @@ export default function HomeClient({ initialBrands = [] }) {
 
   const handleSubscribe = (e) => {
     e.preventDefault();
+    trackContactClick("subscribe_banner_cta");
     router.push(`/contact?email=${encodeURIComponent(subscribeEmail)}`);
   };
 
@@ -234,7 +244,11 @@ export default function HomeClient({ initialBrands = [] }) {
                 </a>
               </li>
               <li>
-                <a href="#contact" className={`nav-item${activeNav === "#contact" ? " active" : ""}`}>
+                <a
+                  href="#contact"
+                  className={`nav-item${activeNav === "#contact" ? " active" : ""}`}
+                  onClick={() => trackContactClick("home_header_nav")}
+                >
                   Contact
                 </a>
               </li>
@@ -247,6 +261,7 @@ export default function HomeClient({ initialBrands = [] }) {
               target="_blank"
               rel="noopener noreferrer"
               className="cta-btn"
+              onClick={() => trackWhatsAppClick("home_header_get_started")}
             >
               <span>Get Started</span>
               <i className="ri-arrow-right-line"></i>
@@ -336,7 +351,10 @@ export default function HomeClient({ initialBrands = [] }) {
               <a
                 href="#contact"
                 className={`mobile-nav-item${activeNav === "#contact" ? " active" : ""}`}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  trackContactClick("home_mobile_nav");
+                }}
               >
                 Contact
               </a>
@@ -349,6 +367,7 @@ export default function HomeClient({ initialBrands = [] }) {
               target="_blank"
               rel="noopener noreferrer"
               className="mobile-cta-btn"
+              onClick={() => trackWhatsAppClick("home_mobile_get_started")}
             >
               Get Started
               <i className="ri-arrow-right-line"></i>
@@ -387,6 +406,7 @@ export default function HomeClient({ initialBrands = [] }) {
             target="_blank"
             rel="noopener noreferrer"
             className="hero-cta-btn"
+            onClick={() => trackWhatsAppClick("home_hero_lets_talk")}
           >
             <span>Let&apos;s Talk</span>
             <i className="ri-arrow-right-line"></i>
@@ -759,11 +779,16 @@ export default function HomeClient({ initialBrands = [] }) {
                 <div className="text-one">+918590417077</div>
               </div>
 
-              <div className="email details">
+              <a
+                href="mailto:Betroverse@gmail.com"
+                className="email details"
+                onClick={() => trackEmailClick("home_contact_section")}
+                style={{ color: "inherit", textDecoration: "none" }}
+              >
                 <i className="fas fa-envelope"></i>
                 <div className="topic">Email</div>
                 <div className="text-one">Betroverse@gmail.com</div>
-              </div>
+              </a>
             </div>
 
             <div className="right-side">
@@ -869,17 +894,33 @@ export default function HomeClient({ initialBrands = [] }) {
               <li><a href="#services">Services</a></li>
               <li><Link href="/portfolio">Portfolio</Link></li>
               <li><a href="#process">Process</a></li>
-              <li><a href="#contact">Contact</a></li>
+              <li>
+                <a href="#contact" onClick={() => trackContactClick("home_footer_contact")}>
+                  Contact
+                </a>
+              </li>
             </ul>
           </div>
 
           <div className="footer__col">
             <h4>Support</h4>
             <ul className="footer__links">
-              <li><a href="#contact">Help Center</a></li>
+              <li>
+                <a href="#contact" onClick={() => trackContactClick("home_footer_help_center")}>
+                  Help Center
+                </a>
+              </li>
               <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#contact">Report an Issue</a></li>
-              <li><a href="#contact">Get a Quote</a></li>
+              <li>
+                <a href="#contact" onClick={() => trackContactClick("home_footer_report_issue")}>
+                  Report an Issue
+                </a>
+              </li>
+              <li>
+                <a href="#contact" onClick={() => trackContactClick("home_footer_get_quote")}>
+                  Get a Quote
+                </a>
+              </li>
             </ul>
           </div>
         </div>

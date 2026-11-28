@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
+import { trackContactClick, trackWhatsAppClick } from "@/lib/gtag";
 
 export default function PortfolioClient({ initialProjects = [] }) {
   const router = useRouter();
@@ -132,7 +133,15 @@ export default function PortfolioClient({ initialProjects = [] }) {
                 </Link>
               </li>
               <li><Link href="/#process" className="nav-item">Process</Link></li>
-              <li><Link href="/#contact" className="nav-item">Contact</Link></li>
+              <li>
+                <Link
+                  href="/#contact"
+                  className="nav-item"
+                  onClick={() => trackContactClick("portfolio_header_nav")}
+                >
+                  Contact
+                </Link>
+              </li>
             </ul>
           </nav>
 
@@ -142,6 +151,7 @@ export default function PortfolioClient({ initialProjects = [] }) {
               target="_blank"
               rel="noopener noreferrer"
               className="cta-btn"
+              onClick={() => trackWhatsAppClick("portfolio_header_get_started")}
             >
               <span>Get Started</span>
               <i className="ri-arrow-right-line"></i>
@@ -186,7 +196,18 @@ export default function PortfolioClient({ initialProjects = [] }) {
             <li><Link href="/#services" className="mobile-nav-item">Services</Link></li>
             <li><Link href="/portfolio" className="mobile-nav-item active">Portfolio</Link></li>
             <li><Link href="/#process" className="mobile-nav-item">Process</Link></li>
-            <li><Link href="/#contact" className="mobile-nav-item">Contact</Link></li>
+            <li>
+              <Link
+                href="/#contact"
+                className="mobile-nav-item"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  trackContactClick("portfolio_mobile_nav");
+                }}
+              >
+                Contact
+              </Link>
+            </li>
           </ul>
           <div className="mobile-drawer-actions">
             <a
@@ -194,6 +215,7 @@ export default function PortfolioClient({ initialProjects = [] }) {
               target="_blank"
               rel="noopener noreferrer"
               className="mobile-cta-btn"
+              onClick={() => trackWhatsAppClick("portfolio_mobile_get_started")}
             >
               Get Started <i className="ri-arrow-right-line"></i>
             </a>
@@ -305,7 +327,11 @@ export default function PortfolioClient({ initialProjects = [] }) {
               <li><Link href="/#about">About</Link></li>
               <li><Link href="/#services">Services</Link></li>
               <li><Link href="/portfolio">Portfolio</Link></li>
-              <li><Link href="/#contact">Contact</Link></li>
+              <li>
+                <Link href="/#contact" onClick={() => trackContactClick("portfolio_footer")}>
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="footer__col">

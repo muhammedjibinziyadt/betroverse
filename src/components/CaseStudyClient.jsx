@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { trackContactClick, trackWhatsAppClick } from "@/lib/gtag";
 
 export default function CaseStudyClient({ project, allProjects = [] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -149,7 +150,15 @@ export default function CaseStudyClient({ project, allProjects = [] }) {
                 </Link>
               </li>
               <li><Link href="/#process" className="nav-item">Process</Link></li>
-              <li><Link href="/#contact" className="nav-item">Contact</Link></li>
+              <li>
+                <Link
+                  href="/#contact"
+                  className="nav-item"
+                  onClick={() => trackContactClick("case_study_header_nav")}
+                >
+                  Contact
+                </Link>
+              </li>
             </ul>
           </nav>
           <div className="header-actions">
@@ -158,6 +167,7 @@ export default function CaseStudyClient({ project, allProjects = [] }) {
               target="_blank"
               rel="noopener noreferrer"
               className="cta-btn"
+              onClick={() => trackWhatsAppClick("case_study_header_get_started")}
             >
               <span>Get Started</span>
               <i className="ri-arrow-right-line"></i>
@@ -201,7 +211,18 @@ export default function CaseStudyClient({ project, allProjects = [] }) {
             <li><Link href="/#services" className="mobile-nav-item">Services</Link></li>
             <li><Link href="/portfolio" className="mobile-nav-item active">Portfolio</Link></li>
             <li><Link href="/#process" className="mobile-nav-item">Process</Link></li>
-            <li><Link href="/#contact" className="mobile-nav-item">Contact</Link></li>
+            <li>
+              <Link
+                href="/#contact"
+                className="mobile-nav-item"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  trackContactClick("case_study_mobile_nav");
+                }}
+              >
+                Contact
+              </Link>
+            </li>
           </ul>
           <div className="mobile-drawer-actions">
             <a
@@ -209,6 +230,7 @@ export default function CaseStudyClient({ project, allProjects = [] }) {
               target="_blank"
               rel="noopener noreferrer"
               className="mobile-cta-btn"
+              onClick={() => trackWhatsAppClick("case_study_mobile_get_started")}
             >
               Get Started <i className="ri-arrow-right-line"></i>
             </a>
@@ -302,6 +324,7 @@ export default function CaseStudyClient({ project, allProjects = [] }) {
                 rel="noopener noreferrer"
                 className="cs-share-btn"
                 title="Share on WhatsApp"
+                onClick={() => trackWhatsAppClick("case_study_share_whatsapp")}
               >
                 <i className="ri-whatsapp-line"></i>
               </a>
@@ -799,7 +822,11 @@ export default function CaseStudyClient({ project, allProjects = [] }) {
               <li><Link href="/#about">About</Link></li>
               <li><Link href="/#services">Services</Link></li>
               <li><Link href="/portfolio">Portfolio</Link></li>
-              <li><Link href="/#contact">Contact</Link></li>
+              <li>
+                <Link href="/#contact" onClick={() => trackContactClick("case_study_footer")}>
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="footer__col">

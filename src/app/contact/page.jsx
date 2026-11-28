@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { trackEnquirySubmit } from "@/lib/gtag";
 
 export default function ContactPage() {
   const [firstName, setFirstName] = useState("");
@@ -15,7 +16,7 @@ export default function ContactPage() {
       const params = new URLSearchParams(window.location.search);
       const prefillEmail = params.get("email");
       if (prefillEmail) setEmail(prefillEmail);
-    } catch {}
+    } catch { }
   }, []);
 
   const handleSubmit = async (e) => {
@@ -23,7 +24,7 @@ export default function ContactPage() {
     setSubmitting(true);
 
     try {
-      await fetch("/api/leads", {
+      const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -35,6 +36,9 @@ export default function ContactPage() {
           message: "Submitted via contact page request form.",
         }),
       });
+      if (res.ok) {
+        trackEnquirySubmit("contact_page_form", service || "General");
+      }
 
       const params = new URLSearchParams();
       params.append("First name", firstName.trim());
@@ -51,7 +55,7 @@ export default function ContactPage() {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: params.toString(),
         }
-      ).catch(() => {});
+      ).catch(() => { });
 
       alert("Form submitted successfully!");
       setFirstName("");

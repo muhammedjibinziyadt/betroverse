@@ -1,3 +1,5 @@
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+
 export const metadata = {
   title: "Betroverse | The Solution for Professional Teams",
   description:
@@ -28,7 +30,10 @@ export default function RootLayout({ children }) {
           href="/images/favicon-32x32.png"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        {children}
+        <GoogleAnalytics />
+      </body>
     </html>
   );
 }
