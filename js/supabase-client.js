@@ -211,7 +211,6 @@
     const { preferThumb = false } = options;
 
     // Resilient mapping of remote Supabase URLs to verified local assets when applicable
-    const remoteMatch = clean.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/[^/?#]+\/(?:portfolio\/|brands\/)?([a-zA-Z0-9_\-\.\s%()]+\.(?:png|jpe?g|webp|svg))(?:?.*)?$/i);
     const remoteMatch = clean.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/[^/?#]+\/(?:portfolio\/|brands\/)?([a-zA-Z0-9_\-\.\s%()]+\.(?:png|jpe?g|webp|svg))(?:\?.*)?$/i);
     if (remoteMatch) {
       clean = "images/" + decodeURIComponent(remoteMatch[1]);
