@@ -43,7 +43,7 @@ module.exports = async function handler(req, res) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 4000);
 
-    const testRes = await fetch(`${supabaseUrl}/rest/v1/`, {
+    const testRes = await fetch(`${supabaseUrl}/rest/v1/portfolio_projects?limit=1`, {
       method: "GET",
       headers: {
         "apikey": supabaseAnonKey,
